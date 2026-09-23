@@ -5,43 +5,70 @@ export function AnimatedRobotMask() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
 
+    const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
-
     if (!ctx) return;
 
 
-    let animationFrame: number;
+    let frame:number;
+
 
     const resize = () => {
       canvas.width = canvas.clientWidth;
       canvas.height = canvas.clientHeight;
     };
 
-    resize();
 
-    window.addEventListener("resize", resize);
+    resize();
+    window.addEventListener("resize",resize);
+
 
 
     const particles = Array.from(
-      { length: 900 },
-      () => ({
-        x: Math.random(),
-        y: Math.random(),
-        size: Math.random() * 2 + 0.5,
-        speed: Math.random() * 0.002 + 0.001,
-        color:
-          Math.random() > 0.5
-            ? "#00eaff"
-            : "#9b5cff"
+      {length:700},
+      ()=>({
+        x:(Math.random()-0.5)*300,
+        y:(Math.random()-0.5)*420,
+        r:Math.random()*1.8+0.4,
+        c:Math.random()>0.5
+        ? "#00eaff"
+        :"#9b5cff"
       })
     );
 
 
-    const draw = () => {
+
+    function line(points:number[][],color:string,width:number){
+
+      ctx.beginPath();
+
+      points.forEach((p,i)=>{
+
+        if(i===0)
+          ctx.moveTo(p[0],p[1]);
+        else
+          ctx.lineTo(p[0],p[1]);
+
+      });
+
+
+      ctx.strokeStyle=color;
+      ctx.lineWidth=width;
+      ctx.shadowBlur=20;
+      ctx.shadowColor=color;
+
+      ctx.stroke();
+
+    }
+
+
+
+
+    const draw=()=>{
+
 
       ctx.clearRect(
         0,
@@ -51,169 +78,226 @@ export function AnimatedRobotMask() {
       );
 
 
-      const w = canvas.width;
-      const h = canvas.height;
+      const w=canvas.width;
+      const h=canvas.height;
 
 
-      // helmet silhouette
+
       ctx.save();
 
+
       ctx.translate(
-        w / 2,
-        h / 2
+        w/2,
+        h/2
       );
 
 
-      const scale = Math.min(w,h)/600;
+      const s=Math.min(w,h)/600;
 
-      ctx.scale(scale,scale);
+      ctx.scale(s,s);
 
 
-      // outer cyber helmet
+
+      // ===== OUTER MASK =====
+
+      line(
+        [
+          [0,-230],
+          [80,-180],
+          [160,-170],
+          [190,-60],
+          [150,120],
+          [80,210],
+          [0,250],
+          [-80,210],
+          [-150,120],
+          [-190,-60],
+          [-160,-170],
+          [-80,-180],
+          [0,-230]
+        ],
+        "#00eaff",
+        4
+      );
+
+
+
+      // ===== FOREHEAD V ARMOR =====
+
+
+      line(
+        [
+          [-120,-120],
+          [0,-40],
+          [120,-120],
+          [60,-160],
+          [0,-100],
+          [-60,-160],
+          [-120,-120]
+        ],
+        "#5b8cff",
+        5
+      );
+
+
+
+      // ===== EYES =====
+
+
+      ctx.fillStyle="#00f5ff";
+
+      ctx.shadowBlur=40;
+      ctx.shadowColor="#00f5ff";
+
+
       ctx.beginPath();
 
-      ctx.moveTo(0,-230);
-
-      ctx.lineTo(150,-180);
-      ctx.lineTo(190,-50);
-
-      ctx.lineTo(130,180);
-
-      ctx.lineTo(0,230);
-
-      ctx.lineTo(-130,180);
-
-      ctx.lineTo(-190,-50);
-
-      ctx.lineTo(-150,-180);
+      ctx.moveTo(-130,-40);
+      ctx.lineTo(-25,-25);
+      ctx.lineTo(-70,0);
+      ctx.lineTo(-140,-5);
 
       ctx.closePath();
 
-
-      ctx.strokeStyle =
-        "#00eaff";
-
-      ctx.lineWidth = 3;
-
-      ctx.shadowBlur = 20;
-
-      ctx.shadowColor =
-        "#00eaff";
-
-      ctx.stroke();
-
-
-
-      // eye visor
-
-      ctx.beginPath();
-
-      ctx.moveTo(-110,-30);
-      ctx.lineTo(-25,-15);
-      ctx.lineTo(-10,0);
-      ctx.lineTo(-110,15);
-
-      ctx.closePath();
-
-
-      ctx.moveTo(110,-30);
-      ctx.lineTo(25,-15);
-      ctx.lineTo(10,0);
-      ctx.lineTo(110,15);
-
-      ctx.closePath();
-
-
-      ctx.fillStyle =
-        "#00f5ff";
-
-      ctx.shadowBlur = 35;
 
       ctx.fill();
 
 
 
-      // center armor
-
       ctx.beginPath();
 
-      ctx.moveTo(0,20);
-
-      ctx.lineTo(45,80);
-
-      ctx.lineTo(0,160);
-
-      ctx.lineTo(-45,80);
+      ctx.moveTo(130,-40);
+      ctx.lineTo(25,-25);
+      ctx.lineTo(70,0);
+      ctx.lineTo(140,-5);
 
       ctx.closePath();
 
 
-      ctx.strokeStyle =
-        "#8b5cff";
-
-      ctx.stroke();
+      ctx.fill();
 
 
-      // particles
+
+
+      // ===== NOSE BRIDGE =====
+
+
+      line(
+        [
+          [0,-20],
+          [25,50],
+          [0,100],
+          [-25,50],
+          [0,-20]
+        ],
+        "#8b5cff",
+        4
+      );
+
+
+
+
+      // ===== CHEEK ARMOR =====
+
+
+      line(
+        [
+          [-150,20],
+          [-80,70],
+          [-100,150],
+          [-150,110]
+        ],
+        "#00eaff",
+        4
+      );
+
+
+      line(
+        [
+          [150,20],
+          [80,70],
+          [100,150],
+          [150,110]
+        ],
+        "#00eaff",
+        4
+      );
+
+
+
+
+
+      // ===== JAW =====
+
+
+      line(
+        [
+          [-90,150],
+          [-40,210],
+          [0,230],
+          [40,210],
+          [90,150]
+        ],
+        "#9b5cff",
+        5
+      );
+
+
+
+
+
+      // ===== PARTICLES =====
+
 
       particles.forEach(p=>{
 
-        const px =
-          (p.x-0.5)*300;
 
-        const py =
-          (p.y-0.5)*420;
+        p.y +=0.25;
 
 
-        const inside =
-          Math.abs(px)<180 &&
-          Math.abs(py)<220;
+        if(p.y>220)
+          p.y=-220;
 
 
-        if(inside){
+        ctx.beginPath();
 
-          ctx.beginPath();
-
-          ctx.arc(
-            px,
-            py,
-            p.size,
-            0,
-            Math.PI*2
-          );
+        ctx.arc(
+          p.x,
+          p.y,
+          p.r,
+          0,
+          Math.PI*2
+        );
 
 
-          ctx.fillStyle =
-            p.color;
+        ctx.fillStyle=p.c;
 
+        ctx.globalAlpha=0.7;
 
-          ctx.fill();
-
-
-          p.y += p.speed;
-
-
-          if(p.y>1)
-            p.y=0;
-        }
+        ctx.fill();
 
       });
+
+
+      ctx.globalAlpha=1;
 
 
       ctx.restore();
 
 
-      animationFrame =
-        requestAnimationFrame(draw);
+
+      frame=requestAnimationFrame(draw);
+
     };
 
 
     draw();
 
 
+
     return()=>{
 
-      cancelAnimationFrame(animationFrame);
+      cancelAnimationFrame(frame);
 
       window.removeEventListener(
         "resize",
@@ -227,13 +311,13 @@ export function AnimatedRobotMask() {
 
 
 
-  return (
+  return(
 
     <motion.div
 
       initial={{
         opacity:0,
-        scale:0.9
+        scale:.8
       }}
 
       animate={{
@@ -256,9 +340,7 @@ export function AnimatedRobotMask() {
     >
 
       <canvas
-
         ref={canvasRef}
-
         className="
         absolute
         inset-0
@@ -271,4 +353,5 @@ export function AnimatedRobotMask() {
     </motion.div>
 
   );
+
 }
