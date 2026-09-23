@@ -7,8 +7,6 @@ type WelcomeIntroProps = {
 }
 
 type Particle = {
-  x: number
-  y: number
   homeX: number
   homeY: number
   size: number
@@ -23,13 +21,29 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
   const [leaving, setLeaving] = useState(false)
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+    /*
+      Keep explicit non-null aliases.
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+      This avoids TypeScript losing the null check inside
+      resize(), draw(), and other nested functions.
+    */
+    const canvasElement = canvasRef.current
 
-    let raf = 0
+    if (!canvasElement) {
+      return
+    }
+
+    const context = canvasElement.getContext('2d')
+
+    if (!context) {
+      return
+    }
+
+    const canvas: HTMLCanvasElement = canvasElement
+    const ctx: CanvasRenderingContext2D = context
+
+    let animationFrame = 0
+
     let width = window.innerWidth
     let height = window.innerHeight
     let dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -37,8 +51,6 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
     const particles: Particle[] = []
 
     const mouse = {
-      x: width / 2,
-      y: height / 2,
       nx: 0,
       ny: 0,
     }
@@ -47,272 +59,580 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
     let smoothY = 0
 
     /*
-      HUMAN PROFILE MASK
+      =====================================================
+      HUMAN PARTICLE GENERATOR
+      =====================================================
 
-      Instead of generating particles inside an ellipse,
-      we first draw a real right-facing human silhouette
-      onto an invisible canvas.
+      First create a right-facing human silhouette inside
+      an invisible canvas.
 
-      Particles are then sampled from that silhouette.
+      Then sample thousands of particles from that mask.
     */
+
     function buildHumanParticles() {
       particles.length = 0
 
       const mask = document.createElement('canvas')
-      const maskCtx = mask.getContext('2d')
+      const maskContext = mask.getContext('2d')
 
-      if (!maskCtx) return
+      if (!maskContext) {
+        return
+      }
 
       mask.width = 760
       mask.height = 920
 
-      maskCtx.clearRect(0, 0, mask.width, mask.height)
-      maskCtx.fillStyle = '#ffffff'
-
-      maskCtx.beginPath()
-
-      // Neck / rear shoulder
-      maskCtx.moveTo(175, 900)
-      maskCtx.bezierCurveTo(190, 830, 205, 765, 210, 700)
-
-      // Back of neck
-      maskCtx.bezierCurveTo(218, 640, 195, 590, 188, 520)
-
-      // Back of skull
-      maskCtx.bezierCurveTo(175, 390, 188, 245, 275, 145)
-      maskCtx.bezierCurveTo(355, 52, 495, 35, 585, 105)
-
-      // Crown
-      maskCtx.bezierCurveTo(645, 152, 675, 215, 669, 278)
-
-      // Forehead
-      maskCtx.bezierCurveTo(666, 315, 675, 340, 697, 365)
-
-      // Brow / nose bridge
-      maskCtx.bezierCurveTo(710, 379, 711, 397, 719, 411)
-
-      // Nose projection
-      maskCtx.bezierCurveTo(729, 427, 751, 442, 748, 456)
-      maskCtx.bezierCurveTo(745, 469, 723, 474, 705, 477)
-
-      // Under nose
-      maskCtx.bezierCurveTo(695, 480, 692, 489, 700, 496)
-
-      // Philtrum / upper lip
-      maskCtx.bezierCurveTo(708, 503, 714, 510, 710, 518)
-
-      // Lips
-      maskCtx.bezierCurveTo(706, 525, 694, 528, 688, 533)
-      maskCtx.bezierCurveTo(698, 538, 704, 546, 699, 555)
-      maskCtx.bezierCurveTo(692, 565, 677, 568, 668, 574)
-
-      // Lower lip to chin
-      maskCtx.bezierCurveTo(663, 582, 666, 594, 661, 605)
-      maskCtx.bezierCurveTo(653, 627, 638, 649, 615, 663)
-
-      // Jaw
-      maskCtx.bezierCurveTo(590, 679, 557, 687, 526, 694)
-      maskCtx.bezierCurveTo(501, 701, 490, 717, 490, 741)
-
-      // Front neck
-      maskCtx.bezierCurveTo(492, 790, 515, 842, 535, 900)
-
-      maskCtx.closePath()
-      maskCtx.fill()
-
-      /*
-        Ear cut-out creates additional facial readability.
-      */
-      maskCtx.globalCompositeOperation = 'destination-out'
-
-      maskCtx.beginPath()
-      maskCtx.ellipse(
-        500,
-        455,
-        48,
-        72,
-        -0.12,
-        0,
-        Math.PI * 2
-      )
-      maskCtx.fill()
-
-      maskCtx.globalCompositeOperation = 'source-over'
-
-      const imageData = maskCtx.getImageData(
+      maskContext.clearRect(
         0,
         0,
         mask.width,
         mask.height
       )
 
-      const density =
-        window.innerWidth < 768 ? 5200 : 12500
+      maskContext.fillStyle = '#ffffff'
+
+      /*
+        HUMAN SIDE PROFILE
+      */
+
+      maskContext.beginPath()
+
+      // Rear shoulder
+      maskContext.moveTo(150, 920)
+
+      maskContext.bezierCurveTo(
+        175,
+        840,
+        205,
+        775,
+        212,
+        710
+      )
+
+      // Back of neck
+      maskContext.bezierCurveTo(
+        218,
+        650,
+        194,
+        585,
+        188,
+        520
+      )
+
+      // Back of skull
+      maskContext.bezierCurveTo(
+        172,
+        390,
+        185,
+        245,
+        270,
+        145
+      )
+
+      maskContext.bezierCurveTo(
+        350,
+        52,
+        490,
+        35,
+        582,
+        103
+      )
+
+      // Crown
+      maskContext.bezierCurveTo(
+        640,
+        147,
+        672,
+        210,
+        667,
+        275
+      )
+
+      // Forehead
+      maskContext.bezierCurveTo(
+        665,
+        315,
+        673,
+        340,
+        695,
+        365
+      )
+
+      // Brow / nose bridge
+      maskContext.bezierCurveTo(
+        708,
+        380,
+        710,
+        397,
+        718,
+        411
+      )
+
+      // Nose
+      maskContext.bezierCurveTo(
+        729,
+        428,
+        752,
+        442,
+        749,
+        456
+      )
+
+      maskContext.bezierCurveTo(
+        746,
+        469,
+        724,
+        475,
+        705,
+        477
+      )
+
+      // Under nose
+      maskContext.bezierCurveTo(
+        694,
+        480,
+        692,
+        488,
+        700,
+        496
+      )
+
+      // Upper lip
+      maskContext.bezierCurveTo(
+        709,
+        503,
+        715,
+        511,
+        710,
+        519
+      )
+
+      // Lips
+      maskContext.bezierCurveTo(
+        706,
+        526,
+        694,
+        529,
+        687,
+        533
+      )
+
+      maskContext.bezierCurveTo(
+        698,
+        539,
+        704,
+        547,
+        699,
+        556
+      )
+
+      // Lower lip
+      maskContext.bezierCurveTo(
+        692,
+        565,
+        678,
+        569,
+        668,
+        575
+      )
+
+      // Chin
+      maskContext.bezierCurveTo(
+        663,
+        584,
+        666,
+        596,
+        660,
+        608
+      )
+
+      maskContext.bezierCurveTo(
+        652,
+        630,
+        637,
+        650,
+        615,
+        664
+      )
+
+      // Jaw
+      maskContext.bezierCurveTo(
+        590,
+        680,
+        556,
+        688,
+        526,
+        695
+      )
+
+      maskContext.bezierCurveTo(
+        500,
+        702,
+        489,
+        718,
+        490,
+        742
+      )
+
+      // Front neck
+      maskContext.bezierCurveTo(
+        492,
+        795,
+        518,
+        850,
+        545,
+        920
+      )
+
+      maskContext.closePath()
+      maskContext.fill()
+
+      /*
+        EAR CUTOUT
+      */
+
+      maskContext.globalCompositeOperation =
+        'destination-out'
+
+      maskContext.beginPath()
+
+      maskContext.ellipse(
+        505,
+        458,
+        48,
+        72,
+        -0.12,
+        0,
+        Math.PI * 2
+      )
+
+      maskContext.fill()
+
+      /*
+        Eye cavity / facial detail
+      */
+
+      maskContext.beginPath()
+
+      maskContext.ellipse(
+        650,
+        405,
+        17,
+        8,
+        -0.08,
+        0,
+        Math.PI * 2
+      )
+
+      maskContext.fill()
+
+      maskContext.globalCompositeOperation =
+        'source-over'
+
+      const imageData =
+        maskContext.getImageData(
+          0,
+          0,
+          mask.width,
+          mask.height
+        )
+
+      const targetParticleCount =
+        window.innerWidth < 768
+          ? 4800
+          : 13500
 
       let attempts = 0
 
       while (
-        particles.length < density &&
-        attempts < density * 40
+        particles.length < targetParticleCount &&
+        attempts < targetParticleCount * 50
       ) {
         attempts++
 
-        const x = Math.floor(Math.random() * mask.width)
-        const y = Math.floor(Math.random() * mask.height)
+        const x = Math.floor(
+          Math.random() * mask.width
+        )
+
+        const y = Math.floor(
+          Math.random() * mask.height
+        )
 
         const alpha =
-          imageData.data[(y * mask.width + x) * 4 + 3]
+          imageData.data[
+            (y * mask.width + x) * 4 + 3
+          ]
 
-        if (alpha < 100) continue
+        if (alpha < 100) {
+          continue
+        }
 
-        const normalizedX = x / mask.width
+        const normalizedX =
+          x / mask.width
 
         /*
-          Red/magenta particles are concentrated toward
-          the rear of the head.
+          Magenta/red rim concentrated toward
+          rear of skull.
         */
-        const redChance =
-          normalizedX < 0.42
-            ? 0.34
-            : normalizedX < 0.55
-              ? 0.12
-              : 0.025
+
+        let redChance = 0.025
+
+        if (normalizedX < 0.42) {
+          redChance = 0.4
+        } else if (normalizedX < 0.55) {
+          redChance = 0.14
+        }
 
         particles.push({
-          x,
-          y,
           homeX: x,
           homeY: y,
-          size: Math.random() * 1.25 + 0.35,
-          phase: Math.random() * Math.PI * 2,
-          depth: Math.random(),
-          red: Math.random() < redChance,
+
+          size:
+            Math.random() * 1.15 + 0.35,
+
+          phase:
+            Math.random() * Math.PI * 2,
+
+          depth:
+            Math.random(),
+
+          red:
+            Math.random() < redChance,
+
           scatter:
             normalizedX < 0.45
-              ? Math.random() * 85
-              : Math.random() * 18,
+              ? Math.random() * 90
+              : Math.random() * 14,
         })
       }
 
       /*
-        Additional dispersed particles behind the skull.
+        Extra particles dispersing behind skull
       */
-      const extra =
-        window.innerWidth < 768 ? 450 : 1300
 
-      for (let i = 0; i < extra; i++) {
-        const x = 70 + Math.random() * 270
-        const y = 120 + Math.random() * 650
+      const extraParticles =
+        window.innerWidth < 768
+          ? 400
+          : 1500
+
+      for (
+        let i = 0;
+        i < extraParticles;
+        i++
+      ) {
+        const x =
+          55 + Math.random() * 300
+
+        const y =
+          110 + Math.random() * 670
 
         particles.push({
-          x,
-          y,
           homeX: x,
           homeY: y,
-          size: Math.random() * 1.4 + 0.35,
-          phase: Math.random() * Math.PI * 2,
-          depth: Math.random(),
-          red: Math.random() > 0.3,
-          scatter: 60 + Math.random() * 170,
+
+          size:
+            Math.random() * 1.35 + 0.35,
+
+          phase:
+            Math.random() * Math.PI * 2,
+
+          depth:
+            Math.random(),
+
+          red:
+            Math.random() > 0.25,
+
+          scatter:
+            70 + Math.random() * 180,
         })
       }
     }
 
+    /*
+      =====================================================
+      RESIZE
+      =====================================================
+    */
+
     function resize() {
       width = window.innerWidth
       height = window.innerHeight
-      dpr = Math.min(window.devicePixelRatio || 1, 2)
 
-      canvas.width = width * dpr
-      canvas.height = height * dpr
+      dpr = Math.min(
+        window.devicePixelRatio || 1,
+        2
+      )
 
-      canvas.style.width = `${width}px`
-      canvas.style.height = `${height}px`
+      canvas.width =
+        Math.floor(width * dpr)
 
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      canvas.height =
+        Math.floor(height * dpr)
+
+      canvas.style.width =
+        `${width}px`
+
+      canvas.style.height =
+        `${height}px`
+
+      ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+      )
 
       buildHumanParticles()
     }
 
-    function handleMouseMove(event: MouseEvent) {
-      mouse.x = event.clientX
-      mouse.y = event.clientY
+    /*
+      =====================================================
+      CURSOR
+      =====================================================
+    */
 
+    function handleMouseMove(
+      event: MouseEvent
+    ) {
       mouse.nx =
-        event.clientX / window.innerWidth - 0.5
+        event.clientX /
+          window.innerWidth -
+        0.5
 
       mouse.ny =
-        event.clientY / window.innerHeight - 0.5
+        event.clientY /
+          window.innerHeight -
+        0.5
     }
 
+    /*
+      =====================================================
+      PARTICLE ANIMATION
+      =====================================================
+    */
+
     function draw(time: number) {
-      ctx.clearRect(0, 0, width, height)
+      ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+      )
 
-      smoothX += (mouse.nx - smoothX) * 0.035
-      smoothY += (mouse.ny - smoothY) * 0.035
+      smoothX +=
+        (mouse.nx - smoothX) * 0.035
 
-      const mobile = width < 768
+      smoothY +=
+        (mouse.ny - smoothY) * 0.035
 
-      const targetHeight = mobile
-        ? height * 0.52
-        : height * 0.82
+      const mobile =
+        width < 768
 
-      const scale = targetHeight / 920
+      const targetHeight =
+        mobile
+          ? height * 0.52
+          : height * 0.84
 
-      const baseX = mobile
-        ? width * 0.5 - (760 * scale) / 2
-        : width * 0.075
+      const scale =
+        targetHeight / 920
 
-      const baseY = mobile
-        ? height * 0.05
-        : height * 0.09
+      const baseX =
+        mobile
+          ? width * 0.5 -
+            (760 * scale) / 2
+          : width * 0.055
+
+      const baseY =
+        mobile
+          ? height * 0.035
+          : height * 0.075
 
       const breathe =
-        1 + Math.sin(time * 0.00125) * 0.007
+        1 +
+        Math.sin(
+          time * 0.00125
+        ) *
+          0.007
 
-      for (const p of particles) {
+      for (
+        let i = 0;
+        i < particles.length;
+        i++
+      ) {
+        const p = particles[i]
+
         const rearFactor =
-          Math.max(0, 1 - p.homeX / 400)
+          Math.max(
+            0,
+            1 - p.homeX / 430
+          )
 
         const scatterWave =
-          Math.sin(time * 0.0007 + p.phase)
+          Math.sin(
+            time * 0.0007 +
+              p.phase
+          )
 
         const scatterX =
           -p.scatter *
           rearFactor *
-          (0.35 + scatterWave * 0.22)
+          (
+            0.36 +
+            scatterWave * 0.22
+          )
 
         const scatterY =
-          Math.sin(time * 0.0011 + p.phase) *
+          Math.sin(
+            time * 0.0011 +
+              p.phase
+          ) *
           p.scatter *
           0.13
 
+        /*
+          Individual particle drift
+        */
+
         const driftX =
-          Math.sin(time * 0.0015 + p.phase) *
-          (1.2 + p.depth * 2)
+          Math.sin(
+            time * 0.0015 +
+              p.phase
+          ) *
+          (1.1 + p.depth * 2.2)
 
         const driftY =
-          Math.cos(time * 0.0012 + p.phase) *
-          (1 + p.depth * 1.7)
+          Math.cos(
+            time * 0.0012 +
+              p.phase
+          ) *
+          (1 + p.depth * 1.8)
 
         /*
-          Cursor interaction:
-          different depth layers move different amounts.
+          Cursor depth parallax
         */
+
         const cursorX =
-          smoothX * (7 + p.depth * 20)
+          smoothX *
+          (7 + p.depth * 21)
 
         const cursorY =
-          smoothY * (4 + p.depth * 12)
+          smoothY *
+          (4 + p.depth * 12)
 
         const centerX = 420
         const centerY = 470
 
         const localX =
-          (p.homeX - centerX) * breathe + centerX
+          (p.homeX - centerX) *
+            breathe +
+          centerX
 
         const localY =
-          (p.homeY - centerY) * breathe + centerY
+          (p.homeY - centerY) *
+            breathe +
+          centerY
 
         const px =
           baseX +
@@ -330,16 +650,24 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
 
         const pulse =
           0.5 +
-          Math.sin(time * 0.0022 + p.phase) * 0.5
+          Math.sin(
+            time * 0.0022 +
+              p.phase
+          ) *
+            0.5
 
         if (p.red) {
-          ctx.fillStyle = `rgba(244,63,94,${
-            0.25 + pulse * 0.55
-          })`
+          ctx.fillStyle =
+            `rgba(244,63,94,${
+              0.24 +
+              pulse * 0.58
+            })`
         } else {
-          ctx.fillStyle = `rgba(34,211,238,${
-            0.28 + pulse * 0.6
-          })`
+          ctx.fillStyle =
+            `rgba(34,211,238,${
+              0.28 +
+              pulse * 0.62
+            })`
         }
 
         ctx.beginPath()
@@ -347,7 +675,11 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         ctx.arc(
           px,
           py,
-          p.size * (0.75 + p.depth * 0.7),
+          p.size *
+            (
+              0.75 +
+              p.depth * 0.7
+            ),
           0,
           Math.PI * 2
         )
@@ -355,18 +687,33 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         ctx.fill()
       }
 
-      raf = requestAnimationFrame(draw)
+      animationFrame =
+        window.requestAnimationFrame(
+          draw
+        )
     }
 
     resize()
 
-    window.addEventListener('resize', resize)
-    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener(
+      'resize',
+      resize
+    )
 
-    raf = requestAnimationFrame(draw)
+    window.addEventListener(
+      'mousemove',
+      handleMouseMove
+    )
+
+    animationFrame =
+      window.requestAnimationFrame(
+        draw
+      )
 
     return () => {
-      cancelAnimationFrame(raf)
+      window.cancelAnimationFrame(
+        animationFrame
+      )
 
       window.removeEventListener(
         'resize',
@@ -380,7 +727,17 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
     }
   }, [])
 
+  /*
+    =======================================================
+    ENTER PORTFOLIO
+    =======================================================
+  */
+
   function enterPortfolio() {
+    if (leaving) {
+      return
+    }
+
     setLeaving(true)
 
     window.setTimeout(() => {
@@ -390,18 +747,22 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 1 }}
+      initial={{
+        opacity: 1,
+      }}
       animate={
         leaving
           ? {
               opacity: 0,
               scale: 1.035,
-              filter: 'blur(12px)',
+              filter:
+                'blur(12px)',
             }
           : {
               opacity: 1,
               scale: 1,
-              filter: 'blur(0px)',
+              filter:
+                'blur(0px)',
             }
       }
       transition={{
@@ -410,57 +771,95 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       }}
       className="fixed inset-0 z-[9999] overflow-hidden bg-[#01040a]"
     >
-      {/* Blueprint grid */}
+      {/* BLUEPRINT GRID */}
+
       <div
         className="absolute inset-0 opacity-[0.13]"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(34,211,238,.11) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(34,211,238,.11) 1px, transparent 1px)
+            linear-gradient(
+              rgba(34,211,238,.11) 1px,
+              transparent 1px
+            ),
+            linear-gradient(
+              90deg,
+              rgba(34,211,238,.11) 1px,
+              transparent 1px
+            )
           `,
-          backgroundSize: '70px 70px',
+
+          backgroundSize:
+            '70px 70px',
         }}
       />
 
-      {/* Scan line */}
+      {/* MOVING SCAN LINE */}
+
       <div className="intro-scan pointer-events-none absolute inset-x-0 top-0 z-[2] h-px bg-gradient-to-r from-transparent via-cyan-300/50 to-transparent" />
 
-      {/* Ambient lighting */}
+      {/* AMBIENT GLOWS */}
+
       <div className="pointer-events-none absolute -left-[10%] top-[5%] h-[85vh] w-[65vw] rounded-full bg-cyan-500/[.035] blur-[150px]" />
 
       <div className="pointer-events-none absolute left-[5%] top-[15%] h-[65vh] w-[35vw] rounded-full bg-rose-500/[.025] blur-[150px]" />
 
       {/* HUMAN PARTICLES */}
+
       <canvas
         ref={canvasRef}
         className="pointer-events-none absolute inset-0 z-[3] h-full w-full"
       />
 
-      {/* INITIALIZATION */}
+      {/* INITIALIZATION HUD */}
+
       <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
+        initial={{
+          opacity: 0,
+          x: -20,
+        }}
+        animate={{
+          opacity: 1,
+          x: 0,
+        }}
         transition={{
           delay: 0.3,
           duration: 0.8,
         }}
         className="absolute left-6 top-7 z-20 hidden font-mono text-[9px] uppercase leading-5 tracking-[.16em] text-cyan-300/60 md:block"
       >
-        <div>Initializing...</div>
-        <div>Loading Systems...</div>
-        <div>Calibrating Vision...</div>
-        <div>Connecting Modules...</div>
+        <div>
+          Initializing...
+        </div>
+
+        <div>
+          Loading Systems...
+        </div>
+
+        <div>
+          Calibrating Vision...
+        </div>
+
+        <div>
+          Connecting Modules...
+        </div>
 
         <div className="text-cyan-300">
           Ready.
         </div>
       </motion.div>
 
-      {/* LEFT TECH LABELS */}
+      {/* LEFT HUD LABELS */}
+
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
+        initial={{
+          opacity: 0,
+        }}
+        animate={{
+          opacity: 1,
+        }}
+        transition={{
+          delay: 1.2,
+        }}
         className="absolute left-7 top-[33%] z-20 hidden font-mono text-[8px] uppercase leading-5 tracking-[.14em] text-cyan-200/50 xl:block"
       >
         <div>AI</div>
@@ -473,7 +872,10 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         <div className="mt-4 h-px w-10 bg-cyan-300/40" />
       </motion.div>
 
-      {/* LARGE ANIMATED BRAIN */}
+      {/* =================================================
+          ANIMATED BRAIN
+      ================================================= */}
+
       <motion.div
         initial={{
           opacity: 0,
@@ -502,15 +904,17 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
           >
             <g className="brain-float">
               <path
-                d="M96 105
-                C70 92 70 60 92 49
-                C98 26 126 23 140 37
-                C158 18 191 29 195 52
-                C222 57 229 86 214 101
-                C224 123 207 146 185 145
-                C173 163 144 161 133 145
-                C109 155 87 137 92 117
-                C77 116 77 107 96 105Z"
+                d="
+                  M96 105
+                  C70 92 70 60 92 49
+                  C98 26 126 23 140 37
+                  C158 18 191 29 195 52
+                  C222 57 229 86 214 101
+                  C224 123 207 146 185 145
+                  C173 163 144 161 133 145
+                  C109 155 87 137 92 117
+                  C77 116 77 107 96 105Z
+                "
                 fill="rgba(34,211,238,.025)"
                 stroke="rgba(34,211,238,.58)"
                 strokeWidth="1"
@@ -518,23 +922,25 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
               />
 
               <path
-                d="M105 70
-                L129 84
-                L151 58
-                L174 79
-                L197 67
+                d="
+                  M105 70
+                  L129 84
+                  L151 58
+                  L174 79
+                  L197 67
 
-                M129 84
-                L119 112
-                L148 128
-                L172 104
-                L197 122
+                  M129 84
+                  L119 112
+                  L148 128
+                  L172 104
+                  L197 122
 
-                M151 58
-                L148 128
+                  M151 58
+                  L148 128
 
-                M174 79
-                L172 104"
+                  M174 79
+                  L172 104
+                "
                 fill="none"
                 stroke="rgba(168,85,247,.7)"
                 strokeWidth="1"
@@ -551,23 +957,41 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
                 [148, 128],
                 [172, 104],
                 [197, 122],
-              ].map(([cx, cy], index) => (
-                <circle
-                  key={index}
-                  cx={cx}
-                  cy={cy}
-                  r="2.6"
-                  fill={
-                    index % 3 === 0
-                      ? '#c084fc'
-                      : '#22d3ee'
-                  }
-                  className="neural-node"
-                  style={{
-                    animationDelay: `${index * 0.17}s`,
-                  }}
-                />
-              ))}
+              ].map(
+                (
+                  point,
+                  index
+                ) => {
+                  const cx =
+                    point[0]
+
+                  const cy =
+                    point[1]
+
+                  return (
+                    <circle
+                      key={
+                        index
+                      }
+                      cx={cx}
+                      cy={cy}
+                      r="2.6"
+                      fill={
+                        index %
+                          3 ===
+                        0
+                          ? '#c084fc'
+                          : '#22d3ee'
+                      }
+                      className="neural-node"
+                      style={{
+                        animationDelay:
+                          `${index * 0.17}s`,
+                      }}
+                    />
+                  )
+                }
+              )}
             </g>
 
             <circle
@@ -599,7 +1023,10 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         </div>
       </motion.div>
 
-      {/* HOLOGRAPHIC EARTH */}
+      {/* =================================================
+          ANIMATED EARTH
+      ================================================= */}
+
       <motion.div
         initial={{
           opacity: 0,
@@ -629,7 +1056,6 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
               viewBox="0 0 200 200"
               className="earth-map h-full w-full"
             >
-              {/* latitude */}
               <ellipse
                 cx="100"
                 cy="100"
@@ -648,7 +1074,6 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
                 stroke="rgba(34,211,238,.12)"
               />
 
-              {/* longitude */}
               <ellipse
                 cx="100"
                 cy="100"
@@ -667,47 +1092,58 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
                 stroke="rgba(34,211,238,.1)"
               />
 
-              {/* stylized continents */}
+              {/* North America */}
+
               <path
-                d="M48 55
-                L62 42
-                L82 39
-                L93 48
-                L88 60
-                L75 64
-                L69 75
-                L57 78
-                L47 69Z"
+                d="
+                  M48 55
+                  L62 42
+                  L82 39
+                  L93 48
+                  L88 60
+                  L75 64
+                  L69 75
+                  L57 78
+                  L47 69Z
+                "
                 fill="rgba(34,211,238,.09)"
                 stroke="rgba(34,211,238,.55)"
                 strokeWidth="1"
               />
 
+              {/* South America */}
+
               <path
-                d="M82 81
-                L98 74
-                L112 82
-                L107 97
-                L115 110
-                L105 132
-                L93 145
-                L84 126
-                L87 108
-                L77 96Z"
+                d="
+                  M82 81
+                  L98 74
+                  L112 82
+                  L107 97
+                  L115 110
+                  L105 132
+                  L93 145
+                  L84 126
+                  L87 108
+                  L77 96Z
+                "
                 fill="rgba(34,211,238,.08)"
                 stroke="rgba(34,211,238,.48)"
                 strokeWidth="1"
               />
 
+              {/* Europe / Asia */}
+
               <path
-                d="M118 55
-                L138 48
-                L158 57
-                L165 72
-                L150 79
-                L140 72
-                L128 80
-                L116 69Z"
+                d="
+                  M118 55
+                  L138 48
+                  L158 57
+                  L165 72
+                  L150 79
+                  L140 72
+                  L128 80
+                  L116 69Z
+                "
                 fill="rgba(34,211,238,.08)"
                 stroke="rgba(34,211,238,.48)"
                 strokeWidth="1"
@@ -749,7 +1185,10 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         </div>
       </motion.div>
 
-      {/* ROBOT ARM HUD */}
+      {/* =================================================
+          ROBOTIC ARM HUD
+      ================================================= */}
+
       <div className="robot-arm-hud pointer-events-none absolute bottom-[7%] right-[2%] z-10 hidden h-[210px] w-[260px] opacity-25 xl:block">
         <svg
           viewBox="0 0 300 230"
@@ -782,7 +1221,6 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
             />
 
             <path d="M170 154 L132 115" />
-
             <path d="M180 154 L144 107" />
 
             <circle
@@ -792,7 +1230,6 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
             />
 
             <path d="M128 101 L164 69" />
-
             <path d="M144 115 L176 80" />
 
             <circle
@@ -802,7 +1239,6 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
             />
 
             <path d="M181 70 L217 88" />
-
             <path d="M177 82 L211 99" />
 
             <circle
@@ -820,7 +1256,10 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         </svg>
       </div>
 
-      {/* MAIN TEXT */}
+      {/* =================================================
+          MAIN CONTENT
+      ================================================= */}
+
       <div className="absolute inset-0 z-30 flex items-center justify-center px-6 md:justify-end md:pr-[7%] xl:pr-[10%]">
         <div className="w-full max-w-[720px] text-center">
           <motion.div
@@ -844,13 +1283,17 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
           <motion.h1
             initial={{
               opacity: 0,
-              letterSpacing: '.18em',
-              filter: 'blur(10px)',
+              letterSpacing:
+                '.18em',
+              filter:
+                'blur(10px)',
             }}
             animate={{
               opacity: 1,
-              letterSpacing: '-.035em',
-              filter: 'blur(0px)',
+              letterSpacing:
+                '-.035em',
+              filter:
+                'blur(0px)',
             }}
             transition={{
               delay: 0.9,
@@ -859,14 +1302,19 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
             className="mt-6 whitespace-nowrap text-4xl font-semibold uppercase text-white sm:text-5xl lg:text-6xl xl:text-[4.6rem]"
           >
             RUDDRHO{' '}
+
             <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-500 bg-clip-text text-transparent">
               MOLLIK
             </span>
           </motion.h1>
 
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{
+              opacity: 0,
+            }}
+            animate={{
+              opacity: 1,
+            }}
             transition={{
               delay: 1.5,
               duration: 0.9,
@@ -874,6 +1322,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
             className="mt-7 font-mono text-[9px] uppercase tracking-[.25em] text-cyan-300/80 sm:text-[11px]"
           >
             Robotics
+
             <span className="mx-3 text-slate-600">
               •
             </span>
@@ -908,6 +1357,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
           </motion.div>
 
           <motion.button
+            type="button"
             initial={{
               opacity: 0,
               y: 18,
@@ -915,6 +1365,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
             animate={{
               opacity: 1,
               y: 0,
+
               boxShadow: [
                 '0 0 12px rgba(34,211,238,.08)',
                 '0 0 38px rgba(34,211,238,.22)',
@@ -938,8 +1389,11 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
                 repeat: Infinity,
               },
             }}
-            onClick={enterPortfolio}
-            className="group mt-10 inline-flex min-w-[300px] items-center justify-center gap-4 rounded-full border border-cyan-300/60 bg-[#03101b]/50 px-10 py-4 font-mono text-xs uppercase tracking-[.18em] text-white backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-cyan-200 hover:bg-cyan-300/[.08]"
+            onClick={
+              enterPortfolio
+            }
+            disabled={leaving}
+            className="group mt-10 inline-flex min-w-[300px] items-center justify-center gap-4 rounded-full border border-cyan-300/60 bg-[#03101b]/50 px-10 py-4 font-mono text-xs uppercase tracking-[.18em] text-white backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-cyan-200 hover:bg-cyan-300/[.08] disabled:pointer-events-none"
           >
             Enter Portfolio
 
@@ -948,88 +1402,134 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         </div>
       </div>
 
-      {/* BOTTOM HUD */}
+      {/* BOTTOM LEFT */}
+
       <div className="absolute bottom-7 left-8 z-20 hidden font-mono text-[8px] uppercase tracking-[.3em] text-cyan-300/40 md:block">
-        Explore&nbsp;&nbsp;•&nbsp;&nbsp;
-        Learn&nbsp;&nbsp;•&nbsp;&nbsp;
-        Build&nbsp;&nbsp;•&nbsp;&nbsp;
+        Explore
+        &nbsp;&nbsp;•&nbsp;&nbsp;
+        Learn
+        &nbsp;&nbsp;•&nbsp;&nbsp;
+        Build
+        &nbsp;&nbsp;•&nbsp;&nbsp;
         Repeat
       </div>
+
+      {/* BOTTOM RIGHT */}
 
       <div className="absolute bottom-7 right-8 z-20 hidden font-mono text-[8px] uppercase tracking-[.3em] text-cyan-300/40 md:block">
         Innovation Lives Here
       </div>
 
+      {/* =================================================
+          ANIMATION CSS
+      ================================================= */}
+
       <style>{`
         .intro-scan {
-          animation: introScan 7s linear infinite;
+          animation:
+            introScan 7s linear infinite;
         }
 
         .brain-panel {
-          animation: brainPanelFloat 5s ease-in-out infinite;
+          animation:
+            brainPanelFloat 5s
+            ease-in-out infinite;
         }
 
         .brain-float {
           transform-origin: center;
-          animation: brainBreathe 4s ease-in-out infinite;
+          animation:
+            brainBreathe 4s
+            ease-in-out infinite;
         }
 
         .brain-outline {
           stroke-dasharray: 7 5;
-          animation: brainDash 8s linear infinite;
+          animation:
+            brainDash 8s
+            linear infinite;
         }
 
         .neural-path {
           stroke-dasharray: 5 8;
-          animation: neuralTravel 2.2s linear infinite;
+          animation:
+            neuralTravel 2.2s
+            linear infinite;
         }
 
         .neural-node {
-          animation: nodePulse 1.8s ease-in-out infinite;
+          animation:
+            nodePulse 1.8s
+            ease-in-out infinite;
         }
 
         .brain-ring-one {
-          transform-origin: 150px 94px;
-          animation: brainRingOne 16s linear infinite;
+          transform-origin:
+            150px 94px;
+
+          animation:
+            brainRingOne 16s
+            linear infinite;
         }
 
         .brain-ring-two {
-          transform-origin: 150px 94px;
-          animation: brainRingTwo 23s linear infinite reverse;
+          transform-origin:
+            150px 94px;
+
+          animation:
+            brainRingTwo 23s
+            linear infinite reverse;
         }
 
         .earth-ring-one {
-          animation: earthRing 30s linear infinite;
+          animation:
+            earthRing 30s
+            linear infinite;
         }
 
         .earth-ring-two {
-          animation: earthRing 19s linear infinite reverse;
+          animation:
+            earthRing 19s
+            linear infinite reverse;
         }
 
         .earth-ring-three {
-          animation: earthRing 13s linear infinite;
+          animation:
+            earthRing 13s
+            linear infinite;
         }
 
         .earth-float {
-          animation: earthFloat 5s ease-in-out infinite;
+          animation:
+            earthFloat 5s
+            ease-in-out infinite;
         }
 
         .earth-map {
           transform-origin: center;
-          animation: earthMapRotate 18s linear infinite;
+
+          animation:
+            earthMapRotate 18s
+            ease-in-out infinite;
         }
 
         .earth-node {
-          animation: earthNode 1.7s ease-in-out infinite;
+          animation:
+            earthNode 1.7s
+            ease-in-out infinite;
         }
 
         .robot-arm-hud {
-          animation: robotHud 4.5s ease-in-out infinite;
+          animation:
+            robotHud 4.5s
+            ease-in-out infinite;
         }
 
         @keyframes introScan {
           0% {
-            transform: translateY(-20px);
+            transform:
+              translateY(-20px);
+
             opacity: 0;
           }
 
@@ -1042,120 +1542,153 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
           }
 
           100% {
-            transform: translateY(100vh);
+            transform:
+              translateY(100vh);
+
             opacity: 0;
           }
         }
 
         @keyframes brainPanelFloat {
-          0%, 100% {
-            transform: translateY(0);
+          0%,
+          100% {
+            transform:
+              translateY(0);
           }
 
           50% {
-            transform: translateY(-7px);
+            transform:
+              translateY(-7px);
           }
         }
 
         @keyframes brainBreathe {
-          0%, 100% {
-            transform: scale(1);
+          0%,
+          100% {
+            transform:
+              scale(1);
           }
 
           50% {
-            transform: scale(1.035);
+            transform:
+              scale(1.035);
           }
         }
 
         @keyframes brainDash {
           to {
-            stroke-dashoffset: -120;
+            stroke-dashoffset:
+              -120;
           }
         }
 
         @keyframes neuralTravel {
           to {
-            stroke-dashoffset: -80;
+            stroke-dashoffset:
+              -80;
           }
         }
 
         @keyframes nodePulse {
-          0%, 100% {
+          0%,
+          100% {
             opacity: .35;
           }
 
           50% {
             opacity: 1;
-            filter: drop-shadow(0 0 7px #22d3ee);
+
+            filter:
+              drop-shadow(
+                0 0 7px #22d3ee
+              );
           }
         }
 
         @keyframes brainRingOne {
           to {
-            transform: rotate(360deg);
+            transform:
+              rotate(360deg);
           }
         }
 
         @keyframes brainRingTwo {
           to {
-            transform: rotate(360deg);
+            transform:
+              rotate(360deg);
           }
         }
 
         @keyframes earthRing {
           to {
-            transform: rotate(360deg);
+            transform:
+              rotate(360deg);
           }
         }
 
         @keyframes earthFloat {
-          0%, 100% {
-            transform: translateY(0);
+          0%,
+          100% {
+            transform:
+              translateY(0);
           }
 
           50% {
-            transform: translateY(-8px);
+            transform:
+              translateY(-8px);
           }
         }
 
         @keyframes earthMapRotate {
-          0% {
-            transform: rotateY(0deg);
+          0%,
+          100% {
+            transform:
+              scaleX(1);
           }
 
           50% {
-            transform: rotateY(18deg);
-          }
-
-          100% {
-            transform: rotateY(0deg);
+            transform:
+              scaleX(.82);
           }
         }
 
         @keyframes earthNode {
-          0%, 100% {
+          0%,
+          100% {
             opacity: .35;
           }
 
           50% {
             opacity: 1;
-            filter: drop-shadow(0 0 8px #22d3ee);
+
+            filter:
+              drop-shadow(
+                0 0 8px #22d3ee
+              );
           }
         }
 
         @keyframes robotHud {
-          0%, 100% {
-            transform: translateY(0);
+          0%,
+          100% {
+            transform:
+              translateY(0);
+
             opacity: .2;
           }
 
           50% {
-            transform: translateY(-7px);
+            transform:
+              translateY(-7px);
+
             opacity: .38;
           }
         }
 
-        @media (prefers-reduced-motion: reduce) {
+        @media (
+          prefers-reduced-motion:
+          reduce
+        ) {
           .intro-scan,
           .brain-panel,
           .brain-float,
@@ -1171,7 +1704,8 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
           .earth-map,
           .earth-node,
           .robot-arm-hud {
-            animation: none !important;
+            animation:
+              none !important;
           }
         }
       `}</style>
