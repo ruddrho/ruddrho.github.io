@@ -74,8 +74,18 @@ export const skillGroups = [
   },
 
   {
+    title: 'Engineering & Simulation',
+    code: 'ENG-04',
+    skills: [
+      'SolidWorks',
+      'COMSOL Multiphysics',
+      'AutoCAD',
+    ],
+  },
+
+  {
     title: 'AI & Computer Vision',
-    code: 'AIV-04',
+    code: 'AIV-05',
     skills: [
       'Machine Learning',
       'Deep Learning',
