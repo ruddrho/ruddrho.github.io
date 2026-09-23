@@ -10,11 +10,22 @@ type WelcomeIntroProps = {
 type Particle = {
   homeX: number
   homeY: number
+
+  startX: number
+  startY: number
+
+  x: number
+  y: number
+
   size: number
   phase: number
   depth: number
-  red: boolean
+
+  colorIndex: number
   scatter: number
+
+  connectionRadius: number
+  signalOffset: number
 }
 
 export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
@@ -44,13 +55,23 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
 
     const particles: Particle[] = []
 
+    const HUMAN_COLORS = [
+      '34,211,238',   // Cyan
+      '56,189,248',   // Electric blue
+      '139,92,246',   // Purple
+      '236,72,153',   // Magenta / pink
+      '249,115,22',   // Warm orange signal nodes
+    ]
+
     const mouse = {
       nx: 0,
       ny: 0,
+      active: false,
     }
 
     let smoothX = 0
     let smoothY = 0
+    let formationStartedAt = performance.now()
 
     /*
       =====================================================
@@ -60,6 +81,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
 
     function buildHumanParticles() {
       particles.length = 0
+      formationStartedAt = performance.now()
 
       const mask = document.createElement('canvas')
       const maskContext = mask.getContext('2d')
@@ -79,213 +101,138 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       )
 
       maskContext.fillStyle = '#ffffff'
+      maskContext.beginPath()
 
       /*
         RIGHT-FACING HUMAN PROFILE
+        Keep the original silhouette unchanged.
       */
 
-      maskContext.beginPath()
-
-      // Rear shoulder
       maskContext.moveTo(150, 920)
 
       maskContext.bezierCurveTo(
-        175,
-        840,
-        205,
-        775,
-        212,
-        710
-      )
-
-      // Back of neck
-      maskContext.bezierCurveTo(
-        218,
-        650,
-        194,
-        585,
-        188,
-        520
-      )
-
-      // Back of skull
-      maskContext.bezierCurveTo(
-        172,
-        390,
-        185,
-        245,
-        270,
-        145
+        175, 840,
+        205, 775,
+        212, 710
       )
 
       maskContext.bezierCurveTo(
-        350,
-        52,
-        490,
-        35,
-        582,
-        103
-      )
-
-      // Crown
-      maskContext.bezierCurveTo(
-        640,
-        147,
-        672,
-        210,
-        667,
-        275
-      )
-
-      // Forehead
-      maskContext.bezierCurveTo(
-        665,
-        315,
-        673,
-        340,
-        695,
-        365
-      )
-
-      // Brow / nose bridge
-      maskContext.bezierCurveTo(
-        708,
-        380,
-        710,
-        397,
-        718,
-        411
-      )
-
-      // Nose projection
-      maskContext.bezierCurveTo(
-        729,
-        428,
-        752,
-        442,
-        749,
-        456
+        218, 650,
+        194, 585,
+        188, 520
       )
 
       maskContext.bezierCurveTo(
-        746,
-        469,
-        724,
-        475,
-        705,
-        477
-      )
-
-      // Under nose
-      maskContext.bezierCurveTo(
-        694,
-        480,
-        692,
-        488,
-        700,
-        496
-      )
-
-      // Upper lip
-      maskContext.bezierCurveTo(
-        709,
-        503,
-        715,
-        511,
-        710,
-        519
-      )
-
-      // Lips
-      maskContext.bezierCurveTo(
-        706,
-        526,
-        694,
-        529,
-        687,
-        533
+        172, 390,
+        185, 245,
+        270, 145
       )
 
       maskContext.bezierCurveTo(
-        698,
-        539,
-        704,
-        547,
-        699,
-        556
-      )
-
-      // Lower lip
-      maskContext.bezierCurveTo(
-        692,
-        565,
-        678,
-        569,
-        668,
-        575
-      )
-
-      // Chin
-      maskContext.bezierCurveTo(
-        663,
-        584,
-        666,
-        596,
-        660,
-        608
+        350, 52,
+        490, 35,
+        582, 103
       )
 
       maskContext.bezierCurveTo(
-        652,
-        630,
-        637,
-        650,
-        615,
-        664
-      )
-
-      // Jaw
-      maskContext.bezierCurveTo(
-        590,
-        680,
-        556,
-        688,
-        526,
-        695
+        640, 147,
+        672, 210,
+        667, 275
       )
 
       maskContext.bezierCurveTo(
-        500,
-        702,
-        489,
-        718,
-        490,
-        742
+        665, 315,
+        673, 340,
+        695, 365
       )
 
-      // Front neck
       maskContext.bezierCurveTo(
-        492,
-        795,
-        518,
-        850,
-        545,
-        920
+        708, 380,
+        710, 397,
+        718, 411
+      )
+
+      maskContext.bezierCurveTo(
+        729, 428,
+        752, 442,
+        749, 456
+      )
+
+      maskContext.bezierCurveTo(
+        746, 469,
+        724, 475,
+        705, 477
+      )
+
+      maskContext.bezierCurveTo(
+        694, 480,
+        692, 488,
+        700, 496
+      )
+
+      maskContext.bezierCurveTo(
+        709, 503,
+        715, 511,
+        710, 519
+      )
+
+      maskContext.bezierCurveTo(
+        706, 526,
+        694, 529,
+        687, 533
+      )
+
+      maskContext.bezierCurveTo(
+        698, 539,
+        704, 547,
+        699, 556
+      )
+
+      maskContext.bezierCurveTo(
+        692, 565,
+        678, 569,
+        668, 575
+      )
+
+      maskContext.bezierCurveTo(
+        663, 584,
+        666, 596,
+        660, 608
+      )
+
+      maskContext.bezierCurveTo(
+        652, 630,
+        637, 650,
+        615, 664
+      )
+
+      maskContext.bezierCurveTo(
+        590, 680,
+        556, 688,
+        526, 695
+      )
+
+      maskContext.bezierCurveTo(
+        500, 702,
+        489, 718,
+        490, 742
+      )
+
+      maskContext.bezierCurveTo(
+        492, 795,
+        518, 850,
+        545, 920
       )
 
       maskContext.closePath()
       maskContext.fill()
 
-      /*
-        SMALL EAR DETAIL
-        Previously this was too large.
-      */
+      /* Small ear and eye details. */
 
       maskContext.globalCompositeOperation =
         'destination-out'
 
       maskContext.beginPath()
-
       maskContext.ellipse(
         505,
         458,
@@ -295,15 +242,9 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         0,
         Math.PI * 2
       )
-
       maskContext.fill()
 
-      /*
-        SMALL EYE CAVITY
-      */
-
       maskContext.beginPath()
-
       maskContext.ellipse(
         650,
         405,
@@ -313,7 +254,6 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         0,
         Math.PI * 2
       )
-
       maskContext.fill()
 
       maskContext.globalCompositeOperation =
@@ -357,93 +297,108 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
           continue
         }
 
-        const normalizedX =
-          x / mask.width
+        const normalizedX = x / mask.width
+        const random = Math.random()
 
         /*
-          RED / MAGENTA DISPERSION
-          Concentrated behind skull.
+          5-color palette:
+          front = cyan / blue
+          middle = cyan / blue / purple
+          rear = purple / magenta
+          orange = rare signal nodes
         */
 
-        let redChance = 0.015
+        let colorIndex = 0
 
-        if (normalizedX < 0.34) {
-          redChance = 0.72
-        } else if (normalizedX < 0.46) {
-          redChance = 0.38
-        } else if (normalizedX < 0.56) {
-          redChance = 0.08
+        if (normalizedX > 0.62) {
+          if (random < 0.60) {
+            colorIndex = 0
+          } else if (random < 0.88) {
+            colorIndex = 1
+          } else if (random < 0.97) {
+            colorIndex = 2
+          } else {
+            colorIndex = 4
+          }
+        } else if (normalizedX > 0.42) {
+          if (random < 0.38) {
+            colorIndex = 0
+          } else if (random < 0.62) {
+            colorIndex = 1
+          } else if (random < 0.82) {
+            colorIndex = 2
+          } else if (random < 0.96) {
+            colorIndex = 3
+          } else {
+            colorIndex = 4
+          }
+        } else {
+          if (random < 0.14) {
+            colorIndex = 0
+          } else if (random < 0.28) {
+            colorIndex = 1
+          } else if (random < 0.52) {
+            colorIndex = 2
+          } else if (random < 0.90) {
+            colorIndex = 3
+          } else {
+            colorIndex = 4
+          }
         }
 
-        let scatter = Math.random() * 8
+        const rearStrength =
+          Math.max(0, 1 - normalizedX)
 
-        if (normalizedX < 0.38) {
-          scatter =
-            35 + Math.random() * 150
-        } else if (normalizedX < 0.48) {
-          scatter =
-            Math.random() * 65
+        const scatter =
+          90 +
+          rearStrength * 270 +
+          Math.random() * 160
+
+        const angle =
+          Math.random() * Math.PI * 2
+
+        const startDistance =
+          scatter *
+          (0.55 + Math.random() * 0.75)
+
+        let startX =
+          x +
+          Math.cos(angle) * startDistance
+
+        const startY =
+          y +
+          Math.sin(angle) *
+            startDistance * 0.72
+
+        /*
+          Pull rear particles farther left so the head
+          appears to emerge from a neural data stream.
+        */
+
+        if (normalizedX < 0.52) {
+          startX -=
+            110 + Math.random() * 230
         }
 
         particles.push({
           homeX: x,
           homeY: y,
-
+          startX,
+          startY,
+          x: startX,
+          y: startY,
           size:
             Math.random() * 1.15 + 0.35,
-
           phase:
             Math.random() * Math.PI * 2,
-
           depth:
             Math.random(),
-
-          red:
-            Math.random() < redChance,
-
+          colorIndex,
           scatter,
-        })
-      }
-
-      /*
-        EXTRA DISPERSED PARTICLES
-        BEHIND THE HEAD
-      */
-
-      const extraParticles =
-        window.innerWidth < 768
-          ? 400
-          : 1500
-
-      for (
-        let i = 0;
-        i < extraParticles;
-        i++
-      ) {
-        const x =
-          55 + Math.random() * 300
-
-        const y =
-          110 + Math.random() * 670
-
-        particles.push({
-          homeX: x,
-          homeY: y,
-
-          size:
-            Math.random() * 1.35 + 0.35,
-
-          phase:
-            Math.random() * Math.PI * 2,
-
-          depth:
+          connectionRadius:
+            26 + Math.random() * 30,
+          signalOffset:
             Math.random(),
-
-          red:
-            Math.random() > 0.22,
-
-          scatter:
-            80 + Math.random() * 190,
         })
       }
     }
@@ -505,6 +460,12 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         event.clientY /
           window.innerHeight -
         0.5
+
+      mouse.active = true
+    }
+
+    function handleMouseLeave() {
+      mouse.active = false
     }
 
     /*
@@ -527,13 +488,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       smoothY +=
         (mouse.ny - smoothY) * 0.035
 
-      const mobile =
-        width < 768
-
-      /*
-        V3:
-        Smaller than previous head.
-      */
+      const mobile = width < 768
 
       const targetHeight =
         mobile
@@ -542,11 +497,6 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
 
       const scale =
         targetHeight / 920
-
-      /*
-        V3:
-        Move slightly left.
-      */
 
       const baseX =
         mobile
@@ -563,8 +513,38 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         1 +
         Math.sin(
           time * 0.00125
-        ) *
-          0.007
+        ) * 0.007
+
+      /*
+        One-time formation:
+        scattered neural cloud -> readable human head.
+      */
+
+      const formationElapsed =
+        time - formationStartedAt
+
+      const formationProgress =
+        Math.max(
+          0,
+          Math.min(
+            1,
+            (formationElapsed - 180) / 2800
+          )
+        )
+
+      const mouseScreenX =
+        (smoothX + 0.5) * width
+
+      const mouseScreenY =
+        (smoothY + 0.5) * height
+
+      const centerX = 420
+      const centerY = 470
+
+      /*
+        PASS 1:
+        calculate every particle position.
+      */
 
       for (
         let i = 0;
@@ -573,126 +553,501 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       ) {
         const p = particles[i]
 
+        const staggered =
+          Math.max(
+            0,
+            Math.min(
+              1,
+              (formationProgress -
+                p.signalOffset * 0.22) /
+                0.78
+            )
+          )
+
+        const formed =
+          1 -
+          Math.pow(
+            1 - staggered,
+            3
+          )
+
+        const homeX =
+          (p.homeX - centerX) *
+            breathe +
+          centerX
+
+        const homeY =
+          (p.homeY - centerY) *
+            breathe +
+          centerY
+
+        /*
+          Scattered particles remain alive while
+          travelling toward their final head position.
+        */
+
+        const startDriftX =
+          Math.sin(
+            time * 0.00075 +
+              p.phase
+          ) *
+          (5 + p.depth * 10)
+
+        const startDriftY =
+          Math.cos(
+            time * 0.00062 +
+              p.phase
+          ) *
+          (4 + p.depth * 8)
+
+        let localX =
+          (p.startX + startDriftX) *
+            (1 - formed) +
+          homeX * formed
+
+        let localY =
+          (p.startY + startDriftY) *
+            (1 - formed) +
+          homeY * formed
+
+        /*
+          After formation, keep the rear of the head
+          gently dissolving / flowing like a data stream.
+        */
+
         const rearFactor =
           Math.max(
             0,
             1 - p.homeX / 430
           )
 
-        const scatterWave =
-          Math.sin(
-            time * 0.0007 +
-              p.phase
-          )
+        const rearFlow =
+          formed * rearFactor
 
-        const scatterX =
-          -p.scatter *
-          rearFactor *
+        localX +=
+          -rearFlow *
+          p.scatter *
+          0.055 *
           (
-            0.36 +
-            scatterWave * 0.22
+            0.45 +
+            Math.sin(
+              time * 0.00065 +
+                p.phase
+            ) * 0.30
           )
 
-        const scatterY =
+        localY +=
+          rearFlow *
           Math.sin(
-            time * 0.0011 +
+            time * 0.001 +
               p.phase
           ) *
           p.scatter *
-          0.13
+          0.018
 
         /*
-          PARTICLE BREATHING / DRIFT
+          Fine breathing / neural vibration.
         */
 
-        const driftX =
+        localX +=
           Math.sin(
-            time * 0.0015 +
+            time * 0.00145 +
               p.phase
           ) *
-          (1.1 + p.depth * 2.2)
+          (0.8 + p.depth * 1.8) *
+          formed
 
-        const driftY =
+        localY +=
           Math.cos(
-            time * 0.0012 +
+            time * 0.00118 +
               p.phase
           ) *
-          (1 + p.depth * 1.8)
+          (0.7 + p.depth * 1.5) *
+          formed
+
+        let px =
+          baseX + localX * scale
+
+        let py =
+          baseY + localY * scale
 
         /*
-          CURSOR DEPTH PARALLAX
+          Whole-head cursor parallax.
         */
 
-        const cursorX =
+        px +=
           smoothX *
-          (7 + p.depth * 21)
+          (5 + p.depth * 15) *
+          formed
 
-        const cursorY =
+        py +=
           smoothY *
-          (4 + p.depth * 12)
+          (3 + p.depth * 9) *
+          formed
 
-        const centerX = 420
-        const centerY = 470
+        /*
+          Local cursor reaction:
+          nearby neural particles bend toward the cursor
+          and receive a subtle orbital distortion.
+        */
 
-        const localX =
-          (p.homeX - centerX) *
-            breathe +
-          centerX
+        if (
+          mouse.active &&
+          formed > 0.45
+        ) {
+          const dx =
+            mouseScreenX - px
 
-        const localY =
-          (p.homeY - centerY) *
-            breathe +
-          centerY
+          const dy =
+            mouseScreenY - py
 
-        const px =
-          baseX +
-          localX * scale +
-          scatterX * scale +
-          driftX +
-          cursorX
+          const distance =
+            Math.sqrt(
+              dx * dx + dy * dy
+            )
 
-        const py =
-          baseY +
-          localY * scale +
-          scatterY * scale +
-          driftY +
-          cursorY
+          const influenceRadius = 175
+
+          if (
+            distance < influenceRadius &&
+            distance > 0
+          ) {
+            const strength =
+              1 -
+              distance / influenceRadius
+
+            px +=
+              (dx / distance) *
+              strength *
+              (5 + p.depth * 10)
+
+            py +=
+              (dy / distance) *
+              strength *
+              (5 + p.depth * 10)
+
+            const swirl =
+              Math.sin(
+                time * 0.0018 +
+                  p.phase
+              ) *
+              strength * 4
+
+            px +=
+              (-dy / distance) * swirl
+
+            py +=
+              (dx / distance) * swirl
+          }
+        }
+
+        p.x = px
+        p.y = py
+      }
+
+      /*
+        PASS 2:
+        neural mesh connections.
+
+        Only a sampled subset is connected so the
+        animation stays smooth even with 13k+ particles.
+      */
+
+      const connectionStep =
+        mobile ? 24 : 18
+
+      const connectionDistance =
+        mobile ? 34 : 46
+
+      const cellSize =
+        connectionDistance
+
+      const grid =
+        new Map<string, number[]>()
+
+      for (
+        let i = 0;
+        i < particles.length;
+        i += connectionStep
+      ) {
+        const p = particles[i]
+
+        const cellX =
+          Math.floor(p.x / cellSize)
+
+        const cellY =
+          Math.floor(p.y / cellSize)
+
+        const key =
+          `${cellX},${cellY}`
+
+        const bucket = grid.get(key)
+
+        if (bucket) {
+          bucket.push(i)
+        } else {
+          grid.set(key, [i])
+        }
+      }
+
+      for (
+        let i = 0;
+        i < particles.length;
+        i += connectionStep
+      ) {
+        const a = particles[i]
+
+        const cellX =
+          Math.floor(a.x / cellSize)
+
+        const cellY =
+          Math.floor(a.y / cellSize)
+
+        let links = 0
+
+        for (
+          let gx = -1;
+          gx <= 1 && links < 2;
+          gx++
+        ) {
+          for (
+            let gy = -1;
+            gy <= 1 && links < 2;
+            gy++
+          ) {
+            const bucket =
+              grid.get(
+                `${cellX + gx},${cellY + gy}`
+              )
+
+            if (!bucket) {
+              continue
+            }
+
+            for (
+              let k = 0;
+              k < bucket.length && links < 2;
+              k++
+            ) {
+              const j = bucket[k]
+
+              if (j <= i) {
+                continue
+              }
+
+              const b = particles[j]
+
+              const dx = a.x - b.x
+              const dy = a.y - b.y
+
+              const distance =
+                Math.sqrt(
+                  dx * dx + dy * dy
+                )
+
+              const allowedDistance =
+                Math.min(
+                  connectionDistance,
+                  (
+                    a.connectionRadius +
+                    b.connectionRadius
+                  ) * 0.72
+                )
+
+              if (
+                distance > allowedDistance
+              ) {
+                continue
+              }
+
+              const opacity =
+                (
+                  1 -
+                  distance /
+                    allowedDistance
+                ) * 0.22
+
+              const gradient =
+                ctx.createLinearGradient(
+                  a.x,
+                  a.y,
+                  b.x,
+                  b.y
+                )
+
+              gradient.addColorStop(
+                0,
+                `rgba(${HUMAN_COLORS[a.colorIndex]},${opacity})`
+              )
+
+              gradient.addColorStop(
+                1,
+                `rgba(${HUMAN_COLORS[b.colorIndex]},${opacity})`
+              )
+
+              ctx.beginPath()
+              ctx.moveTo(a.x, a.y)
+              ctx.lineTo(b.x, b.y)
+              ctx.strokeStyle = gradient
+              ctx.lineWidth = 0.55
+              ctx.stroke()
+
+              links++
+            }
+          }
+        }
+      }
+
+      /*
+        Cursor-to-neural links.
+        This makes the head visibly react to movement.
+      */
+
+      if (mouse.active) {
+        for (
+          let i = 0;
+          i < particles.length;
+          i += connectionStep * 2
+        ) {
+          const p = particles[i]
+
+          const dx =
+            mouseScreenX - p.x
+
+          const dy =
+            mouseScreenY - p.y
+
+          const distance =
+            Math.sqrt(
+              dx * dx + dy * dy
+            )
+
+          if (distance < 145) {
+            const strength =
+              1 - distance / 145
+
+            ctx.beginPath()
+            ctx.moveTo(p.x, p.y)
+            ctx.lineTo(
+              mouseScreenX,
+              mouseScreenY
+            )
+
+            ctx.strokeStyle =
+              `rgba(${HUMAN_COLORS[p.colorIndex]},${strength * 0.18})`
+
+            ctx.lineWidth = 0.55
+            ctx.stroke()
+          }
+        }
+      }
+
+      /*
+        PASS 3:
+        particles + travelling neural signal.
+      */
+
+      const signalPosition =
+        (time * 0.00016) % 1
+
+      for (
+        let i = 0;
+        i < particles.length;
+        i++
+      ) {
+        const p = particles[i]
 
         const pulse =
           0.5 +
           Math.sin(
             time * 0.0022 +
               p.phase
-          ) *
-            0.5
+          ) * 0.5
 
-        if (p.red) {
-          ctx.fillStyle =
-            `rgba(244,63,94,${
-              0.25 +
-              pulse * 0.62
-            })`
-        } else {
-          ctx.fillStyle =
-            `rgba(34,211,238,${
-              0.30 +
-              pulse * 0.65
-            })`
+        const pathPosition =
+          p.homeX / 760
+
+        let signalDistance =
+          Math.abs(
+            pathPosition -
+              signalPosition
+          )
+
+        signalDistance =
+          Math.min(
+            signalDistance,
+            1 - signalDistance
+          )
+
+        const signalBoost =
+          Math.max(
+            0,
+            1 - signalDistance / 0.045
+          )
+
+        const rgb =
+          HUMAN_COLORS[p.colorIndex]
+
+        if (
+          signalBoost > 0.25 &&
+          i % 13 === 0
+        ) {
+          const glowRadius =
+            5 + signalBoost * 10
+
+          const glow =
+            ctx.createRadialGradient(
+              p.x,
+              p.y,
+              0,
+              p.x,
+              p.y,
+              glowRadius
+            )
+
+          glow.addColorStop(
+            0,
+            `rgba(${rgb},${0.34 + signalBoost * 0.32})`
+          )
+
+          glow.addColorStop(
+            1,
+            `rgba(${rgb},0)`
+          )
+
+          ctx.beginPath()
+          ctx.arc(
+            p.x,
+            p.y,
+            glowRadius,
+            0,
+            Math.PI * 2
+          )
+          ctx.fillStyle = glow
+          ctx.fill()
         }
 
         ctx.beginPath()
 
         ctx.arc(
-          px,
-          py,
+          p.x,
+          p.y,
           p.size *
             (
-              0.75 +
-              p.depth * 0.7
+              0.72 +
+              p.depth * 0.62 +
+              signalBoost * 0.45
             ),
           0,
           Math.PI * 2
         )
+
+        ctx.fillStyle =
+          `rgba(${rgb},${
+            0.28 +
+            pulse * 0.54 +
+            signalBoost * 0.16
+          })`
 
         ctx.fill()
       }
@@ -715,6 +1070,11 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       handleMouseMove
     )
 
+    window.addEventListener(
+      'mouseleave',
+      handleMouseLeave
+    )
+
     animationFrame =
       window.requestAnimationFrame(
         draw
@@ -733,6 +1093,11 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       window.removeEventListener(
         'mousemove',
         handleMouseMove
+      )
+
+      window.removeEventListener(
+        'mouseleave',
+        handleMouseLeave
       )
     }
   }, [])
