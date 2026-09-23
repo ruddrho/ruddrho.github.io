@@ -1,105 +1,176 @@
 import { useEffect, useRef } from 'react'
 
+type Pt = { x: number; y: number }
 type Particle = {
-  nx: number
-  ny: number
-  depth: number
-  sx: number
-  sy: number
+  tx: number
+  ty: number
   x: number
   y: number
+  sx: number
+  sy: number
   size: number
   phase: number
   delay: number
   color: number
-  feature: number
+  glow: number
 }
 
-const COLORS = [
+const C = [
   [34, 211, 238],   // cyan
-  [56, 189, 248],   // electric blue
+  [56, 189, 248],   // blue
   [99, 102, 241],   // indigo
   [168, 85, 247],   // purple
   [236, 72, 153],   // magenta
 ] as const
 
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v))
-const smoothstep = (a: number, b: number, x: number) => {
-  const t = clamp((x - a) / (b - a))
-  return t * t * (3 - 2 * t)
-}
-const gauss = (x: number, y: number, cx: number, cy: number, rx: number, ry: number) => {
-  const dx = (x - cx) / rx
-  const dy = (y - cy) / ry
-  return Math.exp(-(dx * dx + dy * dy) * 2.2)
-}
+const ease = (t: number) => 1 - Math.pow(1 - clamp(t), 3)
 
-// Right-facing anatomical silhouette. Coordinates are normalized 0..1.
-function faceBounds(y: number) {
-  // back of skull / neck
-  let left = 0.16
-  if (y < 0.16) left = 0.30 - y * 0.55
-  else if (y > 0.78) left = 0.23 + (y - 0.78) * 0.50
-
-  // front profile: forehead -> brow -> nose -> lips -> chin -> neck
-  let right = 0.76
-  if (y < 0.12) right = 0.58 + y * 1.25
-  else if (y < 0.27) right = 0.73 + (y - 0.12) * 0.34
-  else if (y < 0.36) right = 0.78 + (y - 0.27) * 0.20
-  else if (y < 0.49) right = 0.80 + (y - 0.36) * 0.72 // nose projection
-  else if (y < 0.54) right = 0.895 - (y - 0.49) * 1.20 // nose underside
-  else if (y < 0.60) right = 0.835 - (y - 0.54) * 0.18
-  else if (y < 0.66) right = 0.824 + Math.sin(((y - 0.60) / 0.06) * Math.PI) * 0.026 // lips
-  else if (y < 0.76) right = 0.82 - (y - 0.66) * 0.34
-  else if (y < 0.84) right = 0.786 - (y - 0.76) * 0.95 // chin
-  else right = 0.71 - (y - 0.84) * 0.72 // neck
-
-  return { left, right }
-}
-
-function insideHead(x: number, y: number) {
-  if (y < 0.045 || y > 0.97) return false
-  const { left, right } = faceBounds(y)
-  if (x < left || x > right) return false
-
-  // round skull cap
-  if (y < 0.25) {
-    const dx = (x - 0.48) / 0.36
-    const dy = (y - 0.24) / 0.22
-    if (dx * dx + dy * dy > 1.06) return false
+function sampleLine(a: Pt, b: Pt, step: number, out: Pt[]) {
+  const d = Math.hypot(b.x - a.x, b.y - a.y)
+  const n = Math.max(2, Math.ceil(d / step))
+  for (let i = 0; i <= n; i++) {
+    const t = i / n
+    out.push({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t })
   }
-  return true
 }
 
-function depthAt(x: number, y: number) {
-  const { left, right } = faceBounds(y)
-  const mid = (left + right) * 0.5
-  const half = Math.max(0.001, (right - left) * 0.5)
-  const u = clamp((x - mid) / half, -1, 1)
-  let z = Math.sqrt(Math.max(0, 1 - u * u))
-
-  // facial volumes — subtle, not cartoon outlines
-  z += gauss(x, y, 0.79, 0.46, 0.12, 0.16) * 0.20 // nose / central face
-  z += gauss(x, y, 0.73, 0.63, 0.14, 0.07) * 0.07 // mouth volume
-  z += gauss(x, y, 0.67, 0.75, 0.18, 0.10) * 0.05 // chin
-  z -= gauss(x, y, 0.68, 0.37, 0.13, 0.07) * 0.14 // eye socket
-  z -= gauss(x, y, 0.66, 0.56, 0.11, 0.055) * 0.05 // under nose
-  return clamp(z, 0, 1.25)
+function samplePolyline(points: Pt[], step: number, out: Pt[]) {
+  for (let i = 0; i < points.length - 1; i++) sampleLine(points[i], points[i + 1], step, out)
 }
 
-function featureWeight(x: number, y: number) {
-  const eye = gauss(x, y, 0.69, 0.375, 0.115, 0.055)
-  const iris = gauss(x, y, 0.715, 0.378, 0.035, 0.038)
-  const brow = gauss(x, y, 0.67, 0.315, 0.15, 0.035)
-  const nose = gauss(x, y, 0.805, 0.485, 0.10, 0.14)
-  const lips = gauss(x, y, 0.775, 0.635, 0.105, 0.040)
-  const ear = gauss(x, y, 0.285, 0.49, 0.075, 0.12)
-  const jaw = gauss(x, y, 0.60, 0.76, 0.23, 0.055)
-  return clamp(Math.max(eye * 0.8, iris, brow * 0.5, nose * 0.65, lips * 0.9, ear * 0.7, jaw * 0.45))
+function sampleEllipse(cx: number, cy: number, rx: number, ry: number, count: number, out: Pt[], start = 0, end = Math.PI * 2) {
+  for (let i = 0; i <= count; i++) {
+    const a = start + (end - start) * (i / count)
+    out.push({ x: cx + Math.cos(a) * rx, y: cy + Math.sin(a) * ry })
+  }
+}
+
+function addPanelFill(poly: Pt[], spacing: number, out: Pt[]) {
+  const ys = poly.map(p => p.y)
+  const minY = Math.min(...ys)
+  const maxY = Math.max(...ys)
+
+  for (let y = minY; y <= maxY; y += spacing) {
+    const xs: number[] = []
+    for (let i = 0; i < poly.length; i++) {
+      const a = poly[i]
+      const b = poly[(i + 1) % poly.length]
+      if ((a.y <= y && b.y > y) || (b.y <= y && a.y > y)) {
+        const t = (y - a.y) / (b.y - a.y)
+        xs.push(a.x + (b.x - a.x) * t)
+      }
+    }
+    xs.sort((a, b) => a - b)
+    for (let i = 0; i + 1 < xs.length; i += 2) {
+      for (let x = xs[i]; x <= xs[i + 1]; x += spacing) {
+        out.push({ x, y })
+      }
+    }
+  }
+}
+
+function buildRobotGeometry() {
+  const edge: Pt[] = []
+  const fill: Pt[] = []
+  const accent: Pt[] = []
+
+  // 3/4-view robotic mask silhouette: deliberately mechanical, not a human portrait.
+  const outer: Pt[] = [
+    { x: 0.28, y: 0.11 }, { x: 0.43, y: 0.07 }, { x: 0.59, y: 0.10 },
+    { x: 0.70, y: 0.18 }, { x: 0.76, y: 0.28 }, { x: 0.80, y: 0.37 },
+    { x: 0.86, y: 0.43 }, { x: 0.82, y: 0.49 }, { x: 0.84, y: 0.55 },
+    { x: 0.80, y: 0.61 }, { x: 0.81, y: 0.68 }, { x: 0.75, y: 0.76 },
+    { x: 0.66, y: 0.82 }, { x: 0.60, y: 0.92 }, { x: 0.37, y: 0.91 },
+    { x: 0.30, y: 0.82 }, { x: 0.23, y: 0.74 }, { x: 0.19, y: 0.60 },
+    { x: 0.17, y: 0.44 }, { x: 0.19, y: 0.27 }, { x: 0.23, y: 0.17 },
+    { x: 0.28, y: 0.11 },
+  ]
+  samplePolyline(outer, 0.006, edge)
+
+  // Armor panels
+  const forehead = [
+    {x:.30,y:.14},{x:.47,y:.10},{x:.63,y:.14},{x:.71,y:.23},
+    {x:.63,y:.31},{x:.45,y:.28},{x:.29,y:.24}
+  ]
+  const cheek = [
+    {x:.48,y:.47},{x:.70,y:.43},{x:.78,y:.51},{x:.73,y:.66},
+    {x:.62,y:.73},{x:.48,y:.65}
+  ]
+  const temple = [
+    {x:.25,y:.30},{x:.43,y:.30},{x:.47,y:.45},{x:.38,y:.57},
+    {x:.23,y:.54},{x:.20,y:.41}
+  ]
+  const jaw = [
+    {x:.38,y:.61},{x:.49,y:.68},{x:.63,y:.75},{x:.58,y:.86},
+    {x:.38,y:.84},{x:.28,y:.73}
+  ]
+
+  for (const p of [forehead, cheek, temple, jaw]) {
+    samplePolyline([...p, p[0]], 0.008, edge)
+    addPanelFill(p, 0.018, fill)
+  }
+
+  // Mechanical eye / visor
+  const eye: Pt[] = [
+    {x:.48,y:.35},{x:.60,y:.32},{x:.72,y:.36},{x:.65,y:.41},
+    {x:.54,y:.42},{x:.46,y:.39},{x:.48,y:.35}
+  ]
+  samplePolyline(eye, 0.004, accent)
+  sampleEllipse(.595, .372, .033, .028, 36, accent)
+  sampleEllipse(.595, .372, .012, .012, 20, accent)
+
+  // Nose bridge is a hard mechanical ridge
+  samplePolyline([
+    {x:.70,y:.38},{x:.75,y:.43},{x:.80,y:.48},{x:.75,y:.52},{x:.69,y:.51}
+  ], 0.004, accent)
+
+  // Mouth is a segmented vent, not lips
+  samplePolyline([{x:.63,y:.60},{x:.73,y:.59},{x:.78,y:.62},{x:.72,y:.65},{x:.61,y:.65}], 0.004, accent)
+  for (let i = 0; i < 6; i++) {
+    const y = .602 + i * .009
+    sampleLine({x:.645,y},{x:.745,y:y+.002}, .006, accent)
+  }
+
+  // Ear / side module
+  sampleEllipse(.255, .46, .070, .115, 50, edge, Math.PI * .52, Math.PI * 1.48)
+  sampleEllipse(.258, .46, .040, .078, 40, accent, Math.PI * .55, Math.PI * 1.45)
+  sampleEllipse(.258, .46, .012, .020, 18, accent)
+
+  // Circuit seams
+  const seams: Pt[][] = [
+    [{x:.31,y:.17},{x:.40,y:.24},{x:.44,y:.31}],
+    [{x:.61,y:.16},{x:.59,y:.25},{x:.63,y:.31}],
+    [{x:.31,y:.55},{x:.38,y:.61},{x:.39,y:.72}],
+    [{x:.50,y:.47},{x:.56,y:.52},{x:.56,y:.60}],
+    [{x:.65,y:.70},{x:.68,y:.77},{x:.62,y:.84}],
+    [{x:.25,y:.67},{x:.33,y:.72},{x:.35,y:.82}],
+  ]
+  seams.forEach(s => samplePolyline(s, .006, accent))
+
+  // Neck mechanics
+  const neckL = [{x:.36,y:.82},{x:.34,y:.95},{x:.26,y:1.03}]
+  const neckR = [{x:.59,y:.84},{x:.63,y:.96},{x:.72,y:1.03}]
+  samplePolyline(neckL, .006, edge)
+  samplePolyline(neckR, .006, edge)
+  for (let y=.87; y<1.01; y+=.028) {
+    sampleLine({x:.38,y},{x:.59,y:y+.01}, .010, accent)
+  }
+
+  // Extra sparse interior tech points
+  for (let i = 0; i < 1500; i++) {
+    const x = .21 + Math.random() * .58
+    const y = .12 + Math.random() * .72
+    const dx = (x-.49)/.34
+    const dy = (y-.47)/.40
+    if (dx*dx + dy*dy < 1 && Math.random() > .30) fill.push({x,y})
+  }
+
+  return { edge, fill, accent }
 }
 
 export function AnimatedHumanFace() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -107,206 +178,135 @@ export function AnimatedHumanFace() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    let raf = 0
-    let w = 1
-    let h = 1
-    let dpr = 1
-    let particles: Particle[] = []
-    let start = performance.now()
+    let w = 1, h = 1, dpr = 1, raf = 0
     const mouse = { x: -9999, y: -9999, active: false }
+    const geometry = buildRobotGeometry()
+    let particles: Particle[] = []
+    const start = performance.now()
 
-    const resize = () => {
+    function rebuild() {
+      const mobile = w < 760
+      const scale = Math.min(h * (mobile ? .68 : .82), w * (mobile ? .72 : .48))
+      const ox = mobile ? w * .04 : w * .035
+      const oy = h * .055
+
+      const all: Array<{p: Pt; glow: number; color: number; size: number}> = []
+
+      geometry.fill.forEach((p, i) => {
+        if (mobile && i % 2) return
+        all.push({p, glow:.15, color:i%3, size:.65 + Math.random()*.8})
+      })
+      geometry.edge.forEach((p, i) => all.push({p, glow:.75, color:i%4, size:1.0 + Math.random()*1.1}))
+      geometry.accent.forEach((p, i) => all.push({p, glow:1, color:(i%3===0?4:0), size:1.15 + Math.random()*1.2}))
+
+      particles = all.map((item, i) => {
+        const tx = ox + item.p.x * scale
+        const ty = oy + item.p.y * scale
+        const angle = Math.random() * Math.PI * 2
+        const dist = scale * (.18 + Math.random() * .55)
+        return {
+          tx, ty,
+          x: tx + Math.cos(angle) * dist,
+          y: ty + Math.sin(angle) * dist,
+          sx: tx + Math.cos(angle) * dist,
+          sy: ty + Math.sin(angle) * dist,
+          size: item.size,
+          phase: Math.random() * Math.PI * 2,
+          delay: (i / Math.max(1, all.length)) * .65 + Math.random()*.45,
+          color: item.color,
+          glow: item.glow,
+        }
+      })
+    }
+
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 1.75)
       const r = canvas.getBoundingClientRect()
       w = Math.max(1, r.width)
       h = Math.max(1, r.height)
-      dpr = Math.min(window.devicePixelRatio || 1, 2)
-      canvas.width = Math.round(w * dpr)
-      canvas.height = Math.round(h * dpr)
+      canvas.width = Math.floor(w * dpr)
+      canvas.height = Math.floor(h * dpr)
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      build()
+      rebuild()
     }
 
-    const build = () => {
-      const target = window.innerWidth < 768 ? 4300 : 11500
-      const list: Particle[] = []
-      let tries = 0
-
-      while (list.length < target && tries < target * 10) {
-        tries++
-        const y = 0.045 + Math.random() * 0.925
-        const { left, right } = faceBounds(y)
-        const x = left + Math.random() * (right - left)
-        if (!insideHead(x, y)) continue
-
-        const feature = featureWeight(x, y)
-        // Slightly thin generic regions, retain more points around real facial landmarks.
-        if (feature < 0.18 && Math.random() < 0.16) continue
-
-        const depth = depthAt(x, y)
-        const angle = Math.random() * Math.PI * 2
-        const radius = Math.max(w, h) * (0.28 + Math.random() * 0.42)
-        const sx = w * 0.36 + Math.cos(angle) * radius
-        const sy = h * 0.50 + Math.sin(angle) * radius
-
-        let color = 1
-        const rnd = Math.random()
-        if (feature > 0.45 && rnd < 0.28) color = 4
-        else if (depth > 0.72 && rnd < 0.55) color = 0
-        else if (rnd < 0.72) color = 1
-        else if (rnd < 0.88) color = 2
-        else color = 3
-
-        list.push({
-          nx: x,
-          ny: y,
-          depth,
-          sx,
-          sy,
-          x: sx,
-          y: sy,
-          size: (0.45 + Math.random() * 0.95) * (0.9 + feature * 0.35),
-          phase: Math.random() * Math.PI * 2,
-          delay: Math.random() * 0.85 + (1 - x) * 0.30,
-          color,
-          feature,
-        })
-      }
-
-      // Extra particles inside features. They create density/shading, not neon outlines.
-      const addCluster = (cx: number, cy: number, rx: number, ry: number, count: number, colorBias = 0) => {
-        for (let i = 0; i < count; i++) {
-          const a = Math.random() * Math.PI * 2
-          const rr = Math.sqrt(Math.random())
-          const x = cx + Math.cos(a) * rx * rr
-          const y = cy + Math.sin(a) * ry * rr
-          if (!insideHead(x, y)) continue
-          const depth = depthAt(x, y)
-          const angle = Math.random() * Math.PI * 2
-          const radius = Math.max(w, h) * (0.32 + Math.random() * 0.36)
-          list.push({
-            nx: x, ny: y, depth,
-            sx: w * 0.36 + Math.cos(angle) * radius,
-            sy: h * 0.50 + Math.sin(angle) * radius,
-            x: 0, y: 0,
-            size: 0.55 + Math.random() * 0.95,
-            phase: Math.random() * Math.PI * 2,
-            delay: Math.random() * 0.7,
-            color: Math.random() < 0.24 + colorBias ? 4 : (Math.random() < 0.55 ? 0 : 1),
-            feature: 0.75 + Math.random() * 0.25,
-          })
-          const p = list[list.length - 1]
-          p.x = p.sx; p.y = p.sy
-        }
-      }
-
-      addCluster(0.69, 0.375, 0.095, 0.038, window.innerWidth < 768 ? 180 : 420, 0.04) // eye
-      addCluster(0.715, 0.378, 0.027, 0.029, window.innerWidth < 768 ? 90 : 210, 0.00) // iris
-      addCluster(0.805, 0.49, 0.065, 0.12, window.innerWidth < 768 ? 150 : 360, 0.00) // nose
-      addCluster(0.775, 0.635, 0.085, 0.027, window.innerWidth < 768 ? 140 : 330, 0.22) // lips
-      addCluster(0.285, 0.49, 0.050, 0.095, window.innerWidth < 768 ? 130 : 300, 0.08) // ear
-
-      particles = list
-      start = performance.now()
-    }
-
-    const onMove = (e: MouseEvent) => {
+    function onMove(e: MouseEvent) {
       const r = canvas.getBoundingClientRect()
       mouse.x = e.clientX - r.left
       mouse.y = e.clientY - r.top
       mouse.active = true
     }
-    const onLeave = () => { mouse.active = false }
+    function onLeave() { mouse.active = false }
 
-    const draw = (now: number) => {
-      const elapsed = (now - start) / 1000
+    function draw(now: number) {
       ctx.clearRect(0, 0, w, h)
+      const t = (now - start) / 1000
+      const scan = ((t * .16) % 1.15) - .08
 
-      const faceH = Math.min(h * 0.92, w * 1.06)
-      const faceW = faceH * 0.82
-      const ox = Math.max(-faceW * 0.05, w * 0.015)
-      const oy = (h - faceH) * 0.48
-      const breathe = 1 + Math.sin(now * 0.0011) * 0.004
-      const turn = Math.sin(now * 0.00032) * 0.018
-      const scan = (now * 0.00012) % 1.15 - 0.075
-
-      // very faint volumetric aura
-      const glow = ctx.createRadialGradient(
-        ox + faceW * 0.62, oy + faceH * 0.47, 0,
-        ox + faceW * 0.62, oy + faceH * 0.47, faceW * 0.48
-      )
-      glow.addColorStop(0, 'rgba(34,211,238,0.055)')
-      glow.addColorStop(0.55, 'rgba(99,102,241,0.025)')
-      glow.addColorStop(1, 'rgba(0,0,0,0)')
-      ctx.fillStyle = glow
-      ctx.fillRect(0, 0, w, h)
+      // subtle holographic aura
+      const auraX = w < 760 ? w*.30 : w*.23
+      const auraY = h*.45
+      const aura = ctx.createRadialGradient(auraX,auraY,10,auraX,auraY,Math.min(w,h)*.35)
+      aura.addColorStop(0,'rgba(34,211,238,.045)')
+      aura.addColorStop(.55,'rgba(99,102,241,.025)')
+      aura.addColorStop(1,'rgba(0,0,0,0)')
+      ctx.fillStyle = aura
+      ctx.fillRect(0,0,w,h)
 
       for (const p of particles) {
-        const form = smoothstep(p.delay, p.delay + 1.9, elapsed)
+        const form = ease((t - p.delay) / 1.75)
+        const idleX = Math.sin(t*1.15 + p.phase) * (p.glow > .6 ? 1.2 : .55)
+        const idleY = Math.cos(t*.95 + p.phase*1.4) * (p.glow > .6 ? 1.0 : .45)
 
-        // Depth/parallax makes it read as a volume rather than a flat mask.
-        const depthShift = (p.depth - 0.55) * faceW * (0.030 + turn)
-        let tx = ox + (p.nx - 0.5) * faceW * breathe + faceW * 0.5 + depthShift
-        let ty = oy + (p.ny - 0.5) * faceH * breathe + faceH * 0.5
+        let targetX = p.tx + idleX
+        let targetY = p.ty + idleY
 
-        const micro = 0.7 + p.depth * 1.1
-        tx += Math.sin(now * 0.0014 + p.phase) * micro
-        ty += Math.cos(now * 0.00115 + p.phase * 1.7) * micro * 0.62
-
-        // Mouse interaction: gentle repulsion, then particles return to anatomy.
         if (mouse.active) {
-          const dx = tx - mouse.x
-          const dy = ty - mouse.y
-          const dist = Math.hypot(dx, dy)
-          const radius = 125
-          if (dist < radius && dist > 0.01) {
-            const force = (1 - dist / radius) ** 2
-            tx += (dx / dist) * force * 22
-            ty += (dy / dist) * force * 22
+          const dx = targetX - mouse.x
+          const dy = targetY - mouse.y
+          const d = Math.hypot(dx,dy)
+          if (d < 150 && d > .1) {
+            const force = (1-d/150) * (10 + p.glow*14)
+            targetX += dx/d * force
+            targetY += dy/d * force
           }
         }
 
-        p.x += ((p.sx + (tx - p.sx) * form) - p.x) * 0.105
-        p.y += ((p.sy + (ty - p.sy) * form) - p.y) * 0.105
+        p.x = p.sx + (targetX - p.sx) * form
+        p.y = p.sy + (targetY - p.sy) * form
 
-        const [r, g, b] = COLORS[p.color]
-        const scanGlow = Math.exp(-Math.pow((p.ny - scan) / 0.028, 2))
-        const frontLight = 0.34 + p.depth * 0.52
-        const featureLight = p.feature * 0.22
-        const alpha = clamp((0.22 + frontLight * 0.52 + featureLight + scanGlow * 0.34) * form, 0, 0.94)
-        const size = p.size * (0.76 + p.depth * 0.48 + scanGlow * 0.42)
+        const ny = clamp(p.ty / Math.max(1,h))
+        const scanGlow = Math.exp(-Math.pow((ny-scan)/.035,2))
+        const pulse = .72 + .28*Math.sin(t*2.2+p.phase)
+        const [r,g,b] = C[p.color % C.length]
+        const alpha = clamp((.28 + p.glow*.48 + scanGlow*.30) * form * pulse, 0, 1)
+        const size = p.size * (1 + scanGlow*.55)
 
-        if (p.feature > 0.62 || scanGlow > 0.35) {
-          ctx.shadowBlur = 5 + p.feature * 5 + scanGlow * 7
-          ctx.shadowColor = `rgba(${r},${g},${b},${alpha * 0.75})`
-        } else {
-          ctx.shadowBlur = 0
-        }
+        if (p.glow > .55 || scanGlow > .25) {
+          ctx.shadowBlur = 5 + p.glow*9 + scanGlow*10
+          ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`
+        } else ctx.shadowBlur = 0
 
         ctx.beginPath()
-        ctx.arc(p.x, p.y, size, 0, Math.PI * 2)
+        ctx.arc(p.x,p.y,size,0,Math.PI*2)
         ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`
         ctx.fill()
       }
 
       ctx.shadowBlur = 0
 
-      // sparse short neural links only on high-feature/front points; avoids cartoon contour lines.
-      if (elapsed > 1.25) {
-        ctx.lineWidth = 0.45
-        for (let i = 0; i < particles.length; i += 70) {
+      // moving data packets along random short links
+      if (t > 1.3) {
+        ctx.lineWidth = .55
+        for (let i=0;i<particles.length;i+=115) {
           const a = particles[i]
-          if (a.depth < 0.72 && a.feature < 0.45) continue
-          let best: Particle | null = null
-          let bestD = 26
-          for (let j = i + 1; j < Math.min(particles.length, i + 85); j += 4) {
-            const b = particles[j]
-            const d = Math.hypot(a.x - b.x, a.y - b.y)
-            if (d < bestD) { bestD = d; best = b }
-          }
-          if (best) {
-            const [r, g, b] = COLORS[a.color]
-            ctx.strokeStyle = `rgba(${r},${g},${b},${0.055 + a.feature * 0.055})`
-            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(best.x, best.y); ctx.stroke()
+          if (a.glow < .55) continue
+          const b = particles[(i+37)%particles.length]
+          const d = Math.hypot(a.x-b.x,a.y-b.y)
+          if (d < 95) {
+            const [r,g,bb] = C[a.color%C.length]
+            ctx.strokeStyle = `rgba(${r},${g},${bb},.10)`
+            ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke()
           }
         }
       }
