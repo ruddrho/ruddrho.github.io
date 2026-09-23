@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { FiArrowRight } from 'react-icons/fi'
+import { NeuralNetworkBackground } from './NeuralNetworkBackground'
 
 type WelcomeIntroProps = {
   onEnter: () => void
@@ -802,6 +803,9 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
             '70px 70px',
         }}
       />
+       {/* Interactive Neural Network Background */}
+      
+      <NeuralNetworkBackground />
 
       {/* SCANNING LINE */}
 
