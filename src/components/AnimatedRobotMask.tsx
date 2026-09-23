@@ -4,34 +4,46 @@ export function AnimatedRobotMask() {
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+
   useEffect(() => {
 
     const canvas = canvasRef.current;
 
     if (!canvas) return;
 
+
     const context = canvas.getContext("2d");
 
     if (!context) return;
 
-    const ctx: CanvasRenderingContext2D = context;
+
+    const ctx = context;
+
+
+    let animationFrame = 0;
+    let time = 0;
 
 
     const resize = () => {
 
-      const dpr = window.devicePixelRatio || 1;
+      const ratio = window.devicePixelRatio || 1;
 
-      canvas.width = canvas.clientWidth * dpr;
-      canvas.height = canvas.clientHeight * dpr;
+      canvas.width =
+        canvas.clientWidth * ratio;
+
+      canvas.height =
+        canvas.clientHeight * ratio;
+
 
       ctx.setTransform(
-        dpr,
+        ratio,
         0,
         0,
-        dpr,
+        ratio,
         0,
         0
       );
+
     };
 
 
@@ -43,24 +55,31 @@ export function AnimatedRobotMask() {
     );
 
 
+    // hologram particles
+
     const particles = Array.from(
-      { length: 1200 },
+      {length: 900},
       () => ({
+
         x: Math.random(),
         y: Math.random(),
-        size: Math.random()*2+0.5,
-        speed: Math.random()*0.02+0.005
+        size:
+          Math.random()*2+0.5,
+
+        offset:
+          Math.random()*Math.PI*2
+
       })
     );
 
 
-    let time = 0;
 
+    const draw = () => {
 
-    const animate = () => {
 
       const w = canvas.clientWidth;
       const h = canvas.clientHeight;
+
 
 
       ctx.clearRect(
@@ -71,115 +90,189 @@ export function AnimatedRobotMask() {
       );
 
 
+
+      // PARTICLE AI FACE
+
       particles.forEach((p)=>{
 
 
         const px =
           w/2 +
-          (p.x-0.5)*260;
+          (p.x-0.5)*330;
 
 
         const py =
           h/2 +
-          (p.y-0.5)*360;
+          (p.y-0.5)*430;
 
 
-        // robot mask area
 
-        const mask =
-          Math.abs(p.x-0.5)<0.42 &&
-          p.y>0.12 &&
-          p.y<0.88;
+        const faceMask =
+
+          p.y > 0.10 &&
+          p.y < 0.90 &&
+          Math.abs(p.x-0.5)
+          <
+          0.40;
 
 
-        if(mask){
+
+        if(faceMask){
+
 
           ctx.beginPath();
 
 
+          const pulse =
+            Math.sin(
+              time+p.offset
+            );
+
+
           ctx.fillStyle =
-            Math.sin(time+p.x*10)>0
-            ? "#00eaff"
-            : "#9b5cff";
+            pulse>0
+            ?
+            "#00eaff"
+            :
+            "#7b5cff";
 
 
-          ctx.shadowBlur = 15;
-          ctx.shadowColor="#00eaff";
+
+          ctx.shadowBlur = 18;
+
+          ctx.shadowColor =
+            "#00eaff";
+
 
 
           ctx.arc(
+
             px,
+
             py,
+
             p.size,
+
             0,
+
             Math.PI*2
+
           );
 
 
           ctx.fill();
 
+
         }
+
 
       });
 
 
 
-      // angular robot mask outline
+      ctx.shadowBlur = 30;
 
-      ctx.strokeStyle="#00eaff";
-      ctx.lineWidth=2;
-      ctx.shadowBlur=25;
-      ctx.shadowColor="#00eaff";
+
+
+      // ======================
+      // ROBOT HELMET OUTLINE
+      // ======================
+
+
+      ctx.strokeStyle =
+        "#00eaff";
+
+      ctx.lineWidth = 3;
 
 
       ctx.beginPath();
 
-      ctx.moveTo(w*.35,h*.25);
-      ctx.lineTo(w*.65,h*.25);
 
-      ctx.lineTo(w*.78,h*.45);
+      ctx.moveTo(
+        w*0.35,
+        h*0.18
+      );
 
-      ctx.lineTo(w*.65,h*.75);
 
-      ctx.lineTo(w*.5,h*.88);
+      ctx.lineTo(
+        w*0.65,
+        h*0.18
+      );
 
-      ctx.lineTo(w*.35,h*.75);
 
-      ctx.lineTo(w*.22,h*.45);
+      ctx.lineTo(
+        w*0.78,
+        h*0.38
+      );
+
+
+      ctx.lineTo(
+        w*0.70,
+        h*0.72
+      );
+
+
+      ctx.lineTo(
+        w*0.58,
+        h*0.88
+      );
+
+
+      ctx.lineTo(
+        w*0.42,
+        h*0.88
+      );
+
+
+      ctx.lineTo(
+        w*0.30,
+        h*0.72
+      );
+
+
+      ctx.lineTo(
+        w*0.22,
+        h*0.38
+      );
+
 
       ctx.closePath();
 
+
       ctx.stroke();
 
 
 
-      // glowing eyes
 
-      ctx.strokeStyle="#ffffff";
-      ctx.lineWidth=6;
+      // ======================
+      // FOREHEAD ARMOR V
+      // ======================
+
+
+      ctx.strokeStyle =
+        "#9b5cff";
+
+      ctx.lineWidth = 4;
 
 
       ctx.beginPath();
 
-      ctx.moveTo(
-        w*.32,
-        h*.48
-      );
-
-      ctx.lineTo(
-        w*.45,
-        h*.48
-      );
-
 
       ctx.moveTo(
-        w*.55,
-        h*.48
+        w*0.34,
+        h*0.30
       );
 
+
       ctx.lineTo(
-        w*.68,
-        h*.48
+        w*0.50,
+        h*0.43
+      );
+
+
+      ctx.lineTo(
+        w*0.66,
+        h*0.30
       );
 
 
@@ -187,20 +280,247 @@ export function AnimatedRobotMask() {
 
 
 
-      time +=0.03;
+
+      // ======================
+      // GLOWING EYES
+      // ======================
 
 
-      requestAnimationFrame(
-        animate
+      ctx.strokeStyle =
+        "#ffffff";
+
+
+      ctx.lineWidth = 8;
+
+
+      ctx.shadowBlur = 40;
+
+
+      ctx.shadowColor =
+        "#00ffff";
+
+
+
+      ctx.beginPath();
+
+
+      // left eye
+
+      ctx.moveTo(
+        w*0.30,
+        h*0.48
       );
+
+
+      ctx.lineTo(
+        w*0.45,
+        h*0.45
+      );
+
+
+      ctx.lineTo(
+        w*0.48,
+        h*0.52
+      );
+
+
+      ctx.lineTo(
+        w*0.32,
+        h*0.55
+      );
+
+
+      ctx.closePath();
+
+
+
+      // right eye
+
+
+      ctx.moveTo(
+        w*0.70,
+        h*0.48
+      );
+
+
+      ctx.lineTo(
+        w*0.55,
+        h*0.45
+      );
+
+
+      ctx.lineTo(
+        w*0.52,
+        h*0.52
+      );
+
+
+      ctx.lineTo(
+        w*0.68,
+        h*0.55
+      );
+
+
+      ctx.closePath();
+
+
+
+      ctx.stroke();
+
+
+
+
+      // ======================
+      // NOSE CORE
+      // ======================
+
+
+      ctx.strokeStyle =
+        "#00ffff";
+
+      ctx.lineWidth = 3;
+
+
+      ctx.beginPath();
+
+
+      ctx.moveTo(
+        w*0.50,
+        h*0.50
+      );
+
+
+      ctx.lineTo(
+        w*0.50,
+        h*0.68
+      );
+
+
+      ctx.lineTo(
+        w*0.43,
+        h*0.73
+      );
+
+
+      ctx.moveTo(
+        w*0.50,
+        h*0.68
+      );
+
+
+      ctx.lineTo(
+        w*0.57,
+        h*0.73
+      );
+
+
+      ctx.stroke();
+
+
+
+
+      // ======================
+      // CHEEK ARMOR
+      // ======================
+
+
+      ctx.strokeStyle =
+        "#7b5cff";
+
+
+      ctx.lineWidth = 3;
+
+
+      ctx.beginPath();
+
+
+      ctx.moveTo(
+        w*0.30,
+        h*0.58
+      );
+
+
+      ctx.lineTo(
+        w*0.40,
+        h*0.75
+      );
+
+
+      ctx.moveTo(
+        w*0.70,
+        h*0.58
+      );
+
+
+      ctx.lineTo(
+        w*0.60,
+        h*0.75
+      );
+
+
+      ctx.stroke();
+
+
+
+
+      // ======================
+      // CHIN MECHANICAL CORE
+      // ======================
+
+
+      ctx.strokeStyle =
+        "#00eaff";
+
+
+      for(
+        let i=0;
+        i<5;
+        i++
+      ){
+
+        ctx.beginPath();
+
+
+        ctx.moveTo(
+          w*(0.42+i*0.04),
+          h*0.78
+        );
+
+
+        ctx.lineTo(
+          w*(0.42+i*0.04),
+          h*0.87
+        );
+
+
+        ctx.stroke();
+
+      }
+
+
+
+
+      time +=0.04;
+
+
+      animationFrame =
+        requestAnimationFrame(draw);
+
 
     };
 
 
-    animate();
+
+    draw();
+
 
 
     return()=>{
+
+      cancelAnimationFrame(
+        animationFrame
+      );
+
 
       window.removeEventListener(
         "resize",
@@ -217,8 +537,14 @@ export function AnimatedRobotMask() {
   return (
 
     <canvas
+
       ref={canvasRef}
-      className="w-full h-full"
+
+      className="
+      w-full
+      h-full
+      "
+
     />
 
   );
