@@ -2,291 +2,197 @@ import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 export function AnimatedRobotMask() {
-
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-
   useEffect(() => {
-
     const canvas = canvasRef.current;
-
     if (!canvas) return;
 
-
     const ctx = canvas.getContext("2d");
-
     if (!ctx) return;
 
-
-    let animationFrame = 0;
     let frame = 0;
-
+    let animationId: number;
 
     const resize = () => {
-
-      const rect = canvas.getBoundingClientRect();
-
-      canvas.width =
-        rect.width * window.devicePixelRatio;
-
-      canvas.height =
-        rect.height * window.devicePixelRatio;
-
-
-      ctx.setTransform(
-        window.devicePixelRatio,
-        0,
-        0,
-        window.devicePixelRatio,
-        0,
-        0
-      );
-
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
     };
 
-
     resize();
-
-
-    window.addEventListener(
-      "resize",
-      resize
-    );
-
+    window.addEventListener("resize", resize);
 
 
     const particles = Array.from(
-      { length: 700 },
+      { length: 300 },
       () => ({
         x: Math.random(),
         y: Math.random(),
-        size: Math.random() * 2 + 0.5,
-        color:
-          Math.random() > 0.5
+        r: Math.random() * 2 + 0.5,
+        c: Math.random() > .5
           ? "#00eaff"
           : "#9b5cff"
       })
     );
 
 
+    function draw(){
 
-    const draw = () => {
+      if(!ctx) return;
 
-
-      const width =
-        canvas.clientWidth;
-
-      const height =
-        canvas.clientHeight;
-
+      frame += 0.03;
 
 
       ctx.clearRect(
         0,
         0,
-        width,
-        height
+        canvas.width,
+        canvas.height
       );
 
+
+      const w = canvas.width;
+      const h = canvas.height;
 
 
       ctx.save();
 
-
-
       ctx.translate(
-        width / 2,
-        height / 2
+        w/2,
+        h/2
       );
-
 
 
       const scale =
-        Math.min(width,height) / 520;
+        Math.min(w,h)/650;
 
 
-      ctx.scale(
-        scale,
-        scale
-      );
+      ctx.scale(scale,scale);
 
 
 
-      // ROBOT HEAD OUTLINE
-
-      ctx.beginPath();
-
-      ctx.moveTo(0,-220);
-
-      ctx.lineTo(115,-185);
-
-      ctx.lineTo(175,-70);
-
-      ctx.lineTo(150,120);
-
-      ctx.lineTo(70,190);
-
-      ctx.lineTo(0,220);
-
-      ctx.lineTo(-70,190);
-
-      ctx.lineTo(-150,120);
-
-      ctx.lineTo(-175,-70);
-
-      ctx.lineTo(-115,-185);
-
-      ctx.closePath();
+      // ======================
+      // ROTATING HUD CIRCLES
+      // ======================
 
 
-
-      ctx.strokeStyle =
-        "#00eaff";
-
-      ctx.lineWidth = 4;
-
-      ctx.shadowBlur = 30;
-
-      ctx.shadowColor =
-        "#00eaff";
-
-
-      ctx.stroke();
-
-
-
-      // TOP ARMOR
-
-      ctx.shadowBlur = 15;
-
-      ctx.strokeStyle =
-        "#8b5cff";
+      ctx.rotate(frame);
 
 
       ctx.beginPath();
-
-      ctx.moveTo(
-        -120,
-        -130
-      );
-
-      ctx.lineTo(
+      ctx.arc(
         0,
-        -175
+        0,
+        230,
+        0,
+        Math.PI*2
       );
 
-      ctx.lineTo(
-        120,
-        -130
-      );
-
-
+      ctx.strokeStyle="#00eaff";
+      ctx.lineWidth=5;
+      ctx.shadowBlur=25;
+      ctx.shadowColor="#00eaff";
       ctx.stroke();
 
 
 
-
-      // EYES
-
-
-      ctx.fillStyle =
-        "#00f5ff";
-
-      ctx.shadowBlur =
-        45;
-
-      ctx.shadowColor =
-        "#00f5ff";
+      ctx.rotate(-frame*2);
 
 
 
       ctx.beginPath();
 
+      ctx.arc(
+        0,
+        0,
+        190,
+        0,
+        Math.PI*2
+      );
+
+      ctx.strokeStyle="#8b5cff";
+      ctx.lineWidth=3;
+      ctx.stroke();
+
+
+
+
+      // ======================
+      // ROBOT ARM
+      // ======================
+
+
+      ctx.shadowBlur=15;
+      ctx.shadowColor="#00eaff";
+
+      ctx.strokeStyle="#d8ffff";
+      ctx.lineWidth=10;
+      ctx.lineCap="round";
+
+
+
+      // base
+
+      ctx.beginPath();
 
       ctx.moveTo(
-        -125,
-        -35
+        -50,
+        150
       );
 
       ctx.lineTo(
-        -30,
-        -25
+        50,
+        150
       );
 
-      ctx.lineTo(
-        -55,
-        10
-      );
-
-      ctx.lineTo(
-        -135,
-        0
-      );
-
-      ctx.closePath();
+      ctx.stroke();
 
 
 
-      ctx.moveTo(
-        125,
-        -35
-      );
+      // joint animation
 
-      ctx.lineTo(
-        30,
-        -25
-      );
-
-      ctx.lineTo(
-        55,
-        10
-      );
-
-      ctx.lineTo(
-        135,
-        0
-      );
-
-      ctx.closePath();
+      const elbow =
+        Math.sin(frame)*25;
 
 
-      ctx.fill();
+      const wrist =
+        Math.cos(frame*1.5)*20;
 
 
 
-
-      // FACE CORE
-
-
-      ctx.shadowBlur = 20;
-
-      ctx.strokeStyle =
-        "#b26cff";
-
+      // first arm
 
       ctx.beginPath();
 
       ctx.moveTo(
         0,
-        25
+        120
       );
+
 
       ctx.lineTo(
-        45,
-        85
+        -60,
+        30 + elbow
       );
+
+      ctx.stroke();
+
+
+
+      // second arm
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        -60,
+        30 + elbow
+      );
+
 
       ctx.lineTo(
-        0,
-        160
+        50,
+        -70 + wrist
       );
-
-      ctx.lineTo(
-        -45,
-        85
-      );
-
-      ctx.closePath();
 
 
       ctx.stroke();
@@ -294,114 +200,130 @@ export function AnimatedRobotMask() {
 
 
 
-      // PARTICLE SYSTEM
+      // joints
+
+      const joints=[
+        [0,120],
+        [-60,30+elbow],
+        [50,-70+wrist]
+      ];
 
 
-      particles.forEach(
-        (p)=>{
+      joints.forEach(j=>{
+
+        ctx.beginPath();
+
+        ctx.arc(
+          j[0],
+          j[1],
+          18,
+          0,
+          Math.PI*2
+        );
+
+        ctx.fillStyle="#06121c";
+        ctx.fill();
+
+        ctx.strokeStyle="#00eaff";
+        ctx.stroke();
 
 
-          const x =
-            (p.x-0.5)*300;
+        ctx.beginPath();
 
+        ctx.arc(
+          j[0],
+          j[1],
+          6,
+          0,
+          Math.PI*2
+        );
 
-          const y =
-            (p.y-0.5)*400;
+        ctx.fillStyle="#8b5cff";
+        ctx.fill();
 
-
-
-          ctx.beginPath();
-
-
-          ctx.arc(
-            x,
-            y,
-            p.size,
-            0,
-            Math.PI*2
-          );
-
-
-          ctx.fillStyle =
-            p.color;
-
-
-          ctx.fill();
-
-
-
-          p.y += 0.0007;
-
-
-          if(p.y>1)
-          {
-            p.y=0;
-          }
-
-
-        }
-      );
+      });
 
 
 
+      // gripper animation
 
-      // SCANNER LINE
-
-
-      const scan =
-        Math.sin(frame*0.04)*150;
-
-
-      ctx.strokeStyle =
-        "rgba(0,234,255,0.5)";
-
-
-      ctx.lineWidth=1;
+      const grip =
+        Math.sin(frame*2)*10;
 
 
       ctx.beginPath();
 
-
       ctx.moveTo(
-        -160,
-        scan
+        50,
+        -70+wrist
       );
 
+      ctx.lineTo(
+        90,
+        -90+grip
+      );
+
+      ctx.moveTo(
+        50,
+        -70+wrist
+      );
 
       ctx.lineTo(
-        160,
-        scan
+        90,
+        -50-grip
       );
 
 
       ctx.stroke();
 
+
+
+      // ======================
+      // PARTICLES
+      // ======================
+
+
+      particles.forEach(p=>{
+
+        p.y -=0.001;
+
+        if(p.y<0)
+          p.y=1;
+
+
+        ctx.beginPath();
+
+        ctx.arc(
+          (p.x-.5)*500,
+          (p.y-.5)*500,
+          p.r,
+          0,
+          Math.PI*2
+        );
+
+
+        ctx.fillStyle=p.c;
+        ctx.fill();
+
+      });
 
 
       ctx.restore();
 
 
-
-      frame++;
-
-
-      animationFrame =
+      animationId =
         requestAnimationFrame(draw);
 
-    };
-
+    }
 
 
     draw();
 
 
 
-    return ()=>{
+    return()=>{
 
-      cancelAnimationFrame(
-        animationFrame
-      );
-
+      cancelAnimationFrame(animationId);
 
       window.removeEventListener(
         "resize",
@@ -421,7 +343,7 @@ export function AnimatedRobotMask() {
 
       initial={{
         opacity:0,
-        scale:0.9
+        scale:.85
       }}
 
       animate={{
@@ -432,6 +354,7 @@ export function AnimatedRobotMask() {
       transition={{
         duration:1.2
       }}
+
 
       className="
       relative
@@ -445,20 +368,17 @@ export function AnimatedRobotMask() {
     >
 
       <canvas
-
         ref={canvasRef}
-
         className="
         absolute
         inset-0
         w-full
         h-full
         "
-
       />
+
 
     </motion.div>
 
   );
-
 }
