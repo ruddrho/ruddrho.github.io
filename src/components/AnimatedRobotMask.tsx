@@ -1,232 +1,463 @@
 import { motion } from "framer-motion";
 
 export function AnimatedRobotMask() {
+
   return (
+
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 1.2 }}
-      className="relative w-full h-full flex items-center justify-center"
+
+      initial={{
+        opacity:0,
+        scale:0.85
+      }}
+
+      animate={{
+        opacity:1,
+        scale:1
+      }}
+
+      transition={{
+        duration:1.2
+      }}
+
+      className="
+      w-full
+      h-full
+      flex
+      items-center
+      justify-center
+      "
+
     >
 
       <svg
-        viewBox="0 0 500 500"
-        className="w-full h-full"
+        viewBox="0 0 600 600"
+        className="
+        w-full
+        h-full
+        "
         fill="none"
       >
 
+
         <defs>
-          <filter id="robotGlow">
+
+          <filter id="glow">
+
             <feGaussianBlur
-              stdDeviation="4"
+              stdDeviation="5"
               result="blur"
             />
+
             <feMerge>
+
               <feMergeNode in="blur"/>
+
               <feMergeNode in="SourceGraphic"/>
+
             </feMerge>
+
           </filter>
+
         </defs>
 
 
-        {/* Base rotating hologram ring */}
 
-        <motion.ellipse
-          cx="250"
-          cy="420"
-          rx="150"
-          ry="35"
+        {/* OUTER HUD RING */}
+
+        <motion.circle
+
+          cx="300"
+          cy="300"
+          r="250"
+
           stroke="#00eaff"
-          strokeWidth="3"
-          filter="url(#robotGlow)"
+          strokeWidth="2"
+
+          strokeDasharray="20 15"
+
+          filter="url(#glow)"
+
           animate={{
             rotate:360
           }}
+
+          transition={{
+            duration:20,
+            repeat:Infinity,
+            ease:"linear"
+          }}
+
+          style={{
+            transformOrigin:"300px 300px"
+          }}
+
+        />
+
+
+
+        <motion.circle
+
+          cx="300"
+          cy="300"
+          r="210"
+
+          stroke="#8b5cff"
+          strokeWidth="2"
+
+          strokeDasharray="5 20"
+
+          animate={{
+            rotate:-360
+          }}
+
           transition={{
             duration:15,
             repeat:Infinity,
             ease:"linear"
           }}
+
           style={{
-            transformOrigin:"250px 420px"
+            transformOrigin:"300px 300px"
           }}
+
         />
 
 
-        {/* Robot base */}
+
+
+
+        {/* ROBOT BASE */}
+
+
+        <ellipse
+
+          cx="300"
+          cy="500"
+
+          rx="90"
+          ry="25"
+
+          stroke="#00eaff"
+          strokeWidth="4"
+
+          filter="url(#glow)"
+
+        />
+
 
         <rect
-          x="205"
-          y="350"
-          width="90"
+
+          x="240"
+          y="430"
+
+          width="120"
           height="70"
-          rx="10"
+
+          rx="15"
+
           stroke="#00eaff"
-          strokeWidth="3"
-          filter="url(#robotGlow)"
+
+          strokeWidth="5"
+
         />
 
 
-        {/* Shoulder */}
+
+
+
+        {/* SHOULDER JOINT */}
+
 
         <motion.g
+
           animate={{
             rotate:[-18,18,-18]
           }}
+
           transition={{
             duration:4,
             repeat:Infinity,
             ease:"easeInOut"
           }}
+
           style={{
-            transformOrigin:"250px 350px"
+            transformOrigin:"300px 430px"
           }}
+
         >
 
+
           <circle
-            cx="250"
-            cy="350"
+
+            cx="300"
+            cy="420"
             r="35"
+
             stroke="#00eaff"
-            strokeWidth="4"
+
+            strokeWidth="6"
+
           />
 
 
-          {/* First link */}
+
+          {/* ARM 1 */}
+
 
           <line
-            x1="250"
-            y1="320"
-            x2="150"
-            y2="220"
+
+            x1="300"
+            y1="390"
+
+            x2="170"
+            y2="260"
+
             stroke="#00eaff"
-            strokeWidth="5"
+
+            strokeWidth="12"
+
           />
 
 
-          {/* Elbow */}
 
-          <circle
-            cx="150"
-            cy="220"
-            r="18"
-            stroke="#9b5cff"
-            strokeWidth="3"
-          />
+          {/* ELBOW */}
 
-
-          {/* second link */}
 
           <motion.g
+
             animate={{
               rotate:[-25,25,-25]
             }}
+
             transition={{
               duration:3,
               repeat:Infinity
             }}
+
             style={{
-              transformOrigin:"150px 220px"
+              transformOrigin:"170px 260px"
             }}
+
           >
 
-            <line
-              x1="150"
-              y1="220"
-              x2="300"
-              y2="150"
-              stroke="#00eaff"
-              strokeWidth="5"
-            />
-
-
-            {/* wrist */}
 
             <circle
-              cx="300"
-              cy="150"
-              r="16"
+
+              cx="170"
+              cy="260"
+
+              r="25"
+
               stroke="#9b5cff"
-              strokeWidth="3"
+
+              strokeWidth="6"
+
             />
 
 
-            {/* end effector */}
+
+            {/* ARM 2 */}
+
+
+            <line
+
+              x1="170"
+              y1="260"
+
+              x2="360"
+              y2="160"
+
+              stroke="#00eaff"
+
+              strokeWidth="12"
+
+            />
+
+
+
+
+
+            {/* WRIST */}
+
 
             <motion.g
+
               animate={{
-                rotate:[-30,30,-30]
+                rotate:[-20,20,-20]
               }}
+
               transition={{
-                duration:2,
+                duration:2.5,
                 repeat:Infinity
               }}
+
               style={{
-                transformOrigin:"300px 150px"
+                transformOrigin:"360px 160px"
               }}
+
             >
 
-              <line
-                x1="300"
-                y1="150"
-                x2="390"
-                y2="180"
-                stroke="#00eaff"
+
+              <circle
+
+                cx="360"
+                cy="160"
+
+                r="22"
+
+                stroke="#9b5cff"
+
                 strokeWidth="5"
+
               />
 
 
-              {/* gripper */}
+
+
+              {/* END TOOL */}
+
+
 
               <line
-                x1="390"
-                y1="180"
-                x2="430"
-                y2="160"
+
+                x1="360"
+                y1="160"
+
+                x2="450"
+                y2="190"
+
                 stroke="#00eaff"
-                strokeWidth="4"
+
+                strokeWidth="10"
+
               />
 
-              <line
-                x1="390"
-                y1="180"
-                x2="430"
-                y2="200"
-                stroke="#00eaff"
-                strokeWidth="4"
-              />
+
+
+              {/* GRIPPER */}
+
+
+
+              <motion.g
+
+                animate={{
+                  rotate:[-15,15,-15]
+                }}
+
+                transition={{
+                  duration:1.8,
+                  repeat:Infinity
+                }}
+
+                style={{
+                  transformOrigin:"450px 190px"
+                }}
+
+              >
+
+
+                <line
+
+                  x1="450"
+                  y1="190"
+
+                  x2="510"
+                  y2="150"
+
+                  stroke="#00eaff"
+
+                  strokeWidth="7"
+
+                />
+
+
+
+                <line
+
+                  x1="450"
+                  y1="190"
+
+                  x2="510"
+                  y2="230"
+
+                  stroke="#00eaff"
+
+                  strokeWidth="7"
+
+                />
+
+
+              </motion.g>
+
+
 
             </motion.g>
 
 
+
           </motion.g>
+
+
 
         </motion.g>
 
 
-        {/* AI scan particles */}
 
-        {[1,2,3,4,5].map((i)=>(
+
+
+        {/* SCAN PARTICLES */}
+
+
+        {[...Array(12)].map((_,i)=>(
+
           <motion.circle
+
             key={i}
-            cx="250"
-            cy="250"
-            r="3"
+
+            cx="300"
+
+            cy="300"
+
+            r="4"
+
             fill="#00eaff"
+
+
             animate={{
-              y:[-80,80],
-              opacity:[0,1,0]
+
+              y:[
+                -180,
+                180
+              ],
+
+              opacity:[
+                0,
+                1,
+                0
+              ]
+
             }}
+
             transition={{
-              duration:2+i*0.3,
-              repeat:Infinity
+
+              duration:2+i*0.2,
+
+              repeat:Infinity,
+
+              delay:i*0.15
+
             }}
+
           />
+
         ))}
 
 
       </svg>
 
+
     </motion.div>
+
   );
 }
