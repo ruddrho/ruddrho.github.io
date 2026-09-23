@@ -1,179 +1,137 @@
-import { motion } from 'framer-motion'
+import { motion } from "framer-motion";
 
-export function RobotScene() {
+export function AnimatedRobotMask() {
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-[680px] select-none">
-
-      {/* HUD BACKGROUND */}
-
-      <div className="
-        absolute inset-[5%]
-        rounded-full
-        border border-cyan-300/10
-        bg-cyan-300/[.015]
-        shadow-[inset_0_0_100px_rgba(34,211,238,.06)]
-      " />
-
-
-      <motion.div
-        className="
-        absolute inset-[12%]
-        rounded-full
-        border border-dashed border-cyan-300/20
-        "
-        animate={{
-          rotate:360
-        }}
-        transition={{
-          duration:35,
-          repeat:Infinity,
-          ease:"linear"
-        }}
-      />
-
-
-      <motion.div
-        className="
-        absolute inset-[22%]
-        rounded-full
-        border border-dashed border-purple-400/20
-        "
-        animate={{
-          rotate:-360
-        }}
-        transition={{
-          duration:22,
-          repeat:Infinity,
-          ease:"linear"
-        }}
-      />
-
-
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 1 }}
+      className="relative w-full h-full flex items-center justify-center"
+    >
 
       <svg
         viewBox="0 0 600 600"
-        className="
-        absolute inset-0
-        h-full w-full
-        drop-shadow-[0_0_30px_rgba(34,211,238,.25)]
-        "
+        className="w-full h-full drop-shadow-[0_0_25px_rgba(34,211,238,.25)]"
+        fill="none"
       >
 
         <defs>
-
-          <linearGradient
-            id="arm"
-            x1="0"
-            y1="0"
-            x2="1"
-            y2="1"
-          >
-
-            <stop stopColor="#67e8f9"/>
-
-            <stop
-              offset="1"
-              stopColor="#a855f7"
-            />
-
+          <linearGradient id="robotArm" x1="0" y1="0" x2="1" y2="1">
+            <stop stopColor="#22d3ee" />
+            <stop offset="1" stopColor="#a855f7" />
           </linearGradient>
 
-
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
         </defs>
 
 
+        {/* rotating HUD */}
 
-        <g
-          fill="none"
-          stroke="url(#arm)"
+        <motion.circle
+          cx="300"
+          cy="300"
+          r="250"
+          stroke="#22d3ee"
+          strokeWidth="2"
+          strokeDasharray="12 18"
+          animate={{ rotate: 360 }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+          style={{
+            transformOrigin:"300px 300px"
+          }}
+        />
+
+
+        <motion.circle
+          cx="300"
+          cy="300"
+          r="210"
+          stroke="#a855f7"
+          strokeWidth="2"
+          strokeDasharray="5 20"
+          animate={{ rotate:-360 }}
+          transition={{
+            duration:18,
+            repeat:Infinity,
+            ease:"linear"
+          }}
+          style={{
+            transformOrigin:"300px 300px"
+          }}
+        />
+
+
+
+        {/* Robot arm */}
+
+        <motion.g
+          stroke="url(#robotArm)"
           strokeWidth="5"
           strokeLinecap="round"
           strokeLinejoin="round"
+          filter="url(#glow)"
         >
 
+
+          {/* base */}
+
+          <path d="M180 500 H420 L390 450 H210 Z" />
+
+          <circle
+            cx="300"
+            cy="420"
+            r="45"
+          />
+
+
+
+          {/* shoulder movement */}
 
           <motion.g
 
             animate={{
-              rotate:[
-                0,
-                2,
-                -1,
-                0
-              ]
+              rotate:[0,4,-3,0]
             }}
 
             transition={{
-              duration:8,
+              duration:6,
               repeat:Infinity,
               ease:"easeInOut"
             }}
 
             style={{
-              transformOrigin:
-              "300px 480px"
+              transformOrigin:"300px 420px"
             }}
 
           >
 
-
-            <path
-              d="M210 500h180l-22-50H232z"
-              opacity=".85"
-            />
-
-
-            <circle
-              cx="300"
-              cy="430"
-              r="46"
-            />
-
-
-            <motion.path
-
-              d="M300 384l55-120"
-
-              animate={{
-                rotate:[
-                  0,
-                  3,
-                  -2,
-                  0
-                ]
-              }}
-
-              transition={{
-                duration:5,
-                repeat:Infinity
-              }}
-
-              style={{
-                transformOrigin:
-                "300px 384px"
-              }}
-
-            />
+            <path d="M300 380 L360 250" />
 
 
             <circle
               cx="360"
               cy="250"
-              r="36"
+              r="32"
             />
 
 
 
-            <motion.path
-              d="M389 229l83-64"
+            {/* elbow */}
+
+            <motion.g
 
               animate={{
-                rotate:[
-                  0,
-                  4,
-                  -3,
-                  0
-                ]
+                rotate:[0,-6,5,0]
               }}
 
               transition={{
@@ -182,212 +140,118 @@ export function RobotScene() {
               }}
 
               style={{
-                transformOrigin:
-                "389px 229px"
-              }}
-
-            />
-
-
-            <circle
-              cx="486"
-              cy="153"
-              r="25"
-            />
-
-
-
-            {/* GRIPPER */}
-
-            <motion.g
-
-              animate={{
-                rotate:[
-                  -5,
-                  5,
-                  -5
-                ]
-              }}
-
-              transition={{
-                duration:2.5,
-                repeat:Infinity
-              }}
-
-              style={{
-                transformOrigin:
-                "486px 153px"
+                transformOrigin:"360px 250px"
               }}
 
             >
 
-              <path
-                d="
-                M500 133l28-38m-20 50l46-5m-58 24l28 34
-                "
+              <path d="M385 230 L480 150" />
+
+              <circle
+                cx="480"
+                cy="150"
+                r="25"
               />
 
+
+              {/* wrist + gripper */}
+
+              <motion.g
+
+                animate={{
+                  rotate:[-8,8,-8]
+                }}
+
+                transition={{
+                  duration:2,
+                  repeat:Infinity
+                }}
+
+                style={{
+                  transformOrigin:"480px 150px"
+                }}
+
+              >
+
+                <path d="M500 130 L540 95" />
+
+                <path d="M505 150 L555 150" />
+
+                <path d="M500 170 L540 205" />
+
+
+              </motion.g>
+
+
             </motion.g>
-
-
-
-            <path
-              d="
-              M279 394l52-115
-              M329 396l59-116
-              M389 223l75-78
-              M404 245l78-66
-              "
-              opacity=".35"
-            />
 
 
           </motion.g>
 
 
-        </g>
+        </motion.g>
 
 
 
+        {/* joint lights */}
 
-        {/* JOINT LIGHT */}
+        <g fill="#22d3ee">
 
-        <g fill="#67e8f9">
-
-          <circle
-            cx="300"
-            cy="430"
-            r="7"
-          />
-
-          <circle
-            cx="360"
-            cy="250"
-            r="6"
-          />
-
-          <circle
-            cx="486"
-            cy="153"
-            r="5"
-          />
+          <circle cx="300" cy="420" r="7"/>
+          <circle cx="360" cy="250" r="6"/>
+          <circle cx="480" cy="150" r="5"/>
 
         </g>
 
 
 
+        {/* scanning particles */}
 
-        {/* DATA */}
+        {[...Array(15)].map((_,i)=>(
 
-        <g
-          fontFamily="monospace"
-          fontSize="12"
-          fill="#94a3b8"
-        >
+          <motion.circle
+            key={i}
+            cx={250 + Math.random()*100}
+            cy="300"
+            r="2"
+            fill="#22d3ee"
+            animate={{
+              cy:[180,420,180],
+              opacity:[0,1,0]
+            }}
+            transition={{
+              duration:2+i*0.2,
+              repeat:Infinity
+            }}
+          />
 
-          <text x="70" y="160">
-            JOINT_03 // 42.8°
-          </text>
-
-
-          <text x="390" y="380">
-            CTRL: CLOSED_LOOP
-          </text>
-
-
-          <text x="80" y="440">
-            STATE: NOMINAL
-          </text>
-
-
-        </g>
-
-
-
-
-        {/* SCAN POINT */}
-
-        <motion.div
-          animate={{
-            scale:[
-              1,
-              1.2,
-              1
-            ]
-          }}
-          transition={{
-            duration:3,
-            repeat:Infinity
-          }}
-        />
+        ))}
 
 
 
       </svg>
 
 
-
-      <motion.div
-
-        animate={{
-          scale:[
-            1,
-            1.15,
-            1
-          ],
-
-          opacity:[
-            .35,
-            .9,
-            .35
-          ]
-        }}
-
-        transition={{
-          duration:3,
-          repeat:Infinity
-        }}
-
-        className="
-        absolute
-        right-[4%]
-        top-[44%]
-        h-2
-        w-2
-        rounded-full
-        bg-cyan-300
-        shadow-[0_0_25px_#22d3ee]
-        "
-
-      />
-
-
-
       <div
         className="
         absolute
-        bottom-[5%]
-        left-1/2
-        -translate-x-1/2
+        bottom-8
         rounded-full
-        border border-white/10
+        border
+        border-cyan-300/20
         bg-[#07101f]/80
         px-5
         py-2
+        text-[10px]
         font-mono
-        text-[11px]
-        uppercase
-        tracking-[.24em]
+        tracking-[.25em]
         text-cyan-200
-        backdrop-blur
         "
       >
-
-        Robotic Manipulator // Live Model
-
+        ROBOTIC MANIPULATOR // LIVE MODEL
       </div>
 
 
-    </div>
-  )
+    </motion.div>
+  );
 }
