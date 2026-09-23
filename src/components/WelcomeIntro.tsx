@@ -7,26 +7,29 @@ type WelcomeIntroProps = {
   onEnter: () => void
 }
 
-type Particle = {
-  homeX: number
-  homeY: number
-
-  startX: number
-  startY: number
-
+type FiberPoint = {
   x: number
   y: number
-
-  size: number
-  phase: number
-  depth: number
-
-  colorIndex: number
-  scatter: number
-
-  connectionRadius: number
-  signalOffset: number
 }
+
+type NeuralFiber = {
+  points: FiberPoint[]
+  colorIndex: number
+  width: number
+  alpha: number
+  delay: number
+  speed: number
+  phase: number
+  sparkOffset: number
+}
+
+const HUMAN_NEURAL_COLORS = [
+  '34,211,238',  // cyan
+  '56,189,248',  // electric blue
+  '139,92,246',  // violet
+  '236,72,153',  // magenta / pink
+  '251,146,60',  // warm orange accent
+]
 
 export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -34,16 +37,10 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
 
   useEffect(() => {
     const canvasElement = canvasRef.current
-
-    if (!canvasElement) {
-      return
-    }
+    if (!canvasElement) return
 
     const context = canvasElement.getContext('2d')
-
-    if (!context) {
-      return
-    }
+    if (!context) return
 
     const canvas: HTMLCanvasElement = canvasElement
     const ctx: CanvasRenderingContext2D = context
@@ -52,1053 +49,434 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
     let width = window.innerWidth
     let height = window.innerHeight
     let dpr = Math.min(window.devicePixelRatio || 1, 2)
+    let startTime = performance.now()
 
-    const particles: Particle[] = []
-
-    const HUMAN_COLORS = [
-      '34,211,238',   // Cyan
-      '56,189,248',   // Electric blue
-      '139,92,246',   // Purple
-      '236,72,153',   // Magenta / pink
-      '249,115,22',   // Warm orange signal nodes
-    ]
-
-    const mouse = {
-      nx: 0,
-      ny: 0,
-      active: false,
-    }
-
+    const fibers: NeuralFiber[] = []
+    const mouse = { nx: 0, ny: 0 }
     let smoothX = 0
     let smoothY = 0
-    let formationStartedAt = performance.now()
 
-    /*
-      =====================================================
-      HUMAN PARTICLE GENERATOR
-      =====================================================
-    */
+    const clamp = (value: number, min: number, max: number) =>
+      Math.max(min, Math.min(max, value))
 
-    function buildHumanParticles() {
-      particles.length = 0
-      formationStartedAt = performance.now()
+    const easeOutCubic = (value: number) =>
+      1 - Math.pow(1 - clamp(value, 0, 1), 3)
 
-      const mask = document.createElement('canvas')
-      const maskContext = mask.getContext('2d')
+    function cubicPoint(
+      t: number,
+      p0: FiberPoint,
+      p1: FiberPoint,
+      p2: FiberPoint,
+      p3: FiberPoint
+    ): FiberPoint {
+      const mt = 1 - t
+      const mt2 = mt * mt
+      const t2 = t * t
 
-      if (!maskContext) {
-        return
+      return {
+        x:
+          p0.x * mt2 * mt +
+          3 * p1.x * mt2 * t +
+          3 * p2.x * mt * t2 +
+          p3.x * t2 * t,
+        y:
+          p0.y * mt2 * mt +
+          3 * p1.y * mt2 * t +
+          3 * p2.y * mt * t2 +
+          p3.y * t2 * t,
+      }
+    }
+
+    function insideHead(x: number, y: number) {
+      // Main skull / brain volume.
+      const skullX = (x - 385) / 245
+      const skullY = (y - 395) / 325
+      const skull = skullX * skullX + skullY * skullY <= 1
+
+      // Lower face / jaw volume.
+      const faceX = (x - 520) / 205
+      const faceY = (y - 535) / 235
+      const face = faceX * faceX + faceY * faceY <= 1
+
+      // Neck volume.
+      const neck = x > 320 && x < 545 && y > 650 && y < 920
+
+      // Keep the front edge readable instead of making a round blob.
+      const foreheadLimit = y < 350 ? 655 : 735
+      const lowerFaceLimit = y > 590 ? 670 : 755
+      const frontLimit = Math.min(foreheadLimit, lowerFaceLimit)
+
+      return (skull || face || neck) && x < frontLimit && x > 125
+    }
+
+    function randomHeadPoint(): FiberPoint {
+      for (let attempt = 0; attempt < 80; attempt++) {
+        const x = 120 + Math.random() * 610
+        const y = 70 + Math.random() * 810
+        if (insideHead(x, y)) return { x, y }
       }
 
-      mask.width = 760
-      mask.height = 920
+      return {
+        x: 260 + Math.random() * 320,
+        y: 240 + Math.random() * 420,
+      }
+    }
 
-      maskContext.clearRect(
-        0,
-        0,
-        mask.width,
-        mask.height
-      )
+    function pickColorIndex(target: FiberPoint) {
+      const r = Math.random()
 
-      maskContext.fillStyle = '#ffffff'
-      maskContext.beginPath()
+      // Face/front stays cool and clean.
+      if (target.x > 560) {
+        if (r < 0.58) return 0
+        if (r < 0.86) return 1
+        if (r < 0.96) return 2
+        if (r < 0.99) return 3
+        return 4
+      }
 
-      /*
-        RIGHT-FACING HUMAN PROFILE
-        Keep the original silhouette unchanged.
-      */
+      // Brain/skull gets the cyan-violet-pink mixture seen in the reference.
+      if (r < 0.34) return 0
+      if (r < 0.55) return 1
+      if (r < 0.76) return 2
+      if (r < 0.96) return 3
+      return 4
+    }
 
-      maskContext.moveTo(150, 920)
+    function buildHumanFibers() {
+      fibers.length = 0
 
-      maskContext.bezierCurveTo(
-        175, 840,
-        205, 775,
-        212, 710
-      )
+      const mobile = window.innerWidth < 768
+      const fiberCount = mobile ? 320 : 760
+      const samplesPerFiber = mobile ? 18 : 26
 
-      maskContext.bezierCurveTo(
-        218, 650,
-        194, 585,
-        188, 520
-      )
+      for (let i = 0; i < fiberCount; i++) {
+        const target = randomHeadPoint()
 
-      maskContext.bezierCurveTo(
-        172, 390,
-        185, 245,
-        270, 145
-      )
+        // Reference-like formation core: strands originate around the face,
+        // jaw and upper-neck region, then bloom backward into the skull.
+        const sourceBand = Math.random()
+        let start: FiberPoint
 
-      maskContext.bezierCurveTo(
-        350, 52,
-        490, 35,
-        582, 103
-      )
-
-      maskContext.bezierCurveTo(
-        640, 147,
-        672, 210,
-        667, 275
-      )
-
-      maskContext.bezierCurveTo(
-        665, 315,
-        673, 340,
-        695, 365
-      )
-
-      maskContext.bezierCurveTo(
-        708, 380,
-        710, 397,
-        718, 411
-      )
-
-      maskContext.bezierCurveTo(
-        729, 428,
-        752, 442,
-        749, 456
-      )
-
-      maskContext.bezierCurveTo(
-        746, 469,
-        724, 475,
-        705, 477
-      )
-
-      maskContext.bezierCurveTo(
-        694, 480,
-        692, 488,
-        700, 496
-      )
-
-      maskContext.bezierCurveTo(
-        709, 503,
-        715, 511,
-        710, 519
-      )
-
-      maskContext.bezierCurveTo(
-        706, 526,
-        694, 529,
-        687, 533
-      )
-
-      maskContext.bezierCurveTo(
-        698, 539,
-        704, 547,
-        699, 556
-      )
-
-      maskContext.bezierCurveTo(
-        692, 565,
-        678, 569,
-        668, 575
-      )
-
-      maskContext.bezierCurveTo(
-        663, 584,
-        666, 596,
-        660, 608
-      )
-
-      maskContext.bezierCurveTo(
-        652, 630,
-        637, 650,
-        615, 664
-      )
-
-      maskContext.bezierCurveTo(
-        590, 680,
-        556, 688,
-        526, 695
-      )
-
-      maskContext.bezierCurveTo(
-        500, 702,
-        489, 718,
-        490, 742
-      )
-
-      maskContext.bezierCurveTo(
-        492, 795,
-        518, 850,
-        545, 920
-      )
-
-      maskContext.closePath()
-      maskContext.fill()
-
-      /* Small ear and eye details. */
-
-      maskContext.globalCompositeOperation =
-        'destination-out'
-
-      maskContext.beginPath()
-      maskContext.ellipse(
-        505,
-        458,
-        18,
-        30,
-        -0.12,
-        0,
-        Math.PI * 2
-      )
-      maskContext.fill()
-
-      maskContext.beginPath()
-      maskContext.ellipse(
-        650,
-        405,
-        7,
-        3,
-        -0.08,
-        0,
-        Math.PI * 2
-      )
-      maskContext.fill()
-
-      maskContext.globalCompositeOperation =
-        'source-over'
-
-      const imageData =
-        maskContext.getImageData(
-          0,
-          0,
-          mask.width,
-          mask.height
-        )
-
-      const targetParticleCount =
-        window.innerWidth < 768
-          ? 4800
-          : 13500
-
-      let attempts = 0
-
-      while (
-        particles.length < targetParticleCount &&
-        attempts < targetParticleCount * 50
-      ) {
-        attempts++
-
-        const x = Math.floor(
-          Math.random() * mask.width
-        )
-
-        const y = Math.floor(
-          Math.random() * mask.height
-        )
-
-        const alpha =
-          imageData.data[
-            (y * mask.width + x) * 4 + 3
-          ]
-
-        if (alpha < 100) {
-          continue
-        }
-
-        const normalizedX = x / mask.width
-        const random = Math.random()
-
-        /*
-          5-color palette:
-          front = cyan / blue
-          middle = cyan / blue / purple
-          rear = purple / magenta
-          orange = rare signal nodes
-        */
-
-        let colorIndex = 0
-
-        if (normalizedX > 0.62) {
-          if (random < 0.60) {
-            colorIndex = 0
-          } else if (random < 0.88) {
-            colorIndex = 1
-          } else if (random < 0.97) {
-            colorIndex = 2
-          } else {
-            colorIndex = 4
+        if (sourceBand < 0.48) {
+          start = {
+            x: 620 + Math.random() * 52,
+            y: 405 + Math.random() * 185,
           }
-        } else if (normalizedX > 0.42) {
-          if (random < 0.38) {
-            colorIndex = 0
-          } else if (random < 0.62) {
-            colorIndex = 1
-          } else if (random < 0.82) {
-            colorIndex = 2
-          } else if (random < 0.96) {
-            colorIndex = 3
-          } else {
-            colorIndex = 4
+        } else if (sourceBand < 0.78) {
+          start = {
+            x: 525 + Math.random() * 105,
+            y: 575 + Math.random() * 120,
           }
         } else {
-          if (random < 0.14) {
-            colorIndex = 0
-          } else if (random < 0.28) {
-            colorIndex = 1
-          } else if (random < 0.52) {
-            colorIndex = 2
-          } else if (random < 0.90) {
-            colorIndex = 3
-          } else {
-            colorIndex = 4
+          start = {
+            x: 425 + Math.random() * 100,
+            y: 690 + Math.random() * 155,
           }
         }
 
-        const rearStrength =
-          Math.max(0, 1 - normalizedX)
+        const bend = 45 + Math.random() * 150
+        const verticalWave = (Math.random() - 0.5) * 190
 
-        const scatter =
-          90 +
-          rearStrength * 270 +
-          Math.random() * 160
-
-        const angle =
-          Math.random() * Math.PI * 2
-
-        const startDistance =
-          scatter *
-          (0.55 + Math.random() * 0.75)
-
-        let startX =
-          x +
-          Math.cos(angle) * startDistance
-
-        const startY =
-          y +
-          Math.sin(angle) *
-            startDistance * 0.72
-
-        /*
-          Pull rear particles farther left so the head
-          appears to emerge from a neural data stream.
-        */
-
-        if (normalizedX < 0.52) {
-          startX -=
-            110 + Math.random() * 230
+        const control1: FiberPoint = {
+          x: start.x - bend * (0.30 + Math.random() * 0.42),
+          y: start.y + verticalWave * 0.35,
         }
 
-        particles.push({
-          homeX: x,
-          homeY: y,
-          startX,
-          startY,
-          x: startX,
-          y: startY,
-          size:
-            Math.random() * 1.15 + 0.35,
-          phase:
-            Math.random() * Math.PI * 2,
-          depth:
-            Math.random(),
-          colorIndex,
-          scatter,
-          connectionRadius:
-            26 + Math.random() * 30,
-          signalOffset:
-            Math.random(),
+        const control2: FiberPoint = {
+          x:
+            target.x +
+            (start.x - target.x) * (0.16 + Math.random() * 0.22) +
+            (Math.random() - 0.5) * 70,
+          y:
+            target.y +
+            (Math.random() - 0.5) * 120 -
+            verticalWave * 0.18,
+        }
+
+        const points: FiberPoint[] = []
+
+        for (let sample = 0; sample <= samplesPerFiber; sample++) {
+          const t = sample / samplesPerFiber
+          points.push(cubicPoint(t, start, control1, control2, target))
+        }
+
+        // Delay depends partly on how far back/up the strand must grow.
+        // Face appears first; skull and crown bloom afterwards.
+        const distanceFromCore = clamp((650 - target.x) / 520, 0, 1)
+        const crownDelay = clamp((390 - target.y) / 430, 0, 1)
+
+        fibers.push({
+          points,
+          colorIndex: pickColorIndex(target),
+          width: 0.35 + Math.random() * 1.05,
+          alpha: 0.22 + Math.random() * 0.60,
+          delay:
+            0.02 +
+            distanceFromCore * 0.34 +
+            crownDelay * 0.15 +
+            Math.random() * 0.20,
+          speed: 0.75 + Math.random() * 0.65,
+          phase: Math.random() * Math.PI * 2,
+          sparkOffset: Math.random(),
+        })
+      }
+
+      // A smaller group of loose fibres creates the wispy edges visible
+      // around the crown/back of the reference animation.
+      const looseCount = mobile ? 45 : 120
+
+      for (let i = 0; i < looseCount; i++) {
+        const y = 160 + Math.random() * 590
+        const target: FiberPoint = {
+          x: 105 + Math.random() * 245,
+          y,
+        }
+        const start: FiberPoint = {
+          x: 585 + Math.random() * 75,
+          y: 430 + Math.random() * 210,
+        }
+        const control1: FiberPoint = {
+          x: 500 + Math.random() * 80,
+          y: start.y + (Math.random() - 0.5) * 180,
+        }
+        const control2: FiberPoint = {
+          x: 250 + Math.random() * 120,
+          y: target.y + (Math.random() - 0.5) * 150,
+        }
+        const points: FiberPoint[] = []
+
+        for (let sample = 0; sample <= samplesPerFiber; sample++) {
+          const t = sample / samplesPerFiber
+          points.push(cubicPoint(t, start, control1, control2, target))
+        }
+
+        fibers.push({
+          points,
+          colorIndex: Math.random() < 0.55 ? 0 : Math.random() < 0.7 ? 2 : 3,
+          width: 0.3 + Math.random() * 0.7,
+          alpha: 0.14 + Math.random() * 0.32,
+          delay: 0.28 + Math.random() * 0.36,
+          speed: 0.72 + Math.random() * 0.45,
+          phase: Math.random() * Math.PI * 2,
+          sparkOffset: Math.random(),
         })
       }
     }
 
-    /*
-      =====================================================
-      RESIZE
-      =====================================================
-    */
-
     function resize() {
       width = window.innerWidth
       height = window.innerHeight
+      dpr = Math.min(window.devicePixelRatio || 1, 2)
 
-      dpr = Math.min(
-        window.devicePixelRatio || 1,
-        2
-      )
+      canvas.width = Math.floor(width * dpr)
+      canvas.height = Math.floor(height * dpr)
+      canvas.style.width = `${width}px`
+      canvas.style.height = `${height}px`
 
-      canvas.width =
-        Math.floor(width * dpr)
-
-      canvas.height =
-        Math.floor(height * dpr)
-
-      canvas.style.width =
-        `${width}px`
-
-      canvas.style.height =
-        `${height}px`
-
-      ctx.setTransform(
-        dpr,
-        0,
-        0,
-        dpr,
-        0,
-        0
-      )
-
-      buildHumanParticles()
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      buildHumanFibers()
+      startTime = performance.now()
     }
 
-    /*
-      =====================================================
-      CURSOR
-      =====================================================
-    */
+    function handleMouseMove(event: MouseEvent) {
+      mouse.nx = event.clientX / window.innerWidth - 0.5
+      mouse.ny = event.clientY / window.innerHeight - 0.5
+    }
 
-    function handleMouseMove(
-      event: MouseEvent
+    function drawFiber(
+      fiber: NeuralFiber,
+      reveal: number,
+      baseX: number,
+      baseY: number,
+      scale: number,
+      time: number,
+      glowPass: boolean
     ) {
-      mouse.nx =
-        event.clientX /
-          window.innerWidth -
-        0.5
+      if (reveal <= 0) return
 
-      mouse.ny =
-        event.clientY /
-          window.innerHeight -
-        0.5
+      const maxIndex = Math.max(
+        1,
+        Math.min(
+          fiber.points.length - 1,
+          Math.floor((fiber.points.length - 1) * reveal)
+        )
+      )
 
-      mouse.active = true
+      const rgb = HUMAN_NEURAL_COLORS[fiber.colorIndex]
+      const cursorStrength = 5 + smoothX * 3
+      const pulse = 0.72 + Math.sin(time * 0.002 + fiber.phase) * 0.28
+
+      ctx.beginPath()
+
+      for (let index = 0; index <= maxIndex; index++) {
+        const point = fiber.points[index]
+        const progress = index / Math.max(1, fiber.points.length - 1)
+
+        // Flowing fibres never become perfectly static.
+        const wave =
+          Math.sin(time * 0.00145 + fiber.phase + progress * 8) *
+          (1.2 + progress * 2.8)
+
+        const depthParallax = progress * cursorStrength
+        const x =
+          baseX +
+          point.x * scale +
+          wave * scale +
+          smoothX * depthParallax * 2.4
+        const y =
+          baseY +
+          point.y * scale +
+          Math.cos(time * 0.0012 + fiber.phase + progress * 7) *
+            1.8 *
+            scale +
+          smoothY * depthParallax * 1.6
+
+        if (index === 0) ctx.moveTo(x, y)
+        else ctx.lineTo(x, y)
+      }
+
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+
+      if (glowPass) {
+        ctx.strokeStyle = `rgba(${rgb},${fiber.alpha * 0.11 * pulse})`
+        ctx.lineWidth = (fiber.width * 4.2 + 1.4) * scale
+        ctx.shadowBlur = 10
+        ctx.shadowColor = `rgba(${rgb},.45)`
+      } else {
+        ctx.strokeStyle = `rgba(${rgb},${fiber.alpha * pulse})`
+        ctx.lineWidth = Math.max(0.35, fiber.width * scale)
+        ctx.shadowBlur = 0
+      }
+
+      ctx.stroke()
+      ctx.shadowBlur = 0
     }
-
-    function handleMouseLeave() {
-      mouse.active = false
-    }
-
-    /*
-      =====================================================
-      PARTICLE ANIMATION
-      =====================================================
-    */
 
     function draw(time: number) {
-      ctx.clearRect(
-        0,
-        0,
-        width,
-        height
-      )
+      ctx.clearRect(0, 0, width, height)
 
-      smoothX +=
-        (mouse.nx - smoothX) * 0.035
-
-      smoothY +=
-        (mouse.ny - smoothY) * 0.035
+      smoothX += (mouse.nx - smoothX) * 0.035
+      smoothY += (mouse.ny - smoothY) * 0.035
 
       const mobile = width < 768
+      const targetHeight = mobile ? height * 0.48 : height * 0.74
+      const scale = targetHeight / 920
+      const baseX = mobile
+        ? width * 0.5 - (760 * scale) / 2
+        : width * 0.035
+      const baseY = mobile ? height * 0.035 : height * 0.095
 
-      const targetHeight =
-        mobile
-          ? height * 0.48
-          : height * 0.74
+      // About 3.4 s to fully form, close to the visual rhythm of the reference.
+      const elapsed = (time - startTime) / 3400
+      const masterFormation = easeOutCubic(elapsed)
 
-      const scale =
-        targetHeight / 920
-
-      const baseX =
-        mobile
-          ? width * 0.5 -
-            (760 * scale) / 2
-          : width * 0.035
-
-      const baseY =
-        mobile
-          ? height * 0.035
-          : height * 0.095
-
-      const breathe =
-        1 +
-        Math.sin(
-          time * 0.00125
-        ) * 0.007
-
-      /*
-        One-time formation:
-        scattered neural cloud -> readable human head.
-      */
-
-      const formationElapsed =
-        time - formationStartedAt
-
-      const formationProgress =
-        Math.max(
+      // Soft luminous core visible at the beginning of formation.
+      if (masterFormation < 0.82) {
+        const coreX = baseX + 610 * scale
+        const coreY = baseY + 535 * scale
+        const coreRadius = (18 + masterFormation * 34) * scale
+        const coreGlow = ctx.createRadialGradient(
+          coreX,
+          coreY,
           0,
-          Math.min(
-            1,
-            (formationElapsed - 180) / 2800
-          )
+          coreX,
+          coreY,
+          coreRadius
         )
-
-      const mouseScreenX =
-        (smoothX + 0.5) * width
-
-      const mouseScreenY =
-        (smoothY + 0.5) * height
-
-      const centerX = 420
-      const centerY = 470
-
-      /*
-        PASS 1:
-        calculate every particle position.
-      */
-
-      for (
-        let i = 0;
-        i < particles.length;
-        i++
-      ) {
-        const p = particles[i]
-
-        const staggered =
-          Math.max(
-            0,
-            Math.min(
-              1,
-              (formationProgress -
-                p.signalOffset * 0.22) /
-                0.78
-            )
-          )
-
-        const formed =
-          1 -
-          Math.pow(
-            1 - staggered,
-            3
-          )
-
-        const homeX =
-          (p.homeX - centerX) *
-            breathe +
-          centerX
-
-        const homeY =
-          (p.homeY - centerY) *
-            breathe +
-          centerY
-
-        /*
-          Scattered particles remain alive while
-          travelling toward their final head position.
-        */
-
-        const startDriftX =
-          Math.sin(
-            time * 0.00075 +
-              p.phase
-          ) *
-          (5 + p.depth * 10)
-
-        const startDriftY =
-          Math.cos(
-            time * 0.00062 +
-              p.phase
-          ) *
-          (4 + p.depth * 8)
-
-        let localX =
-          (p.startX + startDriftX) *
-            (1 - formed) +
-          homeX * formed
-
-        let localY =
-          (p.startY + startDriftY) *
-            (1 - formed) +
-          homeY * formed
-
-        /*
-          After formation, keep the rear of the head
-          gently dissolving / flowing like a data stream.
-        */
-
-        const rearFactor =
-          Math.max(
-            0,
-            1 - p.homeX / 430
-          )
-
-        const rearFlow =
-          formed * rearFactor
-
-        localX +=
-          -rearFlow *
-          p.scatter *
-          0.055 *
-          (
-            0.45 +
-            Math.sin(
-              time * 0.00065 +
-                p.phase
-            ) * 0.30
-          )
-
-        localY +=
-          rearFlow *
-          Math.sin(
-            time * 0.001 +
-              p.phase
-          ) *
-          p.scatter *
-          0.018
-
-        /*
-          Fine breathing / neural vibration.
-        */
-
-        localX +=
-          Math.sin(
-            time * 0.00145 +
-              p.phase
-          ) *
-          (0.8 + p.depth * 1.8) *
-          formed
-
-        localY +=
-          Math.cos(
-            time * 0.00118 +
-              p.phase
-          ) *
-          (0.7 + p.depth * 1.5) *
-          formed
-
-        let px =
-          baseX + localX * scale
-
-        let py =
-          baseY + localY * scale
-
-        /*
-          Whole-head cursor parallax.
-        */
-
-        px +=
-          smoothX *
-          (5 + p.depth * 15) *
-          formed
-
-        py +=
-          smoothY *
-          (3 + p.depth * 9) *
-          formed
-
-        /*
-          Local cursor reaction:
-          nearby neural particles bend toward the cursor
-          and receive a subtle orbital distortion.
-        */
-
-        if (
-          mouse.active &&
-          formed > 0.45
-        ) {
-          const dx =
-            mouseScreenX - px
-
-          const dy =
-            mouseScreenY - py
-
-          const distance =
-            Math.sqrt(
-              dx * dx + dy * dy
-            )
-
-          const influenceRadius = 175
-
-          if (
-            distance < influenceRadius &&
-            distance > 0
-          ) {
-            const strength =
-              1 -
-              distance / influenceRadius
-
-            px +=
-              (dx / distance) *
-              strength *
-              (5 + p.depth * 10)
-
-            py +=
-              (dy / distance) *
-              strength *
-              (5 + p.depth * 10)
-
-            const swirl =
-              Math.sin(
-                time * 0.0018 +
-                  p.phase
-              ) *
-              strength * 4
-
-            px +=
-              (-dy / distance) * swirl
-
-            py +=
-              (dx / distance) * swirl
-          }
-        }
-
-        p.x = px
-        p.y = py
-      }
-
-      /*
-        PASS 2:
-        neural mesh connections.
-
-        Only a sampled subset is connected so the
-        animation stays smooth even with 13k+ particles.
-      */
-
-      const connectionStep =
-        mobile ? 24 : 18
-
-      const connectionDistance =
-        mobile ? 34 : 46
-
-      const cellSize =
-        connectionDistance
-
-      const grid =
-        new Map<string, number[]>()
-
-      for (
-        let i = 0;
-        i < particles.length;
-        i += connectionStep
-      ) {
-        const p = particles[i]
-
-        const cellX =
-          Math.floor(p.x / cellSize)
-
-        const cellY =
-          Math.floor(p.y / cellSize)
-
-        const key =
-          `${cellX},${cellY}`
-
-        const bucket = grid.get(key)
-
-        if (bucket) {
-          bucket.push(i)
-        } else {
-          grid.set(key, [i])
-        }
-      }
-
-      for (
-        let i = 0;
-        i < particles.length;
-        i += connectionStep
-      ) {
-        const a = particles[i]
-
-        const cellX =
-          Math.floor(a.x / cellSize)
-
-        const cellY =
-          Math.floor(a.y / cellSize)
-
-        let links = 0
-
-        for (
-          let gx = -1;
-          gx <= 1 && links < 2;
-          gx++
-        ) {
-          for (
-            let gy = -1;
-            gy <= 1 && links < 2;
-            gy++
-          ) {
-            const bucket =
-              grid.get(
-                `${cellX + gx},${cellY + gy}`
-              )
-
-            if (!bucket) {
-              continue
-            }
-
-            for (
-              let k = 0;
-              k < bucket.length && links < 2;
-              k++
-            ) {
-              const j = bucket[k]
-
-              if (j <= i) {
-                continue
-              }
-
-              const b = particles[j]
-
-              const dx = a.x - b.x
-              const dy = a.y - b.y
-
-              const distance =
-                Math.sqrt(
-                  dx * dx + dy * dy
-                )
-
-              const allowedDistance =
-                Math.min(
-                  connectionDistance,
-                  (
-                    a.connectionRadius +
-                    b.connectionRadius
-                  ) * 0.72
-                )
-
-              if (
-                distance > allowedDistance
-              ) {
-                continue
-              }
-
-              const opacity =
-                (
-                  1 -
-                  distance /
-                    allowedDistance
-                ) * 0.22
-
-              const gradient =
-                ctx.createLinearGradient(
-                  a.x,
-                  a.y,
-                  b.x,
-                  b.y
-                )
-
-              gradient.addColorStop(
-                0,
-                `rgba(${HUMAN_COLORS[a.colorIndex]},${opacity})`
-              )
-
-              gradient.addColorStop(
-                1,
-                `rgba(${HUMAN_COLORS[b.colorIndex]},${opacity})`
-              )
-
-              ctx.beginPath()
-              ctx.moveTo(a.x, a.y)
-              ctx.lineTo(b.x, b.y)
-              ctx.strokeStyle = gradient
-              ctx.lineWidth = 0.55
-              ctx.stroke()
-
-              links++
-            }
-          }
-        }
-      }
-
-      /*
-        Cursor-to-neural links.
-        This makes the head visibly react to movement.
-      */
-
-      if (mouse.active) {
-        for (
-          let i = 0;
-          i < particles.length;
-          i += connectionStep * 2
-        ) {
-          const p = particles[i]
-
-          const dx =
-            mouseScreenX - p.x
-
-          const dy =
-            mouseScreenY - p.y
-
-          const distance =
-            Math.sqrt(
-              dx * dx + dy * dy
-            )
-
-          if (distance < 145) {
-            const strength =
-              1 - distance / 145
-
-            ctx.beginPath()
-            ctx.moveTo(p.x, p.y)
-            ctx.lineTo(
-              mouseScreenX,
-              mouseScreenY
-            )
-
-            ctx.strokeStyle =
-              `rgba(${HUMAN_COLORS[p.colorIndex]},${strength * 0.18})`
-
-            ctx.lineWidth = 0.55
-            ctx.stroke()
-          }
-        }
-      }
-
-      /*
-        PASS 3:
-        particles + travelling neural signal.
-      */
-
-      const signalPosition =
-        (time * 0.00016) % 1
-
-      for (
-        let i = 0;
-        i < particles.length;
-        i++
-      ) {
-        const p = particles[i]
-
-        const pulse =
-          0.5 +
-          Math.sin(
-            time * 0.0022 +
-              p.phase
-          ) * 0.5
-
-        const pathPosition =
-          p.homeX / 760
-
-        let signalDistance =
-          Math.abs(
-            pathPosition -
-              signalPosition
-          )
-
-        signalDistance =
-          Math.min(
-            signalDistance,
-            1 - signalDistance
-          )
-
-        const signalBoost =
-          Math.max(
-            0,
-            1 - signalDistance / 0.045
-          )
-
-        const rgb =
-          HUMAN_COLORS[p.colorIndex]
-
-        if (
-          signalBoost > 0.25 &&
-          i % 13 === 0
-        ) {
-          const glowRadius =
-            5 + signalBoost * 10
-
-          const glow =
-            ctx.createRadialGradient(
-              p.x,
-              p.y,
-              0,
-              p.x,
-              p.y,
-              glowRadius
-            )
-
-          glow.addColorStop(
-            0,
-            `rgba(${rgb},${0.34 + signalBoost * 0.32})`
-          )
-
-          glow.addColorStop(
-            1,
-            `rgba(${rgb},0)`
-          )
-
-          ctx.beginPath()
-          ctx.arc(
-            p.x,
-            p.y,
-            glowRadius,
-            0,
-            Math.PI * 2
-          )
-          ctx.fillStyle = glow
-          ctx.fill()
-        }
-
+        coreGlow.addColorStop(0, `rgba(224,247,255,${0.50 - masterFormation * 0.25})`)
+        coreGlow.addColorStop(0.25, `rgba(34,211,238,${0.30 - masterFormation * 0.12})`)
+        coreGlow.addColorStop(0.62, `rgba(168,85,247,${0.13 - masterFormation * 0.05})`)
+        coreGlow.addColorStop(1, 'rgba(34,211,238,0)')
+        ctx.fillStyle = coreGlow
         ctx.beginPath()
-
-        ctx.arc(
-          p.x,
-          p.y,
-          p.size *
-            (
-              0.72 +
-              p.depth * 0.62 +
-              signalBoost * 0.45
-            ),
-          0,
-          Math.PI * 2
-        )
-
-        ctx.fillStyle =
-          `rgba(${rgb},${
-            0.28 +
-            pulse * 0.54 +
-            signalBoost * 0.16
-          })`
-
+        ctx.arc(coreX, coreY, coreRadius, 0, Math.PI * 2)
         ctx.fill()
       }
 
-      animationFrame =
-        window.requestAnimationFrame(
-          draw
-        )
+      // Glow pass first, crisp fibre pass second.
+      for (const glowPass of [true, false]) {
+        for (let i = 0; i < fibers.length; i++) {
+          const fiber = fibers[i]
+          const localFormation = clamp(
+            (masterFormation - fiber.delay) * fiber.speed * 2.35,
+            0,
+            1
+          )
+          const reveal = easeOutCubic(localFormation)
+          drawFiber(fiber, reveal, baseX, baseY, scale, time, glowPass)
+        }
+      }
+
+      // Moving signal sparks travel through selected completed fibres.
+      if (masterFormation > 0.34) {
+        const signalTime = time * 0.00019
+
+        for (let i = 0; i < fibers.length; i += 11) {
+          const fiber = fibers[i]
+          const localFormation = clamp(
+            (masterFormation - fiber.delay) * fiber.speed * 2.35,
+            0,
+            1
+          )
+          if (localFormation < 0.55) continue
+
+          const travel = (signalTime + fiber.sparkOffset) % 1
+          const pointIndex = Math.min(
+            fiber.points.length - 1,
+            Math.floor(travel * (fiber.points.length - 1))
+          )
+          const point = fiber.points[pointIndex]
+          const rgb = HUMAN_NEURAL_COLORS[fiber.colorIndex]
+          const px =
+            baseX +
+            point.x * scale +
+            smoothX * travel * 12
+          const py =
+            baseY +
+            point.y * scale +
+            smoothY * travel * 8
+
+          const radius = (1.2 + (i % 3) * 0.35) * scale
+          ctx.beginPath()
+          ctx.arc(px, py, Math.max(0.8, radius), 0, Math.PI * 2)
+          ctx.fillStyle = `rgba(${rgb},.92)`
+          ctx.shadowBlur = 10
+          ctx.shadowColor = `rgba(${rgb},.9)`
+          ctx.fill()
+          ctx.shadowBlur = 0
+        }
+      }
+
+      // A few tiny nodes make the finished head feel like a living data mesh.
+      if (masterFormation > 0.62) {
+        for (let i = 4; i < fibers.length; i += 23) {
+          const fiber = fibers[i]
+          const point = fiber.points[fiber.points.length - 1]
+          const rgb = HUMAN_NEURAL_COLORS[fiber.colorIndex]
+          const twinkle = 0.35 + Math.sin(time * 0.0024 + fiber.phase) * 0.30
+          const px = baseX + point.x * scale + smoothX * 7
+          const py = baseY + point.y * scale + smoothY * 5
+
+          ctx.beginPath()
+          ctx.arc(px, py, Math.max(0.55, 1.15 * scale), 0, Math.PI * 2)
+          ctx.fillStyle = `rgba(${rgb},${twinkle})`
+          ctx.fill()
+        }
+      }
+
+      animationFrame = window.requestAnimationFrame(draw)
     }
 
     resize()
-
-    window.addEventListener(
-      'resize',
-      resize
-    )
-
-    window.addEventListener(
-      'mousemove',
-      handleMouseMove
-    )
-
-    window.addEventListener(
-      'mouseleave',
-      handleMouseLeave
-    )
-
-    animationFrame =
-      window.requestAnimationFrame(
-        draw
-      )
+    window.addEventListener('resize', resize)
+    window.addEventListener('mousemove', handleMouseMove)
+    animationFrame = window.requestAnimationFrame(draw)
 
     return () => {
-      window.cancelAnimationFrame(
-        animationFrame
-      )
-
-      window.removeEventListener(
-        'resize',
-        resize
-      )
-
-      window.removeEventListener(
-        'mousemove',
-        handleMouseMove
-      )
-
-      window.removeEventListener(
-        'mouseleave',
-        handleMouseLeave
-      )
+      window.cancelAnimationFrame(animationFrame)
+      window.removeEventListener('resize', resize)
+      window.removeEventListener('mousemove', handleMouseMove)
     }
   }, [])
 
