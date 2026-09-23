@@ -52,6 +52,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
     let startTime = performance.now()
 
     const fibers: NeuralFiber[] = []
+    const profileFibers: NeuralFiber[] = []
     const mouse = { nx: 0, ny: 0 }
     let smoothX = 0
     let smoothY = 0
@@ -72,207 +73,243 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       const mt = 1 - t
       const mt2 = mt * mt
       const t2 = t * t
-
       return {
-        x:
-          p0.x * mt2 * mt +
-          3 * p1.x * mt2 * t +
-          3 * p2.x * mt * t2 +
-          p3.x * t2 * t,
-        y:
-          p0.y * mt2 * mt +
-          3 * p1.y * mt2 * t +
-          3 * p2.y * mt * t2 +
-          p3.y * t2 * t,
+        x: p0.x * mt2 * mt + 3 * p1.x * mt2 * t + 3 * p2.x * mt * t2 + p3.x * t2 * t,
+        y: p0.y * mt2 * mt + 3 * p1.y * mt2 * t + 3 * p2.y * mt * t2 + p3.y * t2 * t,
       }
     }
 
-    function insideHead(x: number, y: number) {
-      // Main skull / brain volume.
-      const skullX = (x - 385) / 245
-      const skullY = (y - 395) / 325
-      const skull = skullX * skullX + skullY * skullY <= 1
-
-      // Lower face / jaw volume.
-      const faceX = (x - 520) / 205
-      const faceY = (y - 535) / 235
-      const face = faceX * faceX + faceY * faceY <= 1
-
-      // Neck volume.
-      const neck = x > 320 && x < 545 && y > 650 && y < 920
-
-      // Keep the front edge readable instead of making a round blob.
-      const foreheadLimit = y < 350 ? 655 : 735
-      const lowerFaceLimit = y > 590 ? 670 : 755
-      const frontLimit = Math.min(foreheadLimit, lowerFaceLimit)
-
-      return (skull || face || neck) && x < frontLimit && x > 125
+    function sampleBezier(
+      p0: FiberPoint,
+      p1: FiberPoint,
+      p2: FiberPoint,
+      p3: FiberPoint,
+      count = 28
+    ) {
+      const points: FiberPoint[] = []
+      for (let i = 0; i <= count; i++) {
+        points.push(cubicPoint(i / count, p0, p1, p2, p3))
+      }
+      return points
     }
 
-    function randomHeadPoint(): FiberPoint {
-      for (let attempt = 0; attempt < 80; attempt++) {
-        const x = 120 + Math.random() * 610
-        const y = 70 + Math.random() * 810
-        if (insideHead(x, y)) return { x, y }
-      }
-
+    function jitterPoint(point: FiberPoint, amount: number): FiberPoint {
       return {
-        x: 260 + Math.random() * 320,
-        y: 240 + Math.random() * 420,
+        x: point.x + (Math.random() - 0.5) * amount,
+        y: point.y + (Math.random() - 0.5) * amount,
       }
     }
 
-    function pickColorIndex(target: FiberPoint) {
+    function colorForRegion(frontBias: number) {
       const r = Math.random()
-
-      // Face/front stays cool and clean.
-      if (target.x > 560) {
+      if (frontBias > 0.72) {
         if (r < 0.58) return 0
-        if (r < 0.86) return 1
-        if (r < 0.96) return 2
+        if (r < 0.84) return 1
+        if (r < 0.95) return 2
         if (r < 0.99) return 3
         return 4
       }
-
-      // Brain/skull gets the cyan-violet-pink mixture seen in the reference.
       if (r < 0.34) return 0
-      if (r < 0.55) return 1
-      if (r < 0.76) return 2
+      if (r < 0.54) return 1
+      if (r < 0.75) return 2
       if (r < 0.96) return 3
       return 4
     }
 
+    function addFiber(
+      target: NeuralFiber[],
+      points: FiberPoint[],
+      colorIndex: number,
+      widthValue: number,
+      alpha: number,
+      delay: number,
+      speed: number
+    ) {
+      target.push({
+        points,
+        colorIndex,
+        width: widthValue,
+        alpha,
+        delay,
+        speed,
+        phase: Math.random() * Math.PI * 2,
+        sparkOffset: Math.random(),
+      })
+    }
+
     function buildHumanFibers() {
       fibers.length = 0
+      profileFibers.length = 0
 
       const mobile = window.innerWidth < 768
-      const fiberCount = mobile ? 320 : 760
-      const samplesPerFiber = mobile ? 18 : 26
+      const interiorCount = mobile ? 250 : 520
+      const profileCount = mobile ? 32 : 72
+      const backCount = mobile ? 22 : 46
 
-      for (let i = 0; i < fiberCount; i++) {
-        const target = randomHeadPoint()
+      // Exact right-facing facial silhouette. These guides make the nose,
+      // lips, chin and jaw readable even when hundreds of fibres overlap.
+      const profileSegments: [FiberPoint, FiberPoint, FiberPoint, FiberPoint][] = [
+        [{ x: 575, y: 105 }, { x: 635, y: 135 }, { x: 675, y: 205 }, { x: 667, y: 275 }],
+        [{ x: 667, y: 275 }, { x: 664, y: 318 }, { x: 680, y: 345 }, { x: 698, y: 369 }],
+        [{ x: 698, y: 369 }, { x: 710, y: 385 }, { x: 711, y: 401 }, { x: 719, y: 413 }],
+        [{ x: 719, y: 413 }, { x: 731, y: 430 }, { x: 755, y: 442 }, { x: 750, y: 456 }],
+        [{ x: 750, y: 456 }, { x: 746, y: 469 }, { x: 724, y: 474 }, { x: 704, y: 478 }],
+        [{ x: 704, y: 478 }, { x: 694, y: 482 }, { x: 692, y: 489 }, { x: 700, y: 497 }],
+        [{ x: 700, y: 497 }, { x: 710, y: 504 }, { x: 715, y: 511 }, { x: 710, y: 519 }],
+        [{ x: 710, y: 519 }, { x: 705, y: 526 }, { x: 694, y: 530 }, { x: 687, y: 533 }],
+        [{ x: 687, y: 533 }, { x: 698, y: 539 }, { x: 704, y: 547 }, { x: 699, y: 556 }],
+        [{ x: 699, y: 556 }, { x: 691, y: 565 }, { x: 678, y: 570 }, { x: 668, y: 575 }],
+        [{ x: 668, y: 575 }, { x: 662, y: 586 }, { x: 666, y: 598 }, { x: 659, y: 610 }],
+        [{ x: 659, y: 610 }, { x: 650, y: 632 }, { x: 635, y: 651 }, { x: 613, y: 665 }],
+        [{ x: 613, y: 665 }, { x: 588, y: 681 }, { x: 556, y: 689 }, { x: 526, y: 696 }],
+        [{ x: 526, y: 696 }, { x: 501, y: 704 }, { x: 490, y: 719 }, { x: 490, y: 744 }],
+        [{ x: 490, y: 744 }, { x: 493, y: 798 }, { x: 518, y: 850 }, { x: 545, y: 920 }],
+      ]
 
-        // Reference-like formation core: strands originate around the face,
-        // jaw and upper-neck region, then bloom backward into the skull.
-        const sourceBand = Math.random()
+      const backSegments: [FiberPoint, FiberPoint, FiberPoint, FiberPoint][] = [
+        [{ x: 545, y: 920 }, { x: 470, y: 885 }, { x: 390, y: 855 }, { x: 310, y: 815 }],
+        [{ x: 310, y: 815 }, { x: 235, y: 770 }, { x: 205, y: 700 }, { x: 212, y: 710 }],
+        [{ x: 212, y: 710 }, { x: 220, y: 645 }, { x: 193, y: 585 }, { x: 188, y: 520 }],
+        [{ x: 188, y: 520 }, { x: 172, y: 390 }, { x: 185, y: 245 }, { x: 270, y: 145 }],
+        [{ x: 270, y: 145 }, { x: 350, y: 52 }, { x: 490, y: 35 }, { x: 575, y: 105 }],
+      ]
+
+      // Strong layered facial outline. The earlier version lacked this,
+      // which is why it looked like a feather-shaped bundle instead of a face.
+      for (let copy = 0; copy < profileCount; copy++) {
+        const offset = (copy - profileCount / 2) * 0.17
+        const points: FiberPoint[] = []
+        for (const segment of profileSegments) {
+          const sampled = sampleBezier(
+            jitterPoint({ x: segment[0].x + offset, y: segment[0].y }, 2.2),
+            jitterPoint({ x: segment[1].x + offset, y: segment[1].y }, 3.5),
+            jitterPoint({ x: segment[2].x + offset, y: segment[2].y }, 3.5),
+            jitterPoint({ x: segment[3].x + offset, y: segment[3].y }, 2.2),
+            8
+          )
+          if (points.length) sampled.shift()
+          points.push(...sampled)
+        }
+        addFiber(
+          profileFibers,
+          points,
+          copy % 9 === 0 ? 3 : copy % 13 === 0 ? 2 : copy % 17 === 0 ? 4 : 0,
+          0.35 + Math.random() * 0.75,
+          0.25 + Math.random() * 0.48,
+          0.04 + Math.random() * 0.14,
+          0.95 + Math.random() * 0.28
+        )
+      }
+
+      // Back/crown silhouette completes the skull without creating a spiky fan.
+      for (let copy = 0; copy < backCount; copy++) {
+        const points: FiberPoint[] = []
+        for (const segment of backSegments) {
+          const sampled = sampleBezier(
+            jitterPoint(segment[0], 4),
+            jitterPoint(segment[1], 8),
+            jitterPoint(segment[2], 8),
+            jitterPoint(segment[3], 4),
+            9
+          )
+          if (points.length) sampled.shift()
+          points.push(...sampled)
+        }
+        addFiber(
+          profileFibers,
+          points,
+          Math.random() < 0.45 ? 3 : Math.random() < 0.58 ? 2 : 0,
+          0.3 + Math.random() * 0.65,
+          0.14 + Math.random() * 0.30,
+          0.16 + Math.random() * 0.18,
+          0.82 + Math.random() * 0.30
+        )
+      }
+
+      // Interior neural fibres travel from the rear skull/neck toward precise
+      // facial landmarks. This creates a woven head instead of a filled blob.
+      const faceTargets: FiberPoint[] = [
+        { x: 667, y: 280 }, { x: 695, y: 365 }, { x: 718, y: 412 },
+        { x: 748, y: 455 }, { x: 704, y: 478 }, { x: 700, y: 497 },
+        { x: 710, y: 519 }, { x: 687, y: 533 }, { x: 699, y: 556 },
+        { x: 668, y: 575 }, { x: 659, y: 610 }, { x: 613, y: 665 },
+        { x: 526, y: 696 }, { x: 490, y: 744 },
+      ]
+
+      for (let i = 0; i < interiorCount; i++) {
+        const targetBase = faceTargets[Math.floor(Math.random() * faceTargets.length)]
+        const target = jitterPoint(targetBase, targetBase.x > 690 ? 8 : 20)
+
+        const sourceRoll = Math.random()
         let start: FiberPoint
-
-        if (sourceBand < 0.48) {
+        if (sourceRoll < 0.56) {
           start = {
-            x: 620 + Math.random() * 52,
-            y: 405 + Math.random() * 185,
+            x: 205 + Math.random() * 250,
+            y: 150 + Math.random() * 470,
           }
-        } else if (sourceBand < 0.78) {
+        } else if (sourceRoll < 0.82) {
           start = {
-            x: 525 + Math.random() * 105,
-            y: 575 + Math.random() * 120,
+            x: 300 + Math.random() * 210,
+            y: 610 + Math.random() * 235,
           }
         } else {
           start = {
-            x: 425 + Math.random() * 100,
-            y: 690 + Math.random() * 155,
+            x: 380 + Math.random() * 175,
+            y: 270 + Math.random() * 300,
           }
         }
 
-        const bend = 45 + Math.random() * 150
-        const verticalWave = (Math.random() - 0.5) * 190
-
-        const control1: FiberPoint = {
-          x: start.x - bend * (0.30 + Math.random() * 0.42),
-          y: start.y + verticalWave * 0.35,
+        const c1: FiberPoint = {
+          x: start.x + (target.x - start.x) * (0.24 + Math.random() * 0.16),
+          y: start.y + (Math.random() - 0.5) * 120,
+        }
+        const c2: FiberPoint = {
+          x: start.x + (target.x - start.x) * (0.68 + Math.random() * 0.13),
+          y: target.y + (Math.random() - 0.5) * 95,
         }
 
-        const control2: FiberPoint = {
-          x:
-            target.x +
-            (start.x - target.x) * (0.16 + Math.random() * 0.22) +
-            (Math.random() - 0.5) * 70,
-          y:
-            target.y +
-            (Math.random() - 0.5) * 120 -
-            verticalWave * 0.18,
-        }
-
-        const points: FiberPoint[] = []
-
-        for (let sample = 0; sample <= samplesPerFiber; sample++) {
-          const t = sample / samplesPerFiber
-          points.push(cubicPoint(t, start, control1, control2, target))
-        }
-
-        // Delay depends partly on how far back/up the strand must grow.
-        // Face appears first; skull and crown bloom afterwards.
-        const distanceFromCore = clamp((650 - target.x) / 520, 0, 1)
-        const crownDelay = clamp((390 - target.y) / 430, 0, 1)
-
-        fibers.push({
-          points,
-          colorIndex: pickColorIndex(target),
-          width: 0.35 + Math.random() * 1.05,
-          alpha: 0.22 + Math.random() * 0.60,
-          delay:
-            0.02 +
-            distanceFromCore * 0.34 +
-            crownDelay * 0.15 +
-            Math.random() * 0.20,
-          speed: 0.75 + Math.random() * 0.65,
-          phase: Math.random() * Math.PI * 2,
-          sparkOffset: Math.random(),
-        })
+        addFiber(
+          fibers,
+          sampleBezier(start, c1, c2, target, mobile ? 18 : 24),
+          colorForRegion(target.x / 760),
+          0.25 + Math.random() * 0.78,
+          0.10 + Math.random() * 0.38,
+          0.08 + Math.random() * 0.32,
+          0.82 + Math.random() * 0.42
+        )
       }
 
-      // A smaller group of loose fibres creates the wispy edges visible
-      // around the crown/back of the reference animation.
-      const looseCount = mobile ? 45 : 120
-
-      for (let i = 0; i < looseCount; i++) {
-        const y = 160 + Math.random() * 590
-        const target: FiberPoint = {
-          x: 105 + Math.random() * 245,
-          y,
+      // Eye/brow and jaw accent fibres are intentionally explicit so the
+      // viewer reads a human face immediately.
+      const accents: FiberPoint[][] = [
+        sampleBezier({ x: 615, y: 393 }, { x: 640, y: 382 }, { x: 662, y: 389 }, { x: 680, y: 402 }, 22),
+        sampleBezier({ x: 625, y: 407 }, { x: 644, y: 414 }, { x: 659, y: 414 }, { x: 671, y: 406 }, 18),
+        sampleBezier({ x: 520, y: 555 }, { x: 575, y: 535 }, { x: 635, y: 535 }, { x: 687, y: 533 }, 22),
+        sampleBezier({ x: 470, y: 620 }, { x: 535, y: 620 }, { x: 590, y: 640 }, { x: 613, y: 665 }, 22),
+      ]
+      accents.forEach((points, index) => {
+        for (let copy = 0; copy < (mobile ? 3 : 7); copy++) {
+          addFiber(
+            profileFibers,
+            points.map((p) => jitterPoint(p, 2.8)),
+            index === 1 ? 1 : copy % 4 === 0 ? 2 : 0,
+            0.42 + Math.random() * 0.55,
+            0.30 + Math.random() * 0.38,
+            0.18 + index * 0.035,
+            0.95 + Math.random() * 0.2
+          )
         }
-        const start: FiberPoint = {
-          x: 585 + Math.random() * 75,
-          y: 430 + Math.random() * 210,
-        }
-        const control1: FiberPoint = {
-          x: 500 + Math.random() * 80,
-          y: start.y + (Math.random() - 0.5) * 180,
-        }
-        const control2: FiberPoint = {
-          x: 250 + Math.random() * 120,
-          y: target.y + (Math.random() - 0.5) * 150,
-        }
-        const points: FiberPoint[] = []
-
-        for (let sample = 0; sample <= samplesPerFiber; sample++) {
-          const t = sample / samplesPerFiber
-          points.push(cubicPoint(t, start, control1, control2, target))
-        }
-
-        fibers.push({
-          points,
-          colorIndex: Math.random() < 0.55 ? 0 : Math.random() < 0.7 ? 2 : 3,
-          width: 0.3 + Math.random() * 0.7,
-          alpha: 0.14 + Math.random() * 0.32,
-          delay: 0.28 + Math.random() * 0.36,
-          speed: 0.72 + Math.random() * 0.45,
-          phase: Math.random() * Math.PI * 2,
-          sparkOffset: Math.random(),
-        })
-      }
+      })
     }
 
     function resize() {
       width = window.innerWidth
       height = window.innerHeight
       dpr = Math.min(window.devicePixelRatio || 1, 2)
-
       canvas.width = Math.floor(width * dpr)
       canvas.height = Math.floor(height * dpr)
       canvas.style.width = `${width}px`
       canvas.style.height = `${height}px`
-
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       buildHumanFibers()
       startTime = performance.now()
@@ -292,135 +329,100 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       time: number,
       glowPass: boolean
     ) {
-      if (reveal <= 0) return
-
+      if (reveal <= 0 || fiber.points.length < 2) return
       const maxIndex = Math.max(
         1,
-        Math.min(
-          fiber.points.length - 1,
-          Math.floor((fiber.points.length - 1) * reveal)
-        )
+        Math.min(fiber.points.length - 1, Math.floor((fiber.points.length - 1) * reveal))
       )
-
       const rgb = HUMAN_NEURAL_COLORS[fiber.colorIndex]
-      const cursorStrength = 5 + smoothX * 3
-      const pulse = 0.72 + Math.sin(time * 0.002 + fiber.phase) * 0.28
+      const pulse = 0.76 + Math.sin(time * 0.002 + fiber.phase) * 0.24
 
       ctx.beginPath()
-
       for (let index = 0; index <= maxIndex; index++) {
         const point = fiber.points[index]
         const progress = index / Math.max(1, fiber.points.length - 1)
-
-        // Flowing fibres never become perfectly static.
-        const wave =
-          Math.sin(time * 0.00145 + fiber.phase + progress * 8) *
-          (1.2 + progress * 2.8)
-
-        const depthParallax = progress * cursorStrength
-        const x =
-          baseX +
-          point.x * scale +
-          wave * scale +
-          smoothX * depthParallax * 2.4
-        const y =
-          baseY +
-          point.y * scale +
-          Math.cos(time * 0.0012 + fiber.phase + progress * 7) *
-            1.8 *
-            scale +
-          smoothY * depthParallax * 1.6
-
+        const wave = Math.sin(time * 0.00125 + fiber.phase + progress * 7) * (0.55 + progress * 1.25)
+        const cursorDepth = progress * (4 + fiber.width * 2)
+        const x = baseX + point.x * scale + wave * scale + smoothX * cursorDepth * 1.6
+        const y = baseY + point.y * scale + Math.cos(time * 0.0011 + fiber.phase + progress * 6) * 0.8 * scale + smoothY * cursorDepth
         if (index === 0) ctx.moveTo(x, y)
         else ctx.lineTo(x, y)
       }
 
       ctx.lineCap = 'round'
       ctx.lineJoin = 'round'
-
       if (glowPass) {
-        ctx.strokeStyle = `rgba(${rgb},${fiber.alpha * 0.11 * pulse})`
-        ctx.lineWidth = (fiber.width * 4.2 + 1.4) * scale
-        ctx.shadowBlur = 10
-        ctx.shadowColor = `rgba(${rgb},.45)`
+        ctx.strokeStyle = `rgba(${rgb},${fiber.alpha * 0.09 * pulse})`
+        ctx.lineWidth = (fiber.width * 3.3 + 0.8) * scale
+        ctx.shadowBlur = 8
+        ctx.shadowColor = `rgba(${rgb},.38)`
       } else {
         ctx.strokeStyle = `rgba(${rgb},${fiber.alpha * pulse})`
-        ctx.lineWidth = Math.max(0.35, fiber.width * scale)
+        ctx.lineWidth = Math.max(0.32, fiber.width * scale)
         ctx.shadowBlur = 0
       }
-
       ctx.stroke()
       ctx.shadowBlur = 0
     }
 
+    function drawCollection(
+      collection: NeuralFiber[],
+      masterFormation: number,
+      baseX: number,
+      baseY: number,
+      scale: number,
+      time: number
+    ) {
+      for (const glowPass of [true, false]) {
+        for (const fiber of collection) {
+          const localFormation = clamp(
+            (masterFormation - fiber.delay) * fiber.speed * 2.65,
+            0,
+            1
+          )
+          drawFiber(fiber, easeOutCubic(localFormation), baseX, baseY, scale, time, glowPass)
+        }
+      }
+    }
+
     function draw(time: number) {
       ctx.clearRect(0, 0, width, height)
-
       smoothX += (mouse.nx - smoothX) * 0.035
       smoothY += (mouse.ny - smoothY) * 0.035
 
       const mobile = width < 768
       const targetHeight = mobile ? height * 0.48 : height * 0.74
       const scale = targetHeight / 920
-      const baseX = mobile
-        ? width * 0.5 - (760 * scale) / 2
-        : width * 0.035
+      const baseX = mobile ? width * 0.5 - (760 * scale) / 2 : width * 0.035
       const baseY = mobile ? height * 0.035 : height * 0.095
-
-      // About 3.4 s to fully form, close to the visual rhythm of the reference.
-      const elapsed = (time - startTime) / 3400
+      const elapsed = (time - startTime) / 3600
       const masterFormation = easeOutCubic(elapsed)
 
-      // Soft luminous core visible at the beginning of formation.
-      if (masterFormation < 0.82) {
+      // Formation core around the cheek/jaw, matching the reference's birth point.
+      if (masterFormation < 0.78) {
         const coreX = baseX + 610 * scale
-        const coreY = baseY + 535 * scale
-        const coreRadius = (18 + masterFormation * 34) * scale
-        const coreGlow = ctx.createRadialGradient(
-          coreX,
-          coreY,
-          0,
-          coreX,
-          coreY,
-          coreRadius
-        )
-        coreGlow.addColorStop(0, `rgba(224,247,255,${0.50 - masterFormation * 0.25})`)
-        coreGlow.addColorStop(0.25, `rgba(34,211,238,${0.30 - masterFormation * 0.12})`)
-        coreGlow.addColorStop(0.62, `rgba(168,85,247,${0.13 - masterFormation * 0.05})`)
-        coreGlow.addColorStop(1, 'rgba(34,211,238,0)')
-        ctx.fillStyle = coreGlow
+        const coreY = baseY + 525 * scale
+        const radius = (14 + masterFormation * 28) * scale
+        const glow = ctx.createRadialGradient(coreX, coreY, 0, coreX, coreY, radius)
+        glow.addColorStop(0, `rgba(224,247,255,${0.46 - masterFormation * 0.22})`)
+        glow.addColorStop(0.3, `rgba(34,211,238,${0.28 - masterFormation * 0.10})`)
+        glow.addColorStop(0.7, `rgba(236,72,153,${0.10 - masterFormation * 0.04})`)
+        glow.addColorStop(1, 'rgba(34,211,238,0)')
+        ctx.fillStyle = glow
         ctx.beginPath()
-        ctx.arc(coreX, coreY, coreRadius, 0, Math.PI * 2)
+        ctx.arc(coreX, coreY, radius, 0, Math.PI * 2)
         ctx.fill()
       }
 
-      // Glow pass first, crisp fibre pass second.
-      for (const glowPass of [true, false]) {
-        for (let i = 0; i < fibers.length; i++) {
-          const fiber = fibers[i]
-          const localFormation = clamp(
-            (masterFormation - fiber.delay) * fiber.speed * 2.35,
-            0,
-            1
-          )
-          const reveal = easeOutCubic(localFormation)
-          drawFiber(fiber, reveal, baseX, baseY, scale, time, glowPass)
-        }
-      }
+      // Interior first, crisp anatomical outline last.
+      drawCollection(fibers, masterFormation, baseX, baseY, scale, time)
+      drawCollection(profileFibers, masterFormation, baseX, baseY, scale, time)
 
-      // Moving signal sparks travel through selected completed fibres.
-      if (masterFormation > 0.34) {
-        const signalTime = time * 0.00019
-
-        for (let i = 0; i < fibers.length; i += 11) {
-          const fiber = fibers[i]
-          const localFormation = clamp(
-            (masterFormation - fiber.delay) * fiber.speed * 2.35,
-            0,
-            1
-          )
-          if (localFormation < 0.55) continue
-
+      if (masterFormation > 0.48) {
+        const all = [...fibers, ...profileFibers]
+        const signalTime = time * 0.00017
+        for (let i = 0; i < all.length; i += 17) {
+          const fiber = all[i]
           const travel = (signalTime + fiber.sparkOffset) % 1
           const pointIndex = Math.min(
             fiber.points.length - 1,
@@ -428,40 +430,15 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
           )
           const point = fiber.points[pointIndex]
           const rgb = HUMAN_NEURAL_COLORS[fiber.colorIndex]
-          const px =
-            baseX +
-            point.x * scale +
-            smoothX * travel * 12
-          const py =
-            baseY +
-            point.y * scale +
-            smoothY * travel * 8
-
-          const radius = (1.2 + (i % 3) * 0.35) * scale
+          const px = baseX + point.x * scale + smoothX * travel * 7
+          const py = baseY + point.y * scale + smoothY * travel * 5
           ctx.beginPath()
-          ctx.arc(px, py, Math.max(0.8, radius), 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(${rgb},.92)`
-          ctx.shadowBlur = 10
-          ctx.shadowColor = `rgba(${rgb},.9)`
+          ctx.arc(px, py, Math.max(0.6, 0.95 * scale), 0, Math.PI * 2)
+          ctx.fillStyle = `rgba(${rgb},.82)`
+          ctx.shadowBlur = 8
+          ctx.shadowColor = `rgba(${rgb},.75)`
           ctx.fill()
           ctx.shadowBlur = 0
-        }
-      }
-
-      // A few tiny nodes make the finished head feel like a living data mesh.
-      if (masterFormation > 0.62) {
-        for (let i = 4; i < fibers.length; i += 23) {
-          const fiber = fibers[i]
-          const point = fiber.points[fiber.points.length - 1]
-          const rgb = HUMAN_NEURAL_COLORS[fiber.colorIndex]
-          const twinkle = 0.35 + Math.sin(time * 0.0024 + fiber.phase) * 0.30
-          const px = baseX + point.x * scale + smoothX * 7
-          const py = baseY + point.y * scale + smoothY * 5
-
-          ctx.beginPath()
-          ctx.arc(px, py, Math.max(0.55, 1.15 * scale), 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(${rgb},${twinkle})`
-          ctx.fill()
         }
       }
 
