@@ -1,0 +1,2 @@
+import { portfolio } from '../data/portfolio'
+export function Footer(){return <footer className="relative z-10 border-t border-white/[.06] bg-[#03050c]/70"><div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-8 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between lg:px-8"><span>© 2026 {portfolio.name}</span><span className="font-mono">ROBOTICS // CONTROL SYSTEMS // AUTONOMOUS TECHNOLOGY</span></div></footer>}

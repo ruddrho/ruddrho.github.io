@@ -1,0 +1,5 @@
+import { motion } from 'framer-motion'
+import { FiPlus } from 'react-icons/fi'
+import { SectionTitle } from '../components/SectionTitle'
+import { activityPlaceholders } from '../data/portfolio'
+export function Activities(){return <section id="activities" className="section-wrap"><SectionTitle eyebrow="04 // Academic Activity" title="A framework ready for verified experience." text="No achievements are invented here. Replace these placeholders as your academic record develops."/><div className="space-y-3">{activityPlaceholders.map((a,i)=><motion.div key={a.label} initial={{opacity:0,x:-18}} whileInView={{opacity:1,x:0}} viewport={{once:true}} transition={{delay:i*.05}} className="glass-card flex gap-5 p-5 sm:items-center"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-purple-400/20 bg-purple-400/5 text-purple-300"><FiPlus/></span><div><h3 className="font-medium text-slate-200">{a.label}</h3><p className="mt-1 text-sm leading-6 text-slate-500">{a.detail}</p></div></motion.div>)}</div></section>}

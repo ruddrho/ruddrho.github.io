@@ -1,0 +1,15 @@
+import { motion } from 'framer-motion'
+import { FiArrowUpRight, FiGithub, FiStar, FiUsers, FiFolder } from 'react-icons/fi'
+import { SectionTitle } from '../components/SectionTitle'
+import { portfolio } from '../data/portfolio'
+import { useGithub } from '../hooks/useGithub'
+
+export function Github(){
+ const {profile,repos,loading,error}=useGithub(portfolio.githubUsername)
+ return <section id="github" className="section-wrap"><SectionTitle eyebrow="06 // GitHub Telemetry" title="Live engineering activity." text="Profile statistics and recently updated repositories are loaded directly from the public GitHub API."/>
+ {loading && <div className="glass-card p-8 font-mono text-sm text-cyan-300">SYNCING GITHUB API...</div>}
+ {error && <div className="glass-card p-8 text-slate-400">GitHub API is temporarily unavailable. <a className="text-cyan-300" href={portfolio.github}>Open profile directly.</a></div>}
+ {profile && <><div className="glass-card mb-5 flex flex-col gap-6 p-6 sm:flex-row sm:items-center"><img src={profile.avatar_url} alt={profile.name || portfolio.name} className="h-20 w-20 rounded-2xl border border-cyan-300/20 object-cover"/><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-3"><h3 className="text-xl font-medium text-white">{profile.name || portfolio.name}</h3><span className="font-mono text-xs text-cyan-300">@{portfolio.githubUsername}</span></div><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">{profile.bio || 'Robotics and engineering development on GitHub.'}</p></div><div className="grid grid-cols-2 gap-4 sm:grid-cols-3">{[[FiFolder,profile.public_repos,'Repos'],[FiUsers,profile.followers,'Followers'],[FiUsers,profile.following,'Following']].map(([Icon,val,label],i)=>{const C=Icon as typeof FiFolder;return <div key={i} className="text-center"><C className="mx-auto text-cyan-300"/><b className="mt-1 block text-xl text-white">{String(val)}</b><span className="text-[10px] uppercase tracking-wider text-slate-500">{String(label)}</span></div>})}</div></div>
+ <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">{repos.map((r,i)=><motion.a initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{delay:i*.05}} whileHover={{y:-4}} key={r.id} href={r.html_url} target="_blank" rel="noreferrer" className="glass-card group flex min-h-52 flex-col p-6"><div className="flex items-start justify-between"><FiGithub className="text-xl text-cyan-300"/><FiArrowUpRight className="text-slate-600 transition group-hover:text-purple-300"/></div><h3 className="mt-5 break-words font-medium text-slate-100">{r.name}</h3><p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-500">{r.description || 'Repository description not provided.'}</p><div className="mt-auto flex items-center gap-4 pt-5 font-mono text-[10px] uppercase tracking-wider text-slate-500"><span>{r.language || 'Code'}</span><span className="flex items-center gap-1"><FiStar/>{r.stargazers_count}</span></div></motion.a>)}</div></>}
+ </section>
+}
