@@ -1,148 +1,150 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from "react";
 
-type Particle = {
-  x:number;y:number;tx:number;ty:number;vx:number;vy:number;
-  size:number;color:number;phase:number;
-}
+type Dot = {
+  x:number;
+  y:number;
+  tx:number;
+  ty:number;
+  s:number;
+  c:number;
+  p:number;
+};
 
-const colors = [
-  [34,211,238],
-  [59,130,246],
-  [168,85,247],
-  [236,72,153]
-]
+const palette = [
+  "34,211,238",
+  "59,130,246",
+  "168,85,247",
+  "236,72,153"
+];
 
-function createMask(w:number,h:number){
-  const pts:{x:number;y:number}[]=[]
+function buildRobotMask(w:number,h:number):Dot[]{
+  const points:{x:number,y:number}[]=[];
 
-  const addLine=(a:[number,number],b:[number,number],n:number)=>{
-    for(let i=0;i<=n;i++){
-      const t=i/n
-      pts.push({
-        x:a[0]+(b[0]-a[0])*t,
-        y:a[1]+(b[1]-a[1])*t
-      })
+  const line=(x1:number,y1:number,x2:number,y2:number,count:number)=>{
+    for(let i=0;i<count;i++){
+      const t=i/(count-1);
+      points.push({
+        x:x1+(x2-x1)*t,
+        y:y1+(y2-y1)*t
+      });
     }
-  }
+  };
 
-  const addPoly=(p:number[][])=>{
-    for(let i=0;i<p.length;i++){
-      addLine(
-        [p[i][0],p[i][1]],
-        [p[(i+1)%p.length][0],p[(i+1)%p.length][1]],
-        40
-      )
+  const poly=(arr:number[][])=>{
+    for(let i=0;i<arr.length;i++){
+      const a=arr[i];
+      const b=arr[(i+1)%arr.length];
+      line(a[0],a[1],b[0],b[1],35);
     }
-  }
+  };
 
-  // futuristic symmetric robotic mask
-  addPoly([
-    [0.50,0.08],[0.72,0.25],[0.66,0.42],
-    [0.82,0.55],[0.65,0.88],
-    [0.50,0.98],[0.35,0.88],
-    [0.18,0.55],[0.34,0.42],
-    [0.28,0.25]
-  ])
+  // sharp cyber mask outer armor
+  poly([
+    [0.50,0.08],
+    [0.78,0.22],
+    [0.86,0.50],
+    [0.72,0.82],
+    [0.50,0.94],
+    [0.28,0.82],
+    [0.14,0.50],
+    [0.22,0.22]
+  ]);
 
   // eye visor
-  addPoly([
-    [0.28,0.43],[0.45,0.38],[0.50,0.43],
-    [0.55,0.38],[0.72,0.43],
-    [0.58,0.55],[0.42,0.55]
-  ])
+  poly([
+    [0.22,0.40],
+    [0.42,0.34],
+    [0.50,0.40],
+    [0.58,0.34],
+    [0.78,0.40],
+    [0.60,0.50],
+    [0.40,0.50]
+  ]);
 
-  // center core
-  for(let i=0;i<2500;i++){
-    const x=.22+Math.random()*.56
-    const y=.18+Math.random()*.68
-    const dx=(x-.5)/.35
-    const dy=(y-.55)/.45
-    if(dx*dx+dy*dy<1) pts.push({x,y})
+  // central reactor
+  for(let i=0;i<800;i++){
+    const a=Math.random()*Math.PI*2;
+    const r=Math.random()*0.10;
+    points.push({
+      x:0.5+Math.cos(a)*r,
+      y:0.56+Math.sin(a)*r
+    });
   }
 
-  return pts.map(p=>({
+  // circuit lines
+  for(let i=0;i<25;i++){
+    const y=.18+i*.025;
+    line(.28,y,.72,y+Math.sin(i)*.02,20);
+  }
+
+  return points.map(pt=>({
     x:w/2,
     y:h/2,
-    tx:p.x*w*.75+w*.02,
-    ty:p.y*h*.75+h*.08,
-    vx:0,vy:0,
-    size:Math.random()*1.8+.4,
-    color:Math.floor(Math.random()*colors.length),
-    phase:Math.random()*6.28
-  }))
+    tx:w*(pt.x*.65+.15),
+    ty:h*(pt.y*.72+.12),
+    s:Math.random()*2+0.5,
+    c:Math.floor(Math.random()*palette.length),
+    p:Math.random()*10
+  }));
 }
 
 export function AnimatedHumanFace(){
-  const ref=useRef<HTMLCanvasElement|null>(null)
+  const canvasRef=useRef<HTMLCanvasElement>(null);
 
   useEffect(()=>{
-    const canvas=ref.current
-    if(!canvas)return
-    const ctx=canvas.getContext('2d')
-    if(!ctx)return
+    const canvas=canvasRef.current;
+    if(!canvas)return;
 
-    let particles:Particle[]=[]
-    let w=0,h=0
-    let raf=0
-    const mouse={x:-999,y:-999}
+    const ctx=canvas.getContext("2d");
+    if(!ctx)return;
+
+    let w=0;
+    let h=0;
+    let dots:Dot[]=[];
+    let frame=0;
 
     const resize=()=>{
-      w=canvas.clientWidth
-      h=canvas.clientHeight
-      canvas.width=w*devicePixelRatio
-      canvas.height=h*devicePixelRatio
-      ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)
-      particles=createMask(w,h)
-    }
+      w=canvas.clientWidth;
+      h=canvas.clientHeight;
+      canvas.width=w*devicePixelRatio;
+      canvas.height=h*devicePixelRatio;
+      ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+      dots=buildRobotMask(w,h);
+    };
 
-    const move=(e:MouseEvent)=>{
-      const r=canvas.getBoundingClientRect()
-      mouse.x=e.clientX-r.left
-      mouse.y=e.clientY-r.top
-    }
+    const animate=(t:number)=>{
+      ctx.clearRect(0,0,w,h);
 
-    const animate=(time:number)=>{
-      ctx.clearRect(0,0,w,h)
+      dots.forEach(d=>{
+        d.x+=(d.tx-d.x)*0.045;
+        d.y+=(d.ty-d.y)*0.045;
 
-      particles.forEach((p)=>{
-        p.x+=(p.tx-p.x)*.035
-        p.y+=(p.ty-p.y)*.035
+        const pulse=0.65+Math.sin(t*0.004+d.p)*0.35;
+        ctx.beginPath();
+        ctx.fillStyle=`rgba(${palette[d.c]},${pulse})`;
+        ctx.shadowBlur=14;
+        ctx.shadowColor=`rgb(${palette[d.c]})`;
+        ctx.arc(d.x,d.y,d.s,0,Math.PI*2);
+        ctx.fill();
+      });
 
-        const dx=p.x-mouse.x
-        const dy=p.y-mouse.y
-        const d=Math.sqrt(dx*dx+dy*dy)
+      frame=requestAnimationFrame(animate);
+    };
 
-        if(d<130){
-          p.x+=dx/d*8
-          p.y+=dy/d*8
-        }
-
-        const c=colors[p.color]
-        const pulse=0.65+Math.sin(time*.003+p.phase)*.35
-
-        ctx.beginPath()
-        ctx.shadowBlur=12
-        ctx.shadowColor=`rgb(${c[0]},${c[1]},${c[2]})`
-        ctx.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},${pulse})`
-        ctx.arc(p.x,p.y,p.size,0,Math.PI*2)
-        ctx.fill()
-      })
-
-      ctx.shadowBlur=0
-      raf=requestAnimationFrame(animate)
-    }
-
-    resize()
-    window.addEventListener('resize',resize)
-    window.addEventListener('mousemove',move)
-    raf=requestAnimationFrame(animate)
+    resize();
+    window.addEventListener("resize",resize);
+    frame=requestAnimationFrame(animate);
 
     return()=>{
-      cancelAnimationFrame(raf)
-      window.removeEventListener('resize',resize)
-      window.removeEventListener('mousemove',move)
-    }
-  },[])
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize",resize);
+    };
+  },[]);
 
-  return <canvas ref={ref} className="absolute inset-0 w-full h-full pointer-events-none"/>
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none"
+    />
+  );
 }
