@@ -2,45 +2,71 @@ import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 export function AnimatedRobotMask() {
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+
   useEffect(() => {
+
     const canvas = canvasRef.current;
+
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
 
-    let frame = 0;
-    let animationId: number;
+    const context = canvas.getContext("2d");
+
+    if (!context) return;
+
+
+    const ctx = context;
+
+
+    let animationId:number;
+    let time = 0;
+
+
 
     const resize = () => {
+
       canvas.width = canvas.clientWidth;
       canvas.height = canvas.clientHeight;
+
     };
 
+
     resize();
-    window.addEventListener("resize", resize);
+
+    window.addEventListener(
+      "resize",
+      resize
+    );
+
 
 
     const particles = Array.from(
-      { length: 300 },
-      () => ({
-        x: Math.random(),
-        y: Math.random(),
-        r: Math.random() * 2 + 0.5,
-        c: Math.random() > .5
+      {length:350},
+      ()=>({
+
+        x:Math.random(),
+        y:Math.random(),
+        size:Math.random()*2+0.5,
+
+        color:
+          Math.random()>0.5
           ? "#00eaff"
-          : "#9b5cff"
+          : "#8b5cff"
+
       })
     );
 
 
-    function draw(){
 
-      if(!ctx) return;
 
-      frame += 0.03;
+    const draw = () => {
+
+
+      time += 0.03;
+
 
 
       ctx.clearRect(
@@ -51,11 +77,14 @@ export function AnimatedRobotMask() {
       );
 
 
+
       const w = canvas.width;
       const h = canvas.height;
 
 
+
       ctx.save();
+
 
       ctx.translate(
         w/2,
@@ -63,23 +92,28 @@ export function AnimatedRobotMask() {
       );
 
 
+
       const scale =
-        Math.min(w,h)/650;
+        Math.min(w,h)/600;
 
 
-      ctx.scale(scale,scale);
+      ctx.scale(
+        scale,
+        scale
+      );
 
 
 
-      // ======================
-      // ROTATING HUD CIRCLES
-      // ======================
+      // =========================
+      // ROTATING HUD RINGS
+      // =========================
 
 
-      ctx.rotate(frame);
+      ctx.rotate(time);
 
 
       ctx.beginPath();
+
       ctx.arc(
         0,
         0,
@@ -88,15 +122,18 @@ export function AnimatedRobotMask() {
         Math.PI*2
       );
 
+
       ctx.strokeStyle="#00eaff";
-      ctx.lineWidth=5;
+      ctx.lineWidth=4;
+
       ctx.shadowBlur=25;
       ctx.shadowColor="#00eaff";
+
       ctx.stroke();
 
 
 
-      ctx.rotate(-frame*2);
+      ctx.rotate(-time*2);
 
 
 
@@ -110,22 +147,25 @@ export function AnimatedRobotMask() {
         Math.PI*2
       );
 
+
       ctx.strokeStyle="#8b5cff";
-      ctx.lineWidth=3;
+      ctx.lineWidth=2;
+
       ctx.stroke();
 
 
 
 
-      // ======================
+
+      // =========================
       // ROBOT ARM
-      // ======================
+      // =========================
 
 
-      ctx.shadowBlur=15;
+      ctx.shadowBlur=18;
       ctx.shadowColor="#00eaff";
 
-      ctx.strokeStyle="#d8ffff";
+      ctx.strokeStyle="#e8ffff";
       ctx.lineWidth=10;
       ctx.lineCap="round";
 
@@ -136,12 +176,12 @@ export function AnimatedRobotMask() {
       ctx.beginPath();
 
       ctx.moveTo(
-        -50,
+        -55,
         150
       );
 
       ctx.lineTo(
-        50,
+        55,
         150
       );
 
@@ -149,18 +189,18 @@ export function AnimatedRobotMask() {
 
 
 
-      // joint animation
 
-      const elbow =
-        Math.sin(frame)*25;
-
-
-      const wrist =
-        Math.cos(frame*1.5)*20;
+      const jointMove =
+        Math.sin(time)*25;
 
 
+      const wristMove =
+        Math.cos(time*1.5)*18;
 
-      // first arm
+
+
+
+      // lower arm
 
       ctx.beginPath();
 
@@ -171,106 +211,143 @@ export function AnimatedRobotMask() {
 
 
       ctx.lineTo(
-        -60,
-        30 + elbow
+        -65,
+        25 + jointMove
       );
+
 
       ctx.stroke();
 
 
 
-      // second arm
+
+      // upper arm
+
 
       ctx.beginPath();
 
+
       ctx.moveTo(
-        -60,
-        30 + elbow
+        -65,
+        25 + jointMove
       );
 
 
       ctx.lineTo(
-        50,
-        -70 + wrist
+        55,
+        -75 + wristMove
       );
 
 
       ctx.stroke();
+
 
 
 
 
       // joints
 
-      const joints=[
+
+      const joints = [
+
         [0,120],
-        [-60,30+elbow],
-        [50,-70+wrist]
+
+        [-65,25+jointMove],
+
+        [55,-75+wristMove]
+
       ];
 
 
-      joints.forEach(j=>{
+
+      joints.forEach(([x,y])=>{
+
 
         ctx.beginPath();
 
+
         ctx.arc(
-          j[0],
-          j[1],
+          x,
+          y,
           18,
           0,
           Math.PI*2
         );
 
-        ctx.fillStyle="#06121c";
+
+        ctx.fillStyle="#07131f";
+
         ctx.fill();
 
+
+
         ctx.strokeStyle="#00eaff";
+
+        ctx.lineWidth=3;
+
         ctx.stroke();
+
+
 
 
         ctx.beginPath();
 
+
         ctx.arc(
-          j[0],
-          j[1],
+          x,
+          y,
           6,
           0,
           Math.PI*2
         );
 
+
         ctx.fillStyle="#8b5cff";
+
         ctx.fill();
+
 
       });
 
 
 
-      // gripper animation
+
+
+
+      // =========================
+      // GRIPPER
+      // =========================
+
 
       const grip =
-        Math.sin(frame*2)*10;
+        Math.sin(time*3)*12;
+
 
 
       ctx.beginPath();
 
-      ctx.moveTo(
-        50,
-        -70+wrist
-      );
-
-      ctx.lineTo(
-        90,
-        -90+grip
-      );
 
       ctx.moveTo(
-        50,
-        -70+wrist
+        55,
+        -75+wristMove
       );
 
+
       ctx.lineTo(
-        90,
-        -50-grip
+        95,
+        -95+grip
+      );
+
+
+      ctx.moveTo(
+        55,
+        -75+wristMove
+      );
+
+
+      ctx.lineTo(
+        95,
+        -55-grip
       );
 
 
@@ -278,43 +355,64 @@ export function AnimatedRobotMask() {
 
 
 
-      // ======================
+
+
+
+      // =========================
       // PARTICLES
-      // ======================
+      // =========================
 
 
       particles.forEach(p=>{
 
+
         p.y -=0.001;
+
 
         if(p.y<0)
           p.y=1;
 
 
+
         ctx.beginPath();
 
+
         ctx.arc(
-          (p.x-.5)*500,
-          (p.y-.5)*500,
-          p.r,
+
+          (p.x-0.5)*450,
+
+          (p.y-0.5)*450,
+
+          p.size,
+
           0,
+
           Math.PI*2
+
         );
 
 
-        ctx.fillStyle=p.c;
+        ctx.fillStyle=p.color;
+
         ctx.fill();
 
+
       });
+
+
+
 
 
       ctx.restore();
 
 
+
       animationId =
         requestAnimationFrame(draw);
 
-    }
+
+    };
+
 
 
     draw();
@@ -323,7 +421,10 @@ export function AnimatedRobotMask() {
 
     return()=>{
 
-      cancelAnimationFrame(animationId);
+      cancelAnimationFrame(
+        animationId
+      );
+
 
       window.removeEventListener(
         "resize",
@@ -337,19 +438,22 @@ export function AnimatedRobotMask() {
 
 
 
+
   return (
 
     <motion.div
 
       initial={{
         opacity:0,
-        scale:.85
+        scale:0.9
       }}
+
 
       animate={{
         opacity:1,
         scale:1
       }}
+
 
       transition={{
         duration:1.2
@@ -367,18 +471,23 @@ export function AnimatedRobotMask() {
 
     >
 
+
       <canvas
+
         ref={canvasRef}
+
         className="
         absolute
         inset-0
         w-full
         h-full
         "
+
       />
 
 
     </motion.div>
 
   );
+
 }
