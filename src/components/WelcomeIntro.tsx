@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { FiArrowRight } from 'react-icons/fi'
 import { NeuralNetworkBackground } from './NeuralNetworkBackground'
 import { AnimatedHumanFace } from './AnimatedHumanFace'
+import { AnimatedRobotMask } from "./AnimatedRobotMask";
 
 type WelcomeIntroProps = {
   onEnter: () => void
@@ -550,7 +551,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         transition={{ duration: 1.1, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
         className="absolute left-[2.5vw] top-[6vh] z-[4] h-[84vh] w-[43vw] md:block"
       >
-        <AnimatedHumanFace />
+        <AnimatedRobotMask />
       </motion.div>
 
       <motion.div
@@ -559,7 +560,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         transition={{ duration: 1.1 }}
         className="absolute left-[-8vw] top-[8vh] z-[4] h-[45vh] w-[76vw] md:hidden"
       >
-        <AnimatedHumanFace />
+        AnimatedRobotMask />
       </motion.div>
 
       {/* =================================================
