@@ -178,6 +178,10 @@ export function AnimatedHumanFace() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
+    // Keep non-null references for nested animation callbacks (strict TypeScript).
+    const canvasEl: HTMLCanvasElement = canvas
+    const context: CanvasRenderingContext2D = ctx
+
     let w = 1, h = 1, dpr = 1, raf = 0
     const mouse = { x: -9999, y: -9999, active: false }
     const geometry = buildRobotGeometry()
@@ -221,17 +225,17 @@ export function AnimatedHumanFace() {
 
     function resize() {
       dpr = Math.min(window.devicePixelRatio || 1, 1.75)
-      const r = canvas.getBoundingClientRect()
+      const r = canvasEl.getBoundingClientRect()
       w = Math.max(1, r.width)
       h = Math.max(1, r.height)
-      canvas.width = Math.floor(w * dpr)
-      canvas.height = Math.floor(h * dpr)
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      canvasEl.width = Math.floor(w * dpr)
+      canvasEl.height = Math.floor(h * dpr)
+      context.setTransform(dpr, 0, 0, dpr, 0, 0)
       rebuild()
     }
 
     function onMove(e: MouseEvent) {
-      const r = canvas.getBoundingClientRect()
+      const r = canvasEl.getBoundingClientRect()
       mouse.x = e.clientX - r.left
       mouse.y = e.clientY - r.top
       mouse.active = true
@@ -239,19 +243,19 @@ export function AnimatedHumanFace() {
     function onLeave() { mouse.active = false }
 
     function draw(now: number) {
-      ctx.clearRect(0, 0, w, h)
+      context.clearRect(0, 0, w, h)
       const t = (now - start) / 1000
       const scan = ((t * .16) % 1.15) - .08
 
       // subtle holographic aura
       const auraX = w < 760 ? w*.30 : w*.23
       const auraY = h*.45
-      const aura = ctx.createRadialGradient(auraX,auraY,10,auraX,auraY,Math.min(w,h)*.35)
+      const aura = context.createRadialGradient(auraX,auraY,10,auraX,auraY,Math.min(w,h)*.35)
       aura.addColorStop(0,'rgba(34,211,238,.045)')
       aura.addColorStop(.55,'rgba(99,102,241,.025)')
       aura.addColorStop(1,'rgba(0,0,0,0)')
-      ctx.fillStyle = aura
-      ctx.fillRect(0,0,w,h)
+      context.fillStyle = aura
+      context.fillRect(0,0,w,h)
 
       for (const p of particles) {
         const form = ease((t - p.delay) / 1.75)
@@ -283,21 +287,21 @@ export function AnimatedHumanFace() {
         const size = p.size * (1 + scanGlow*.55)
 
         if (p.glow > .55 || scanGlow > .25) {
-          ctx.shadowBlur = 5 + p.glow*9 + scanGlow*10
-          ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`
-        } else ctx.shadowBlur = 0
+          context.shadowBlur = 5 + p.glow*9 + scanGlow*10
+          context.shadowColor = `rgba(${r},${g},${b},${alpha})`
+        } else context.shadowBlur = 0
 
-        ctx.beginPath()
-        ctx.arc(p.x,p.y,size,0,Math.PI*2)
-        ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`
-        ctx.fill()
+        context.beginPath()
+        context.arc(p.x,p.y,size,0,Math.PI*2)
+        context.fillStyle = `rgba(${r},${g},${b},${alpha})`
+        context.fill()
       }
 
-      ctx.shadowBlur = 0
+      context.shadowBlur = 0
 
       // moving data packets along random short links
       if (t > 1.3) {
-        ctx.lineWidth = .55
+        context.lineWidth = .55
         for (let i=0;i<particles.length;i+=115) {
           const a = particles[i]
           if (a.glow < .55) continue
@@ -305,8 +309,8 @@ export function AnimatedHumanFace() {
           const d = Math.hypot(a.x-b.x,a.y-b.y)
           if (d < 95) {
             const [r,g,bb] = C[a.color%C.length]
-            ctx.strokeStyle = `rgba(${r},${g},${bb},.10)`
-            ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke()
+            context.strokeStyle = `rgba(${r},${g},${bb},.10)`
+            context.beginPath(); context.moveTo(a.x,a.y); context.lineTo(b.x,b.y); context.stroke()
           }
         }
       }
