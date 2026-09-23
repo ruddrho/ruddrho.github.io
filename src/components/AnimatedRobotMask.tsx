@@ -2,123 +2,66 @@ import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 export function AnimatedRobotMask() {
-
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-
     const canvas = canvasRef.current;
-
     if (!canvas) return;
 
-
     const context = canvas.getContext("2d");
-
     if (!context) return;
 
     const ctx = context;
 
-
-    let frame:number;
-
+    let frame = 0;
+    let animationId: number;
 
     const resize = () => {
+      const rect = canvas.getBoundingClientRect();
 
-      canvas.width = canvas.clientWidth;
-      canvas.height = canvas.clientHeight;
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
 
+      ctx.setTransform(
+        window.devicePixelRatio,
+        0,
+        0,
+        window.devicePixelRatio,
+        0,
+        0
+      );
     };
 
 
     resize();
 
-    window.addEventListener(
-      "resize",
-      resize
-    );
-
+    window.addEventListener("resize", resize);
 
 
     const particles = Array.from(
-      {length:500},
-      ()=>({
-
-        x:(Math.random()-0.5)*220,
-        y:(Math.random()-0.5)*320,
-
-        size:
-          Math.random()*1.8+0.3,
-
-        speed:
-          Math.random()*0.4+0.15,
-
-        color:
+      { length: 500 },
+      () => ({
+        x: Math.random(),
+        y: Math.random(),
+        r: Math.random()*2+0.5,
+        c:
           Math.random()>0.5
           ? "#00eaff"
-          :"#8b5cff"
-
+          : "#8b5cff"
       })
     );
 
 
+    function draw(){
 
-    const stroke = (
-      pts:number[][],
-      color:string,
-      width:number
-    )=>{
-
-      ctx.beginPath();
-
-      pts.forEach((p,i)=>{
-
-        if(i===0)
-          ctx.moveTo(
-            p[0],
-            p[1]
-          );
-        else
-          ctx.lineTo(
-            p[0],
-            p[1]
-          );
-
-      });
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
 
 
-      ctx.strokeStyle=color;
-      ctx.lineWidth=width;
-
-      ctx.shadowBlur=25;
-      ctx.shadowColor=color;
-
-      ctx.stroke();
-
-    };
-
-
-
-
-
-    const draw = ()=>{
-
-
-      ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-
-
-      const w=canvas.width;
-      const h=canvas.height;
-
+      ctx.clearRect(0,0,w,h);
 
 
       ctx.save();
-
 
       ctx.translate(
         w/2,
@@ -126,133 +69,85 @@ export function AnimatedRobotMask() {
       );
 
 
-      const scale =
-        Math.min(w,h)/600;
+      const s =
+        Math.min(w,h)/500;
 
-
-      ctx.scale(
-        scale,
-        scale
-      );
+      ctx.scale(s,s);
 
 
 
-
-      // DARK INNER HELMET
+      // outer robotic head
 
       ctx.beginPath();
 
-      ctx.moveTo(0,-230);
-
-      ctx.lineTo(110,-170);
-
-      ctx.lineTo(170,-50);
-
-      ctx.lineTo(120,170);
-
-      ctx.lineTo(0,230);
-
-      ctx.lineTo(-120,170);
-
-      ctx.lineTo(-170,-50);
-
-      ctx.lineTo(-110,-170);
+      ctx.moveTo(0,-210);
+      ctx.lineTo(120,-170);
+      ctx.lineTo(170,-60);
+      ctx.lineTo(150,120);
+      ctx.lineTo(70,190);
+      ctx.lineTo(0,220);
+      ctx.lineTo(-70,190);
+      ctx.lineTo(-150,120);
+      ctx.lineTo(-170,-60);
+      ctx.lineTo(-120,-170);
 
       ctx.closePath();
 
 
-      ctx.fillStyle =
-        "rgba(5,15,30,0.75)";
+      ctx.strokeStyle="#00eaff";
+      ctx.lineWidth=3;
 
+      ctx.shadowBlur=25;
+      ctx.shadowColor="#00eaff";
 
-      ctx.fill();
-
-
-
-
-      // OUTER ARMOR
-
-      stroke(
-        [
-          [0,-240],
-          [120,-180],
-          [175,-50],
-          [130,170],
-          [0,240],
-          [-130,170],
-          [-175,-50],
-          [-120,-180],
-          [0,-240]
-        ],
-        "#00eaff",
-        4
-      );
+      ctx.stroke();
 
 
 
+      // helmet panels
 
+      ctx.shadowBlur=10;
+      ctx.strokeStyle="#8b5cff";
 
-
-      // FOREHEAD 3 LAYER ARMOR
-
-
-      stroke(
-        [
-          [-130,-140],
-          [0,-45],
-          [130,-140]
-        ],
-        "#3da5ff",
-        5
-      );
-
-
-      stroke(
-        [
-          [-80,-165],
-          [0,-95],
-          [80,-165]
-        ],
-        "#8b5cff",
-        3
-      );
-
-
-
-
-
-
-      // LEFT EYE
 
       ctx.beginPath();
 
-      ctx.moveTo(-125,-35);
-      ctx.lineTo(-35,-25);
-      ctx.lineTo(-80,5);
-      ctx.lineTo(-145,-5);
+      ctx.moveTo(-100,-120);
+      ctx.lineTo(0,-170);
+      ctx.lineTo(100,-120);
 
-      ctx.closePath();
+      ctx.moveTo(-130,50);
+      ctx.lineTo(-70,110);
 
+      ctx.moveTo(130,50);
+      ctx.lineTo(70,110);
+
+      ctx.stroke();
+
+
+
+      // glowing eyes
 
       ctx.fillStyle="#00f5ff";
 
-      ctx.shadowBlur=35;
-      ctx.shadowColor="#00eaff";
-
-      ctx.fill();
-
-
-
-
-      // RIGHT EYE
+      ctx.shadowBlur=40;
+      ctx.shadowColor="#00f5ff";
 
 
       ctx.beginPath();
 
-      ctx.moveTo(125,-35);
-      ctx.lineTo(35,-25);
-      ctx.lineTo(80,5);
-      ctx.lineTo(145,-5);
+      ctx.moveTo(-115,-35);
+      ctx.lineTo(-20,-20);
+      ctx.lineTo(-45,5);
+      ctx.lineTo(-125,0);
+
+      ctx.closePath();
+
+
+      ctx.moveTo(115,-35);
+      ctx.lineTo(20,-20);
+      ctx.lineTo(45,5);
+      ctx.lineTo(125,0);
 
       ctx.closePath();
 
@@ -261,127 +156,86 @@ export function AnimatedRobotMask() {
 
 
 
+      // center face reactor
+
+      ctx.shadowBlur=15;
+
+      ctx.strokeStyle="#8b5cff";
+
+      ctx.beginPath();
+
+      ctx.moveTo(0,20);
+      ctx.lineTo(45,80);
+      ctx.lineTo(0,150);
+      ctx.lineTo(-45,80);
+      ctx.closePath();
+
+      ctx.stroke();
 
 
 
-      // NOSE CORE
-
-
-      stroke(
-        [
-          [0,-30],
-          [28,55],
-          [0,120],
-          [-28,55],
-          [0,-30]
-        ],
-        "#9b5cff",
-        4
-      );
-
-
-
-
-
-
-      // CHEEK MECHANICAL PLATES
-
-
-      stroke(
-        [
-          [-145,15],
-          [-75,65],
-          [-110,145],
-          [-155,95]
-        ],
-        "#00eaff",
-        4
-      );
-
-
-      stroke(
-        [
-          [145,15],
-          [75,65],
-          [110,145],
-          [155,95]
-        ],
-        "#00eaff",
-        4
-      );
-
-
-
-
-
-
-      // JAW ARMOR
-
-
-      stroke(
-        [
-          [-95,150],
-          [-45,210],
-          [0,235],
-          [45,210],
-          [95,150]
-        ],
-        "#8b5cff",
-        5
-      );
-
-
-
-
-
-
-      // PARTICLE SCAN INSIDE MASK
+      // particles inside mask
 
 
       particles.forEach(p=>{
 
-
-        p.y += p.speed;
-
-
-        if(p.y>170)
-          p.y=-170;
-
+        const px=(p.x-.5)*280;
+        const py=(p.y-.5)*380;
 
 
         ctx.beginPath();
 
-
         ctx.arc(
-          p.x,
-          p.y,
-          p.size,
+          px,
+          py,
+          p.r,
           0,
           Math.PI*2
         );
 
-
-        ctx.fillStyle=p.color;
-
-        ctx.globalAlpha=0.6;
+        ctx.fillStyle=p.c;
 
         ctx.fill();
+
+
+        p.y +=0.0008;
+
+        if(p.y>1)
+          p.y=0;
 
 
       });
 
 
-      ctx.globalAlpha=1;
+
+      // scanning animation
+
+      ctx.strokeStyle="rgba(0,234,255,.5)";
+      ctx.lineWidth=1;
+
+
+      const scan =
+        Math.sin(frame*0.03)*120;
+
+
+      ctx.beginPath();
+
+      ctx.moveTo(-150,scan);
+      ctx.lineTo(150,scan);
+
+      ctx.stroke();
 
 
 
       ctx.restore();
 
 
-      frame=requestAnimationFrame(draw);
+      frame++;
 
-    };
+      animationId=
+        requestAnimationFrame(draw);
 
+    }
 
 
     draw();
@@ -390,7 +244,7 @@ export function AnimatedRobotMask() {
 
     return()=>{
 
-      cancelAnimationFrame(frame);
+      cancelAnimationFrame(animationId);
 
       window.removeEventListener(
         "resize",
@@ -404,13 +258,13 @@ export function AnimatedRobotMask() {
 
 
 
-  return(
+  return (
 
     <motion.div
 
       initial={{
         opacity:0,
-        scale:0.85
+        scale:0.9
       }}
 
       animate={{
@@ -430,6 +284,7 @@ export function AnimatedRobotMask() {
       items-center
       justify-center
       "
+
     >
 
       <canvas
