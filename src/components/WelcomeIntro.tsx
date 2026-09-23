@@ -560,7 +560,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         transition={{ duration: 1.1 }}
         className="absolute left-[-8vw] top-[8vh] z-[4] h-[45vh] w-[76vw] md:hidden"
       >
-        AnimatedRobotMask />
+        <AnimatedRobotMask />
       </motion.div>
 
       {/* =================================================
