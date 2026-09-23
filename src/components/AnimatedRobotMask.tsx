@@ -1,73 +1,111 @@
 import { useEffect, useRef } from "react";
 
 export function AnimatedRobotMask() {
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
+
     const canvas = canvasRef.current;
+
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const context = canvas.getContext("2d");
+
+    if (!context) return;
+
+    const ctx: CanvasRenderingContext2D = context;
+
 
     const resize = () => {
-      canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-      canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-      ctx.scale(
-        window.devicePixelRatio,
-        window.devicePixelRatio
+
+      const dpr = window.devicePixelRatio || 1;
+
+      canvas.width = canvas.clientWidth * dpr;
+      canvas.height = canvas.clientHeight * dpr;
+
+      ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
       );
     };
 
+
     resize();
-    window.addEventListener("resize", resize);
 
-    let t = 0;
+    window.addEventListener(
+      "resize",
+      resize
+    );
 
-    const particles = Array.from({ length: 900 }, () => ({
-      x: Math.random(),
-      y: Math.random(),
-      size: Math.random() * 2 + 0.5,
-      phase: Math.random() * Math.PI * 2,
-    }));
 
-    function draw() {
-      const w = canvas.offsetWidth;
-      const h = canvas.offsetHeight;
+    const particles = Array.from(
+      { length: 1200 },
+      () => ({
+        x: Math.random(),
+        y: Math.random(),
+        size: Math.random()*2+0.5,
+        speed: Math.random()*0.02+0.005
+      })
+    );
 
-      ctx.clearRect(0,0,w,h);
 
-      particles.forEach(p => {
+    let time = 0;
+
+
+    const animate = () => {
+
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+
+
+      ctx.clearRect(
+        0,
+        0,
+        w,
+        h
+      );
+
+
+      particles.forEach((p)=>{
+
 
         const px =
-          w * 0.5 +
-          (p.x - 0.5) * 260 +
-          Math.sin(t + p.phase) * 4;
+          w/2 +
+          (p.x-0.5)*260;
+
 
         const py =
-          h * 0.5 +
-          (p.y - 0.5) * 380 +
-          Math.cos(t + p.phase) * 4;
+          h/2 +
+          (p.y-0.5)*360;
 
 
-        // robotic mask shape
+        // robot mask area
+
         const mask =
-          Math.abs(p.x - 0.5) < 0.35 &&
-          p.y > 0.15 &&
-          p.y < 0.85;
+          Math.abs(p.x-0.5)<0.42 &&
+          p.y>0.12 &&
+          p.y<0.88;
 
 
         if(mask){
 
           ctx.beginPath();
 
+
           ctx.fillStyle =
-            p.phase % 2
-            ? "#00d9ff"
+            Math.sin(time+p.x*10)>0
+            ? "#00eaff"
             : "#9b5cff";
 
-          ctx.shadowBlur = 12;
-          ctx.shadowColor = "#00d9ff";
+
+          ctx.shadowBlur = 15;
+          ctx.shadowColor="#00eaff";
+
 
           ctx.arc(
             px,
@@ -77,66 +115,112 @@ export function AnimatedRobotMask() {
             Math.PI*2
           );
 
+
           ctx.fill();
+
         }
 
       });
 
 
-      // glowing mask lines
+
+      // angular robot mask outline
 
       ctx.strokeStyle="#00eaff";
       ctx.lineWidth=2;
-
-      ctx.shadowBlur=20;
+      ctx.shadowBlur=25;
       ctx.shadowColor="#00eaff";
 
 
       ctx.beginPath();
 
-      ctx.moveTo(w*0.32,h*0.32);
-      ctx.lineTo(w*0.68,h*0.32);
-      ctx.lineTo(w*0.76,h*0.55);
-      ctx.lineTo(w*0.5,h*0.78);
-      ctx.lineTo(w*0.24,h*0.55);
+      ctx.moveTo(w*.35,h*.25);
+      ctx.lineTo(w*.65,h*.25);
+
+      ctx.lineTo(w*.78,h*.45);
+
+      ctx.lineTo(w*.65,h*.75);
+
+      ctx.lineTo(w*.5,h*.88);
+
+      ctx.lineTo(w*.35,h*.75);
+
+      ctx.lineTo(w*.22,h*.45);
+
       ctx.closePath();
 
       ctx.stroke();
 
 
-      // eyes
+
+      // glowing eyes
 
       ctx.strokeStyle="#ffffff";
-      ctx.lineWidth=5;
+      ctx.lineWidth=6;
+
 
       ctx.beginPath();
-      ctx.moveTo(w*.34,h*.48);
-      ctx.lineTo(w*.46,h*.48);
 
-      ctx.moveTo(w*.54,h*.48);
-      ctx.lineTo(w*.66,h*.48);
+      ctx.moveTo(
+        w*.32,
+        h*.48
+      );
+
+      ctx.lineTo(
+        w*.45,
+        h*.48
+      );
+
+
+      ctx.moveTo(
+        w*.55,
+        h*.48
+      );
+
+      ctx.lineTo(
+        w*.68,
+        h*.48
+      );
+
 
       ctx.stroke();
 
 
-      t +=0.02;
 
-      requestAnimationFrame(draw);
-    }
+      time +=0.03;
 
-    draw();
+
+      requestAnimationFrame(
+        animate
+      );
+
+    };
+
+
+    animate();
+
 
     return()=>{
-      window.removeEventListener("resize",resize);
+
+      window.removeEventListener(
+        "resize",
+        resize
+      );
+
     };
+
 
   },[]);
 
 
+
   return (
+
     <canvas
       ref={canvasRef}
       className="w-full h-full"
     />
+
   );
+
 }
