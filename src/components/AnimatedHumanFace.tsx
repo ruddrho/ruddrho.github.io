@@ -1,168 +1,141 @@
 import { useEffect, useRef } from "react";
 
-type Particle = {
-  x:number;
-  y:number;
-  z:number;
-  tx:number;
-  ty:number;
-  tz:number;
-  size:number;
-  color:number;
-  phase:number;
+type P = {
+  x:number;y:number;tx:number;ty:number;
+  size:number; color:string; phase:number;
 };
 
-const colors = [
+const C = [
   "34,211,238",
   "59,130,246",
   "168,85,247",
   "236,72,153"
 ];
 
-function generateAIHead(w:number,h:number):Particle[]{
-  const pts:Particle[]=[];
+function makeMask(w:number,h:number):P[] {
+  const pts:P[] = [];
 
-  for(let i=0;i<4200;i++){
-    const theta=Math.random()*Math.PI*2;
-    const y=Math.random()*2-1;
-
-    const radius=Math.sqrt(1-y*y);
-
-    // 3D head volume
-    let x=radius*Math.cos(theta);
-    let z=radius*Math.sin(theta);
-
-    let yy=y;
-
-    // face shaping
-    x*=0.48;
-    yy*=0.75;
-
-    if(yy< -0.45){
-      x*=0.72;
-    }
-
-    // front face projection
-    const px=w*0.32 + x*w*0.85;
-    const py=h*0.50 + yy*h*0.75;
-
+  const add = (x:number,y:number,s=1)=>{
     pts.push({
       x:w/2,
       y:h/2,
-      z:0,
-      tx:px,
-      ty:py,
-      tz:z,
-      size:Math.random()*1.8+0.4,
-      color:Math.floor(Math.random()*colors.length),
-      phase:Math.random()*10
+      tx:w*x,
+      ty:h*y,
+      size:s,
+      color:C[Math.floor(Math.random()*C.length)],
+      phase:Math.random()*20
     });
+  };
+
+  const line=(a:number[],b:number[],n:number)=>{
+    for(let i=0;i<n;i++){
+      const t=i/(n-1);
+      add(
+        a[0]+(b[0]-a[0])*t,
+        a[1]+(b[1]-a[1])*t,
+        1.5
+      );
+    }
+  };
+
+  // helmet shell
+  const shell=[
+    [0.50,0.08],[0.72,0.18],[0.82,0.42],
+    [0.76,0.72],[0.60,0.88],
+    [0.50,0.94],[0.40,0.88],
+    [0.24,0.72],[0.18,0.42],
+    [0.28,0.18]
+  ];
+
+  for(let i=0;i<shell.length;i++)
+    line(shell[i],shell[(i+1)%shell.length],45);
+
+  // visor
+  line([0.28,0.38],[0.46,0.34],35);
+  line([0.54,0.34],[0.72,0.38],35);
+  line([0.46,0.34],[0.50,0.42],20);
+  line([0.50,0.42],[0.54,0.34],20);
+
+  // eyes
+  for(let i=0;i<120;i++){
+    add(0.34+Math.random()*0.32,0.40+Math.random()*0.04,2);
+  }
+
+  // reactor
+  for(let i=0;i<350;i++){
+    const a=Math.random()*Math.PI*2;
+    const r=Math.random()*0.07;
+    add(0.5+Math.cos(a)*r,0.58+Math.sin(a)*r,2);
+  }
+
+  // jaw vents
+  for(let y=0.70;y<0.80;y+=0.018){
+    line([0.38,y],[0.62,y],20);
   }
 
   return pts;
 }
 
 export function AnimatedHumanFace(){
-
-  const canvasRef=useRef<HTMLCanvasElement>(null);
+  const ref=useRef<HTMLCanvasElement>(null);
 
   useEffect(()=>{
-
-    const canvas=canvasRef.current;
+    const canvas=ref.current;
     if(!canvas)return;
-
     const ctx=canvas.getContext("2d");
     if(!ctx)return;
 
-    let w=0;
-    let h=0;
-    let particles:Particle[]=[];
+    let w=0,h=0;
+    let particles:P[]=[];
     let raf=0;
-
     const mouse={x:0,y:0};
 
     const resize=()=>{
       w=canvas.clientWidth;
       h=canvas.clientHeight;
-
       canvas.width=w*devicePixelRatio;
       canvas.height=h*devicePixelRatio;
-
       ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-
-      particles=generateAIHead(w,h);
+      particles=makeMask(w,h);
     };
 
     const move=(e:MouseEvent)=>{
-      const r=canvas.getBoundingClientRect();
-      mouse.x=(e.clientX-r.left-w/2)/w;
-      mouse.y=(e.clientY-r.top-h/2)/h;
+      mouse.x=e.clientX/w-0.5;
+      mouse.y=e.clientY/h-0.5;
     };
 
-    const render=(time:number)=>{
-
+    const draw=(t:number)=>{
       ctx.clearRect(0,0,w,h);
 
       particles.forEach(p=>{
+        p.x+=(p.tx-p.x)*0.04;
+        p.y+=(p.ty-p.y)*0.04;
 
-        const float=Math.sin(time*0.002+p.phase)*2;
-
-        p.x+=(p.tx-p.x)*0.025;
-        p.y+=(p.ty-p.y)*0.025;
-
-        const rotateX=mouse.y*20;
-        const rotateY=mouse.x*30;
-
-        const depth=p.z+rotateY;
-
-        const px=p.x + Math.sin(depth)*rotateX;
-        const py=p.y + float;
-
-        const glow=0.45+
-          Math.sin(time*0.004+p.phase)*0.35;
+        const px=p.x+mouse.x*18*Math.sin(p.phase);
+        const py=p.y+mouse.y*12;
 
         ctx.beginPath();
-        ctx.fillStyle=
-        `rgba(${colors[p.color]},${glow})`;
-
         ctx.shadowBlur=18;
-        ctx.shadowColor=
-        `rgb(${colors[p.color]})`;
-
-        ctx.arc(
-          px,
-          py,
-          p.size*(1+depth*0.1),
-          0,
-          Math.PI*2
-        );
-
+        ctx.shadowColor=`rgb(${p.color})`;
+        ctx.fillStyle=`rgba(${p.color},${0.55+Math.sin(t*.004+p.phase)*.35})`;
+        ctx.arc(px,py,p.size,0,Math.PI*2);
         ctx.fill();
       });
 
-      raf=requestAnimationFrame(render);
+      raf=requestAnimationFrame(draw);
     };
 
     resize();
-
     window.addEventListener("resize",resize);
     window.addEventListener("mousemove",move);
-
-    raf=requestAnimationFrame(render);
+    raf=requestAnimationFrame(draw);
 
     return()=>{
       cancelAnimationFrame(raf);
       window.removeEventListener("resize",resize);
       window.removeEventListener("mousemove",move);
     };
-
   },[]);
 
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
-    />
-  );
+  return <canvas ref={ref} className="absolute inset-0 w-full h-full pointer-events-none"/>;
 }
