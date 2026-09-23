@@ -1,331 +1,271 @@
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
+import { useEffect } from "react";
 
 export function FlyingDrone() {
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+
+  const x = useSpring(mouseX, {
+    stiffness: 40,
+    damping: 15
+  });
+
+  const y = useSpring(mouseY, {
+    stiffness: 40,
+    damping: 15
+  });
+
+
+
+  useEffect(()=>{
+
+    const move = (e:MouseEvent)=>{
+
+      const xPos =
+        (e.clientX - window.innerWidth/2) * 0.15;
+
+      const yPos =
+        (e.clientY - window.innerHeight/2) * 0.15;
+
+
+      mouseX.set(xPos);
+      mouseY.set(yPos);
+
+    };
+
+
+    window.addEventListener(
+      "mousemove",
+      move
+    );
+
+
+    return()=>{
+      window.removeEventListener(
+        "mousemove",
+        move
+      );
+    };
+
+
+  },[mouseX,mouseY]);
+
+
 
   return (
 
     <motion.div
 
+      style={{
+        x,
+        y
+      }}
+
       className="
       absolute
-      z-20
-      pointer-events-none
-      w-[120px]
-      h-[120px]
+      top-[20%]
+      left-[45%]
+      w-[90px]
+      h-[90px]
       "
-
-      animate={{
-        x:[
-          0,
-          220,
-          420,
-          180,
-          0
-        ],
-
-        y:[
-          20,
-          -80,
-          40,
-          120,
-          20
-        ],
-
-      }}
-
-      transition={{
-
-        duration:18,
-
-        repeat:Infinity,
-
-        ease:"easeInOut"
-
-      }}
-
     >
 
 
-      <svg
+      <motion.svg
+
         viewBox="0 0 200 200"
-        className="w-full h-full"
-        fill="none"
+
+        className="
+        w-full
+        h-full
+        drop-shadow-[0_0_25px_rgba(34,211,238,.8)]
+        "
+
+        animate={{
+          y:[0,-10,0]
+        }}
+
+        transition={{
+          duration:3,
+          repeat:Infinity,
+          ease:"easeInOut"
+        }}
+
       >
 
 
         <defs>
 
-          <filter id="droneGlow">
+          <linearGradient
+            id="droneGlow"
+            x1="0"
+            y1="0"
+            x2="1"
+            y2="1"
+          >
 
-            <feGaussianBlur
-              stdDeviation="3"
-              result="blur"
+            <stop stopColor="#22d3ee"/>
+
+            <stop
+              offset="1"
+              stopColor="#a855f7"
             />
 
-            <feMerge>
-
-              <feMergeNode in="blur"/>
-
-              <feMergeNode in="SourceGraphic"/>
-
-            </feMerge>
-
-          </filter>
-
+          </linearGradient>
 
         </defs>
 
 
 
-        {/* Drone body */}
+        {/* drone body */}
+
+        <circle
+
+          cx="100"
+          cy="100"
+          r="32"
+
+          fill="#07101f"
+
+          stroke="url(#droneGlow)"
+
+          strokeWidth="5"
+
+        />
+
+
+
+        {/* arms */}
+
+        <g
+
+          stroke="url(#droneGlow)"
+
+          strokeWidth="5"
+
+          fill="none"
+
+        >
+
+          <path d="M75 85 L35 55"/>
+
+          <path d="M125 85 L165 55"/>
+
+          <path d="M75 115 L35 145"/>
+
+          <path d="M125 115 L165 145"/>
+
+
+        </g>
+
+
+
+
+        {/* rotating propellers */}
 
         <motion.g
-          filter="url(#droneGlow)"
+
           animate={{
-            y:[0,-5,0]
+            rotate:360
           }}
 
           transition={{
-            duration:2,
-            repeat:Infinity
+            duration:0.8,
+            repeat:Infinity,
+            ease:"linear"
+          }}
+
+          style={{
+            transformOrigin:"100px 100px"
           }}
 
         >
 
 
-          {/* center body */}
+          <ellipse
 
-          <rect
+            cx="35"
+            cy="55"
 
-            x="70"
-            y="80"
-
-            width="60"
-
-            height="35"
-
-            rx="12"
+            rx="22"
+            ry="5"
 
             stroke="#22d3ee"
 
-            strokeWidth="3"
+            fill="none"
 
           />
 
 
+          <ellipse
 
-          {/* left arm */}
+            cx="165"
+            cy="55"
 
-          <line
-
-            x1="75"
-            y1="90"
-
-            x2="35"
-            y2="60"
+            rx="22"
+            ry="5"
 
             stroke="#22d3ee"
 
-            strokeWidth="3"
+            fill="none"
 
           />
 
 
-          {/* right arm */}
 
-          <line
+          <ellipse
 
-            x1="125"
-            y1="90"
+            cx="35"
+            cy="145"
 
-            x2="165"
-            y2="60"
+            rx="22"
+            ry="5"
 
             stroke="#22d3ee"
 
-            strokeWidth="3"
+            fill="none"
 
           />
 
 
 
-          {/* back arms */}
+          <ellipse
 
-          <line
+            cx="165"
+            cy="145"
 
-            x1="75"
-            y1="110"
-
-            x2="40"
-            y2="140"
+            rx="22"
+            ry="5"
 
             stroke="#22d3ee"
 
-            strokeWidth="3"
+            fill="none"
 
           />
-
-
-          <line
-
-            x1="125"
-            y1="110"
-
-            x2="160"
-            y2="140"
-
-            stroke="#22d3ee"
-
-            strokeWidth="3"
-
-          />
-
-
-
-
-          {/* Propellers */}
-
-          {[
-
-            [35,60],
-
-            [165,60],
-
-            [40,140],
-
-            [160,140]
-
-          ].map((p,i)=>(
-
-
-            <motion.g
-
-              key={i}
-
-              animate={{
-
-                rotate:360
-
-              }}
-
-              transition={{
-
-                duration:1,
-
-                repeat:Infinity,
-
-                ease:"linear"
-
-              }}
-
-              style={{
-
-                transformOrigin:
-                `${p[0]}px ${p[1]}px`
-
-              }}
-
-            >
-
-              <circle
-
-                cx={p[0]}
-
-                cy={p[1]}
-
-                r="14"
-
-                stroke="#a855f7"
-
-                strokeWidth="2"
-
-              />
-
-
-              <line
-
-                x1={p[0]-10}
-
-                y1={p[1]}
-
-                x2={p[0]+10}
-
-                y2={p[1]}
-
-                stroke="#22d3ee"
-
-                strokeWidth="2"
-
-              />
-
-
-            </motion.g>
-
-
-          ))}
-
-
-
-          {/* Camera */}
-
-          <circle
-
-            cx="100"
-
-            cy="115"
-
-            r="7"
-
-            fill="#22d3ee"
-
-          />
-
 
 
         </motion.g>
 
 
 
-        {/* scan beam */}
 
-        <motion.line
+        {/* AI sensor */}
 
-          x1="100"
+        <circle
 
-          y1="120"
+          cx="100"
+          cy="100"
 
-          x2="100"
+          r="9"
 
-          y2="170"
-
-          stroke="#22d3ee"
-
-          strokeWidth="2"
-
-          opacity="0.5"
-
-          animate={{
-
-            opacity:[
-              0.2,
-              0.8,
-              0.2
-            ]
-
-          }}
-
-          transition={{
-
-            duration:2,
-
-            repeat:Infinity
-
-          }}
+          fill="#22d3ee"
 
         />
 
 
-      </svg>
+      </motion.svg>
 
 
     </motion.div>
