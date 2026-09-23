@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { FiArrowRight } from 'react-icons/fi'
 import { NeuralNetworkBackground } from './NeuralNetworkBackground'
+import { AnimatedHumanFace } from './AnimatedHumanFace'
 
 type WelcomeIntroProps = {
   onEnter: () => void
@@ -538,86 +539,27 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       <div className="pointer-events-none absolute left-[5%] top-[15%] h-[65vh] w-[35vw] rounded-full bg-rose-500/[.03] blur-[150px]" />
 
       {/* =================================================
-          HUMAN PARTICLES
-      ================================================= */}
-
-      {/* Old procedural fibre canvas is intentionally hidden.
-          The fixed point-cloud face below guarantees a real human anatomy. */}
-      <canvas
-        ref={canvasRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[3] h-full w-full opacity-0"
-      />
-
-      {/* =================================================
-          FIXED HUMAN AI FACE — POINT CLOUD REFERENCE STYLE
+          ANIMATED HUMAN POINT-CLOUD FACE
+          The PNG is used only as an invisible geometry mask inside
+          AnimatedHumanFace. No static image is rendered on screen.
       ================================================= */}
 
       <motion.div
-        initial={{ opacity: 0, x: -42, scale: 0.94, filter: 'blur(12px)' }}
-        animate={{ opacity: 1, x: 0, scale: 1, filter: 'blur(0px)' }}
-        transition={{ duration: 1.8, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
-        className="pointer-events-none absolute left-[3.5vw] top-[7vh] z-[4] hidden h-[82vh] w-[42vw] origin-center md:block"
+        initial={{ opacity: 0, x: -35, scale: 0.96 }}
+        animate={{ opacity: 1, x: 0, scale: 1 }}
+        transition={{ duration: 1.1, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+        className="absolute left-[2.5vw] top-[6vh] z-[4] h-[84vh] w-[43vw] md:block"
       >
-        <motion.div
-          animate={{
-            x: [0, 5, 0, -3, 0],
-            y: [0, -3, 1, -2, 0],
-            scale: [1, 1.006, 1, 1.004, 1],
-          }}
-          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-          className="relative h-full w-full"
-        >
-          <img
-            src="/ai-human-face.png"
-            alt=""
-            draggable={false}
-            className="h-full w-full select-none object-contain object-left mix-blend-screen"
-            style={{
-              filter:
-                'saturate(1.18) contrast(1.10) brightness(1.04) drop-shadow(0 0 20px rgba(56,189,248,.20)) drop-shadow(0 0 42px rgba(139,92,246,.12))',
-              WebkitMaskImage:
-                'radial-gradient(ellipse 72% 76% at 52% 46%, black 52%, rgba(0,0,0,.96) 67%, transparent 94%)',
-              maskImage:
-                'radial-gradient(ellipse 72% 76% at 52% 46%, black 52%, rgba(0,0,0,.96) 67%, transparent 94%)',
-            }}
-          />
-
-          {/* soft cyan/pink illumination keeps the face alive without changing anatomy */}
-          <motion.div
-            animate={{ opacity: [0.14, 0.28, 0.16, 0.24, 0.14] }}
-            transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute inset-[10%] rounded-full bg-[radial-gradient(circle_at_62%_44%,rgba(34,211,238,.20),transparent_42%),radial-gradient(circle_at_54%_62%,rgba(236,72,153,.13),transparent_44%)] blur-2xl"
-          />
-
-          {/* vertical data scan across the fixed face */}
-          <motion.div
-            initial={{ left: '10%', opacity: 0 }}
-            animate={{ left: ['10%', '78%'], opacity: [0, 0.45, 0.22, 0] }}
-            transition={{ duration: 4.8, repeat: Infinity, repeatDelay: 1.8, ease: 'easeInOut' }}
-            className="absolute top-[12%] h-[68%] w-px bg-gradient-to-b from-transparent via-cyan-200/80 to-transparent shadow-[0_0_16px_rgba(34,211,238,.55)]"
-          />
-        </motion.div>
+        <AnimatedHumanFace />
       </motion.div>
 
-      {/* Mobile version */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.92 }}
-        animate={{ opacity: 0.72, scale: 1 }}
-        transition={{ duration: 1.4, delay: 0.2 }}
-        className="pointer-events-none absolute left-[-9vw] top-[9vh] z-[4] h-[44vh] w-[72vw] md:hidden"
+        initial={{ opacity: 0, scale: 0.94 }}
+        animate={{ opacity: 0.82, scale: 1 }}
+        transition={{ duration: 1.1 }}
+        className="absolute left-[-8vw] top-[8vh] z-[4] h-[45vh] w-[76vw] md:hidden"
       >
-        <img
-          src="/ai-human-face.png"
-          alt=""
-          draggable={false}
-          className="h-full w-full select-none object-contain object-left mix-blend-screen"
-          style={{
-            filter: 'saturate(1.15) contrast(1.08) brightness(.95)',
-            WebkitMaskImage: 'radial-gradient(ellipse at center, black 55%, transparent 94%)',
-            maskImage: 'radial-gradient(ellipse at center, black 55%, transparent 94%)',
-          }}
-        />
+        <AnimatedHumanFace />
       </motion.div>
 
       {/* =================================================
