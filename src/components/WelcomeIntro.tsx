@@ -21,12 +21,6 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
   const [leaving, setLeaving] = useState(false)
 
   useEffect(() => {
-    /*
-      Keep explicit non-null aliases.
-
-      This avoids TypeScript losing the null check inside
-      resize(), draw(), and other nested functions.
-    */
     const canvasElement = canvasRef.current
 
     if (!canvasElement) {
@@ -43,7 +37,6 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
     const ctx: CanvasRenderingContext2D = context
 
     let animationFrame = 0
-
     let width = window.innerWidth
     let height = window.innerHeight
     let dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -62,11 +55,6 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       =====================================================
       HUMAN PARTICLE GENERATOR
       =====================================================
-
-      First create a right-facing human silhouette inside
-      an invisible canvas.
-
-      Then sample thousands of particles from that mask.
     */
 
     function buildHumanParticles() {
@@ -92,7 +80,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       maskContext.fillStyle = '#ffffff'
 
       /*
-        HUMAN SIDE PROFILE
+        RIGHT-FACING HUMAN PROFILE
       */
 
       maskContext.beginPath()
@@ -168,7 +156,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         411
       )
 
-      // Nose
+      // Nose projection
       maskContext.bezierCurveTo(
         729,
         428,
@@ -288,7 +276,8 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       maskContext.fill()
 
       /*
-        EAR CUTOUT
+        SMALL EAR DETAIL
+        Previously this was too large.
       */
 
       maskContext.globalCompositeOperation =
@@ -299,8 +288,8 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       maskContext.ellipse(
         505,
         458,
-        48,
-        72,
+        18,
+        30,
         -0.12,
         0,
         Math.PI * 2
@@ -309,7 +298,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       maskContext.fill()
 
       /*
-        Eye cavity / facial detail
+        SMALL EYE CAVITY
       */
 
       maskContext.beginPath()
@@ -317,8 +306,8 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       maskContext.ellipse(
         650,
         405,
-        17,
-        8,
+        7,
+        3,
         -0.08,
         0,
         Math.PI * 2
@@ -371,16 +360,28 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
           x / mask.width
 
         /*
-          Magenta/red rim concentrated toward
-          rear of skull.
+          RED / MAGENTA DISPERSION
+          Concentrated behind skull.
         */
 
-        let redChance = 0.025
+        let redChance = 0.015
 
-        if (normalizedX < 0.42) {
-          redChance = 0.4
-        } else if (normalizedX < 0.55) {
-          redChance = 0.14
+        if (normalizedX < 0.34) {
+          redChance = 0.72
+        } else if (normalizedX < 0.46) {
+          redChance = 0.38
+        } else if (normalizedX < 0.56) {
+          redChance = 0.08
+        }
+
+        let scatter = Math.random() * 8
+
+        if (normalizedX < 0.38) {
+          scatter =
+            35 + Math.random() * 150
+        } else if (normalizedX < 0.48) {
+          scatter =
+            Math.random() * 65
         }
 
         particles.push({
@@ -399,15 +400,13 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
           red:
             Math.random() < redChance,
 
-          scatter:
-            normalizedX < 0.45
-              ? Math.random() * 90
-              : Math.random() * 14,
+          scatter,
         })
       }
 
       /*
-        Extra particles dispersing behind skull
+        EXTRA DISPERSED PARTICLES
+        BEHIND THE HEAD
       */
 
       const extraParticles =
@@ -440,10 +439,10 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
             Math.random(),
 
           red:
-            Math.random() > 0.25,
+            Math.random() > 0.22,
 
           scatter:
-            70 + Math.random() * 180,
+            80 + Math.random() * 190,
         })
       }
     }
@@ -530,24 +529,34 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       const mobile =
         width < 768
 
+      /*
+        V3:
+        Smaller than previous head.
+      */
+
       const targetHeight =
         mobile
-          ? height * 0.52
-          : height * 0.84
+          ? height * 0.48
+          : height * 0.74
 
       const scale =
         targetHeight / 920
+
+      /*
+        V3:
+        Move slightly left.
+      */
 
       const baseX =
         mobile
           ? width * 0.5 -
             (760 * scale) / 2
-          : width * 0.055
+          : width * 0.035
 
       const baseY =
         mobile
           ? height * 0.035
-          : height * 0.075
+          : height * 0.095
 
       const breathe =
         1 +
@@ -592,7 +601,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
           0.13
 
         /*
-          Individual particle drift
+          PARTICLE BREATHING / DRIFT
         */
 
         const driftX =
@@ -610,7 +619,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
           (1 + p.depth * 1.8)
 
         /*
-          Cursor depth parallax
+          CURSOR DEPTH PARALLAX
         */
 
         const cursorX =
@@ -659,14 +668,14 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         if (p.red) {
           ctx.fillStyle =
             `rgba(244,63,94,${
-              0.24 +
-              pulse * 0.58
+              0.25 +
+              pulse * 0.62
             })`
         } else {
           ctx.fillStyle =
             `rgba(34,211,238,${
-              0.28 +
-              pulse * 0.62
+              0.30 +
+              pulse * 0.65
             })`
         }
 
@@ -771,7 +780,9 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       }}
       className="fixed inset-0 z-[9999] overflow-hidden bg-[#01040a]"
     >
-      {/* BLUEPRINT GRID */}
+      {/* =================================================
+          BLUEPRINT GRID
+      ================================================= */}
 
       <div
         className="absolute inset-0 opacity-[0.13]"
@@ -787,30 +798,33 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
               transparent 1px
             )
           `,
-
           backgroundSize:
             '70px 70px',
         }}
       />
 
-      {/* MOVING SCAN LINE */}
+      {/* SCANNING LINE */}
 
       <div className="intro-scan pointer-events-none absolute inset-x-0 top-0 z-[2] h-px bg-gradient-to-r from-transparent via-cyan-300/50 to-transparent" />
 
-      {/* AMBIENT GLOWS */}
+      {/* AMBIENT LIGHT */}
 
       <div className="pointer-events-none absolute -left-[10%] top-[5%] h-[85vh] w-[65vw] rounded-full bg-cyan-500/[.035] blur-[150px]" />
 
-      <div className="pointer-events-none absolute left-[5%] top-[15%] h-[65vh] w-[35vw] rounded-full bg-rose-500/[.025] blur-[150px]" />
+      <div className="pointer-events-none absolute left-[5%] top-[15%] h-[65vh] w-[35vw] rounded-full bg-rose-500/[.03] blur-[150px]" />
 
-      {/* HUMAN PARTICLES */}
+      {/* =================================================
+          HUMAN PARTICLES
+      ================================================= */}
 
       <canvas
         ref={canvasRef}
         className="pointer-events-none absolute inset-0 z-[3] h-full w-full"
       />
 
-      {/* INITIALIZATION HUD */}
+      {/* =================================================
+          INITIALIZATION HUD
+      ================================================= */}
 
       <motion.div
         initial={{
@@ -848,7 +862,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         </div>
       </motion.div>
 
-      {/* LEFT HUD LABELS */}
+      {/* LEFT TECH HUD */}
 
       <motion.div
         initial={{
@@ -873,7 +887,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       </motion.div>
 
       {/* =================================================
-          ANIMATED BRAIN
+          ANIMATED HOLOGRAPHIC BRAIN
       ================================================= */}
 
       <motion.div
@@ -889,9 +903,9 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
           delay: 0.8,
           duration: 1,
         }}
-        className="absolute left-[50%] top-[5%] z-20 hidden -translate-x-1/2 lg:block"
+        className="absolute left-[49%] top-[4%] z-20 hidden -translate-x-1/2 lg:block"
       >
-        <div className="brain-panel relative h-[180px] w-[280px] overflow-hidden rounded-xl border border-cyan-300/10 bg-[#020a13]/30 backdrop-blur-[2px]">
+        <div className="brain-panel relative h-[205px] w-[315px] overflow-hidden rounded-xl border border-cyan-300/10 bg-[#020a13]/30 backdrop-blur-[2px]">
           <div className="absolute left-4 top-3 font-mono text-[7px] uppercase tracking-[.22em] text-cyan-300/40">
             Brain // AI Interface
           </div>
@@ -916,7 +930,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
                   C77 116 77 107 96 105Z
                 "
                 fill="rgba(34,211,238,.025)"
-                stroke="rgba(34,211,238,.58)"
+                stroke="rgba(34,211,238,.68)"
                 strokeWidth="1"
                 className="brain-outline"
               />
@@ -942,7 +956,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
                   L172 104
                 "
                 fill="none"
-                stroke="rgba(168,85,247,.7)"
+                stroke="rgba(168,85,247,.78)"
                 strokeWidth="1"
                 className="neural-path"
               />
@@ -970,16 +984,12 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
 
                   return (
                     <circle
-                      key={
-                        index
-                      }
+                      key={index}
                       cx={cx}
                       cy={cy}
                       r="2.6"
                       fill={
-                        index %
-                          3 ===
-                        0
+                        index % 3 === 0
                           ? '#c084fc'
                           : '#22d3ee'
                       }
@@ -999,7 +1009,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
               cy="94"
               r="69"
               fill="none"
-              stroke="rgba(34,211,238,.12)"
+              stroke="rgba(34,211,238,.14)"
               strokeDasharray="3 7"
               className="brain-ring-one"
             />
@@ -1009,7 +1019,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
               cy="94"
               r="82"
               fill="none"
-              stroke="rgba(168,85,247,.09)"
+              stroke="rgba(168,85,247,.12)"
               strokeDasharray="14 10"
               className="brain-ring-two"
             />
@@ -1040,29 +1050,31 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
           delay: 1,
           duration: 1.2,
         }}
-        className="absolute right-[4%] top-[5%] z-20 hidden xl:block"
+        className="absolute right-[3%] top-[4%] z-20 hidden xl:block"
       >
-        <div className="relative h-[260px] w-[260px]">
+        <div className="relative h-[285px] w-[285px]">
           <div className="earth-ring-one absolute inset-0 rounded-full border border-cyan-300/10" />
 
           <div className="earth-ring-two absolute inset-4 rounded-full border border-dashed border-cyan-300/15" />
 
-          <div className="earth-ring-three absolute inset-10 rounded-full border border-cyan-300/[.07]" />
+          <div className="earth-ring-three absolute inset-10 rounded-full border border-cyan-300/[.09]" />
 
-          <div className="earth-float absolute inset-[42px] overflow-hidden rounded-full border border-cyan-300/25 bg-cyan-300/[.018] shadow-[0_0_55px_rgba(34,211,238,.08)]">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_30%,rgba(34,211,238,.18),transparent_48%)]" />
+          <div className="earth-float absolute inset-[42px] overflow-hidden rounded-full border border-cyan-300/30 bg-cyan-300/[.025] shadow-[0_0_65px_rgba(34,211,238,.16)]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_30%,rgba(34,211,238,.22),transparent_48%)]" />
 
             <svg
               viewBox="0 0 200 200"
               className="earth-map h-full w-full"
             >
+              {/* LATITUDE */}
+
               <ellipse
                 cx="100"
                 cy="100"
                 rx="91"
                 ry="34"
                 fill="none"
-                stroke="rgba(34,211,238,.18)"
+                stroke="rgba(34,211,238,.20)"
               />
 
               <ellipse
@@ -1071,8 +1083,10 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
                 rx="91"
                 ry="62"
                 fill="none"
-                stroke="rgba(34,211,238,.12)"
+                stroke="rgba(34,211,238,.14)"
               />
+
+              {/* LONGITUDE */}
 
               <ellipse
                 cx="100"
@@ -1080,7 +1094,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
                 rx="38"
                 ry="91"
                 fill="none"
-                stroke="rgba(34,211,238,.16)"
+                stroke="rgba(34,211,238,.18)"
               />
 
               <ellipse
@@ -1089,10 +1103,10 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
                 rx="65"
                 ry="91"
                 fill="none"
-                stroke="rgba(34,211,238,.1)"
+                stroke="rgba(34,211,238,.12)"
               />
 
-              {/* North America */}
+              {/* NORTH AMERICA */}
 
               <path
                 d="
@@ -1106,12 +1120,12 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
                   L57 78
                   L47 69Z
                 "
-                fill="rgba(34,211,238,.09)"
-                stroke="rgba(34,211,238,.55)"
+                fill="rgba(34,211,238,.10)"
+                stroke="rgba(34,211,238,.65)"
                 strokeWidth="1"
               />
 
-              {/* South America */}
+              {/* SOUTH AMERICA */}
 
               <path
                 d="
@@ -1126,12 +1140,12 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
                   L87 108
                   L77 96Z
                 "
-                fill="rgba(34,211,238,.08)"
-                stroke="rgba(34,211,238,.48)"
+                fill="rgba(34,211,238,.09)"
+                stroke="rgba(34,211,238,.58)"
                 strokeWidth="1"
               />
 
-              {/* Europe / Asia */}
+              {/* EUROPE / ASIA */}
 
               <path
                 d="
@@ -1144,8 +1158,8 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
                   L128 80
                   L116 69Z
                 "
-                fill="rgba(34,211,238,.08)"
-                stroke="rgba(34,211,238,.48)"
+                fill="rgba(34,211,238,.09)"
+                stroke="rgba(34,211,238,.58)"
                 strokeWidth="1"
               />
 
@@ -1175,7 +1189,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
             </svg>
           </div>
 
-          <div className="absolute right-[-25px] top-[105px] font-mono text-[7px] uppercase leading-5 tracking-[.15em] text-cyan-300/40">
+          <div className="absolute right-[-15px] top-[115px] font-mono text-[7px] uppercase leading-5 tracking-[.15em] text-cyan-300/45">
             <div>Vision</div>
             <div>Planning</div>
             <div>Control</div>
@@ -1186,17 +1200,17 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
       </motion.div>
 
       {/* =================================================
-          ROBOTIC ARM HUD
+          ROBOT ARM BLUEPRINT
       ================================================= */}
 
-      <div className="robot-arm-hud pointer-events-none absolute bottom-[7%] right-[2%] z-10 hidden h-[210px] w-[260px] opacity-25 xl:block">
+      <div className="robot-arm-hud pointer-events-none absolute bottom-[6%] right-[2%] z-10 hidden h-[230px] w-[285px] opacity-40 xl:block">
         <svg
           viewBox="0 0 300 230"
           className="h-full w-full"
         >
           <g
             fill="none"
-            stroke="rgba(34,211,238,.65)"
+            stroke="rgba(34,211,238,.72)"
             strokeWidth="1"
           >
             <ellipse
@@ -1253,11 +1267,35 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
             <path d="M251 75 L265 67" />
             <path d="M254 106 L269 112" />
           </g>
+
+          <circle
+            cx="137"
+            cy="111"
+            r="3"
+            fill="#22d3ee"
+            className="robot-node"
+          />
+
+          <circle
+            cx="170"
+            cy="74"
+            r="3"
+            fill="#22d3ee"
+            className="robot-node"
+          />
+
+          <circle
+            cx="218"
+            cy="94"
+            r="3"
+            fill="#c084fc"
+            className="robot-node"
+          />
         </svg>
       </div>
 
       {/* =================================================
-          MAIN CONTENT
+          MAIN WELCOME CONTENT
       ================================================= */}
 
       <div className="absolute inset-0 z-30 flex items-center justify-center px-6 md:justify-end md:pr-[7%] xl:pr-[10%]">
@@ -1402,7 +1440,9 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         </div>
       </div>
 
-      {/* BOTTOM LEFT */}
+      {/* =================================================
+          BOTTOM HUD
+      ================================================= */}
 
       <div className="absolute bottom-7 left-8 z-20 hidden font-mono text-[8px] uppercase tracking-[.3em] text-cyan-300/40 md:block">
         Explore
@@ -1413,8 +1453,6 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
         &nbsp;&nbsp;•&nbsp;&nbsp;
         Repeat
       </div>
-
-      {/* BOTTOM RIGHT */}
 
       <div className="absolute bottom-7 right-8 z-20 hidden font-mono text-[8px] uppercase tracking-[.3em] text-cyan-300/40 md:block">
         Innovation Lives Here
@@ -1438,6 +1476,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
 
         .brain-float {
           transform-origin: center;
+
           animation:
             brainBreathe 4s
             ease-in-out infinite;
@@ -1445,6 +1484,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
 
         .brain-outline {
           stroke-dasharray: 7 5;
+
           animation:
             brainDash 8s
             linear infinite;
@@ -1452,6 +1492,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
 
         .neural-path {
           stroke-dasharray: 5 8;
+
           animation:
             neuralTravel 2.2s
             linear infinite;
@@ -1525,6 +1566,12 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
             ease-in-out infinite;
         }
 
+        .robot-node {
+          animation:
+            robotNodePulse 1.7s
+            ease-in-out infinite;
+        }
+
         @keyframes introScan {
           0% {
             transform:
@@ -1571,7 +1618,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
 
           50% {
             transform:
-              scale(1.035);
+              scale(1.04);
           }
         }
 
@@ -1674,14 +1721,30 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
             transform:
               translateY(0);
 
-            opacity: .2;
+            opacity: .28;
           }
 
           50% {
             transform:
               translateY(-7px);
 
-            opacity: .38;
+            opacity: .55;
+          }
+        }
+
+        @keyframes robotNodePulse {
+          0%,
+          100% {
+            opacity: .3;
+          }
+
+          50% {
+            opacity: 1;
+
+            filter:
+              drop-shadow(
+                0 0 8px #22d3ee
+              );
           }
         }
 
@@ -1703,7 +1766,8 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
           .earth-float,
           .earth-map,
           .earth-node,
-          .robot-arm-hud {
+          .robot-arm-hud,
+          .robot-node {
             animation:
               none !important;
           }
