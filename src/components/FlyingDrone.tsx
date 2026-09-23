@@ -8,49 +8,52 @@ export function FlyingDrone() {
 
 
   const x = useSpring(mouseX, {
-    stiffness: 40,
-    damping: 15
+    stiffness: 35,
+    damping: 18
   });
+
 
   const y = useSpring(mouseY, {
-    stiffness: 40,
-    damping: 15
+    stiffness: 35,
+    damping: 18
   });
 
 
 
-  useEffect(()=>{
+  useEffect(() => {
 
-    const move = (e:MouseEvent)=>{
+    const handleMouseMove = (e: MouseEvent) => {
 
-      const xPos =
-        (e.clientX - window.innerWidth/2) * 0.15;
-
-      const yPos =
-        (e.clientY - window.innerHeight/2) * 0.15;
+      const moveX =
+        (e.clientX - window.innerWidth / 2) * 0.12;
 
 
-      mouseX.set(xPos);
-      mouseY.set(yPos);
+      const moveY =
+        (e.clientY - window.innerHeight / 2) * 0.12;
+
+
+      mouseX.set(moveX);
+      mouseY.set(moveY);
 
     };
 
 
     window.addEventListener(
       "mousemove",
-      move
+      handleMouseMove
     );
 
 
-    return()=>{
+    return () => {
       window.removeEventListener(
         "mousemove",
-        move
+        handleMouseMove
       );
     };
 
 
-  },[mouseX,mouseY]);
+  }, [mouseX, mouseY]);
+
 
 
 
@@ -65,11 +68,10 @@ export function FlyingDrone() {
 
       className="
       absolute
-      top-[20%]
-      left-[45%]
       w-[90px]
       h-[90px]
       "
+
     >
 
 
@@ -80,12 +82,14 @@ export function FlyingDrone() {
         className="
         w-full
         h-full
-        drop-shadow-[0_0_25px_rgba(34,211,238,.8)]
+        drop-shadow-[0_0_20px_rgba(34,211,238,.8)]
         "
 
+
         animate={{
-          y:[0,-10,0]
+          y:[0,-8,0]
         }}
+
 
         transition={{
           duration:3,
@@ -96,40 +100,42 @@ export function FlyingDrone() {
       >
 
 
+
         <defs>
 
-          <linearGradient
-            id="droneGlow"
-            x1="0"
-            y1="0"
-            x2="1"
-            y2="1"
-          >
+          <linearGradient 
+          id="drone"
+          x1="0"
+          y1="0"
+          x2="1"
+          y2="1">
 
             <stop stopColor="#22d3ee"/>
 
-            <stop
-              offset="1"
-              stopColor="#a855f7"
-            />
+            <stop 
+            offset="1"
+            stopColor="#a855f7"/>
 
           </linearGradient>
+
 
         </defs>
 
 
 
-        {/* drone body */}
+
+
+        {/* body */}
 
         <circle
 
           cx="100"
           cy="100"
-          r="32"
+          r="35"
 
           fill="#07101f"
 
-          stroke="url(#droneGlow)"
+          stroke="url(#drone)"
 
           strokeWidth="5"
 
@@ -137,11 +143,13 @@ export function FlyingDrone() {
 
 
 
+
+
         {/* arms */}
 
         <g
 
-          stroke="url(#droneGlow)"
+          stroke="url(#drone)"
 
           strokeWidth="5"
 
@@ -149,13 +157,13 @@ export function FlyingDrone() {
 
         >
 
-          <path d="M75 85 L35 55"/>
+          <path d="M70 85 L30 60"/>
 
-          <path d="M125 85 L165 55"/>
+          <path d="M130 85 L170 60"/>
 
-          <path d="M75 115 L35 145"/>
+          <path d="M70 115 L30 140"/>
 
-          <path d="M125 115 L165 145"/>
+          <path d="M130 115 L170 140"/>
 
 
         </g>
@@ -163,7 +171,9 @@ export function FlyingDrone() {
 
 
 
-        {/* rotating propellers */}
+
+
+        {/* propellers */}
 
         <motion.g
 
@@ -172,37 +182,31 @@ export function FlyingDrone() {
           }}
 
           transition={{
-            duration:0.8,
+
+            duration:1,
+
             repeat:Infinity,
+
             ease:"linear"
+
           }}
 
+
           style={{
-            transformOrigin:"100px 100px"
+
+            transformOrigin:
+            "100px 100px"
+
           }}
 
         >
 
 
-          <ellipse
-
-            cx="35"
-            cy="55"
-
-            rx="22"
-            ry="5"
-
-            stroke="#22d3ee"
-
-            fill="none"
-
-          />
-
 
           <ellipse
 
-            cx="165"
-            cy="55"
+            cx="30"
+            cy="60"
 
             rx="22"
             ry="5"
@@ -217,8 +221,8 @@ export function FlyingDrone() {
 
           <ellipse
 
-            cx="35"
-            cy="145"
+            cx="170"
+            cy="60"
 
             rx="22"
             ry="5"
@@ -233,8 +237,8 @@ export function FlyingDrone() {
 
           <ellipse
 
-            cx="165"
-            cy="145"
+            cx="30"
+            cy="140"
 
             rx="22"
             ry="5"
@@ -244,6 +248,23 @@ export function FlyingDrone() {
             fill="none"
 
           />
+
+
+
+          <ellipse
+
+            cx="170"
+            cy="140"
+
+            rx="22"
+            ry="5"
+
+            stroke="#22d3ee"
+
+            fill="none"
+
+          />
+
 
 
         </motion.g>
@@ -251,18 +272,22 @@ export function FlyingDrone() {
 
 
 
-        {/* AI sensor */}
+
+
+        {/* AI light */}
 
         <circle
 
           cx="100"
+
           cy="100"
 
-          r="9"
+          r="10"
 
           fill="#22d3ee"
 
         />
+
 
 
       </motion.svg>
@@ -270,5 +295,7 @@ export function FlyingDrone() {
 
     </motion.div>
 
+
   );
+
 }
