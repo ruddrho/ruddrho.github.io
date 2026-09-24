@@ -4,6 +4,7 @@ import { AnimatedBackground } from './components/AnimatedBackground'
 import { Footer } from './components/Footer'
 import { Navbar } from './components/Navbar'
 import { WelcomeIntro } from './components/WelcomeIntro'
+import { ScrollProgress } from './components/ScrollProgress'
 
 import { About } from './sections/About'
 import { Activities } from './sections/Activities'
@@ -25,6 +26,8 @@ export default function App() {
     >
       {/* EXISTING WEBSITE BACKGROUND */}
       <AnimatedBackground />
+      {/* ANIMATED SCROLL PROGRESS */}
+      {!showIntro && <ScrollProgress />}
 
       <div className="fixed inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:70px_70px] [mask-image:linear-gradient(to_bottom,black,transparent_90%)]" />
 
