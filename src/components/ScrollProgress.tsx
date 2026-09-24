@@ -8,18 +8,22 @@ import {
 import { useEffect, useState } from "react";
 
 const NODE_COUNT = 7;
-const TRACK_HEIGHT = 336;
+const TRACK_HEIGHT = 330;
 
 export function ScrollProgress() {
 
   const { scrollYProgress } = useScroll();
+
   const [progress, setProgress] = useState(0);
 
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 90,
-    damping: 24,
-    mass: 0.5
-  });
+  const smoothProgress = useSpring(
+    scrollYProgress,
+    {
+      stiffness: 90,
+      damping: 24,
+      mass: 0.5
+    }
+  );
 
   const orbY = useTransform(
     smoothProgress,
@@ -51,22 +55,18 @@ export function ScrollProgress() {
   );
 
   return (
-    <motion.div
-      initial={{
-        opacity: 0,
-        x: 20
-      }}
-      animate={{
-        opacity: 1,
-        x: 0
-      }}
-      transition={{
-        duration: 1,
-        delay: 0.8
-      }}
+
+    /*
+     * OUTER WRAPPER
+     *
+     * This wrapper controls the TRUE vertical centering.
+     * Framer Motion cannot override this transform.
+     */
+
+    <div
       className="
         fixed
-        right-6
+        right-5
         top-1/2
         -translate-y-1/2
         z-[999]
@@ -75,146 +75,235 @@ export function ScrollProgress() {
         pointer-events-none
       "
     >
-      <div
-        className="relative w-[34px]"
-        style={{
-          height: `${TRACK_HEIGHT}px`
+
+      {/*
+       * INNER MOTION WRAPPER
+       * Animation is separated from positioning.
+       */}
+
+      <motion.div
+
+        initial={{
+          opacity: 0,
+          x: 20
         }}
+
+        animate={{
+          opacity: 1,
+          x: 0
+        }}
+
+        transition={{
+          duration: 0.8,
+          delay: 0.4
+        }}
+
+        className="
+          relative
+          flex
+          items-center
+          justify-center
+          rounded-full
+          bg-[#070910]/80
+          px-[14px]
+          py-[10px]
+          backdrop-blur-sm
+          border
+          border-white/[0.035]
+          shadow-[0_0_30px_rgba(0,0,0,.35)]
+        "
       >
 
-        {/* Base track */}
         <div
-          className="
-            absolute
-            left-1/2
-            top-0
-            h-full
-            w-px
-            -translate-x-1/2
-            bg-white/15
-          "
-        />
-
-        {/* Active purple track */}
-        <motion.div
+          className="relative w-[32px]"
           style={{
-            scaleY: progressScale,
-            transformOrigin: "top"
+            height: `${TRACK_HEIGHT}px`
           }}
-          className="
-            absolute
-            left-1/2
-            top-0
-            h-full
-            w-[2px]
-            -translate-x-1/2
-            bg-gradient-to-b
-            from-violet-300
-            via-violet-400
-            to-purple-500
-            shadow-[0_0_12px_rgba(167,139,250,0.55)]
-          "
-        />
-
-        {/* Nodes */}
-        {Array.from({
-          length: NODE_COUNT
-        }).map((_, index) => {
-
-          const position =
-            (index / (NODE_COUNT - 1)) *
-            TRACK_HEIGHT;
-
-          const passed = index <= activeNode;
-
-          return (
-            <motion.div
-              key={index}
-              animate={{
-                scale:
-                  index === activeNode
-                    ? 1.15
-                    : 1,
-
-                opacity:
-                  passed
-                    ? 1
-                    : 0.45
-              }}
-              transition={{
-                duration: 0.3
-              }}
-              className={`
-                absolute
-                left-1/2
-                h-[14px]
-                w-[14px]
-                -translate-x-1/2
-                -translate-y-1/2
-                rounded-full
-                border-2
-
-                ${
-                  passed
-                    ? `
-                      border-violet-300
-                      bg-violet-300
-                      shadow-[0_0_10px_rgba(167,139,250,.45)]
-                    `
-                    : `
-                      border-white/25
-                      bg-[#070b12]
-                    `
-                }
-              `}
-              style={{
-                top: `${position}px`
-              }}
-            />
-          );
-        })}
-
-        {/* Moving glowing orb */}
-        <motion.div
-          style={{
-            y: orbY
-          }}
-          className="
-            absolute
-            left-1/2
-            top-0
-            h-[30px]
-            w-[30px]
-            -translate-x-1/2
-            -translate-y-1/2
-            rounded-full
-            border-[7px]
-            border-violet-400/35
-            bg-violet-300
-            shadow-[0_0_18px_rgba(167,139,250,.75)]
-          "
         >
-          <motion.div
-            animate={{
-              scale: [1, 1.7, 1],
-              opacity: [0.35, 0, 0.35]
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeOut"
-            }}
+
+
+          {/* BASE TRACK */}
+
+          <div
             className="
               absolute
-              inset-[-5px]
-              rounded-full
-              border
-              border-violet-300/50
+              left-1/2
+              top-0
+              h-full
+              w-[2px]
+              -translate-x-1/2
+              bg-white/[0.10]
             "
           />
-        </motion.div>
 
-      </div>
-    </motion.div>
+
+          {/* ACTIVE PURPLE TRACK */}
+
+          <motion.div
+
+            style={{
+              scaleY: progressScale,
+              transformOrigin: "top"
+            }}
+
+            className="
+              absolute
+              left-1/2
+              top-0
+              h-full
+              w-[2px]
+              -translate-x-1/2
+
+              bg-gradient-to-b
+              from-violet-300
+              via-violet-400
+              to-violet-500
+
+              shadow-[0_0_8px_rgba(167,139,250,.60)]
+            "
+          />
+
+
+          {/* NODES */}
+
+          {Array.from({
+            length: NODE_COUNT
+          }).map((_, index) => {
+
+            const position =
+              (index / (NODE_COUNT - 1)) *
+              TRACK_HEIGHT;
+
+            const passed =
+              index <= activeNode;
+
+            const isActive =
+              index === activeNode;
+
+            return (
+
+              <motion.div
+
+                key={index}
+
+                animate={{
+                  scale: isActive ? 1.08 : 1
+                }}
+
+                transition={{
+                  duration: 0.25
+                }}
+
+                className={`
+                  absolute
+                  left-1/2
+
+                  -translate-x-1/2
+                  -translate-y-1/2
+
+                  rounded-full
+
+                  ${
+                    passed
+                      ? `
+                        h-[14px]
+                        w-[14px]
+
+                        bg-violet-300
+                        border-2
+                        border-violet-300
+
+                        shadow-[0_0_8px_rgba(167,139,250,.40)]
+                      `
+                      : `
+                        h-[14px]
+                        w-[14px]
+
+                        bg-[#080a10]
+
+                        border-2
+                        border-white/[0.18]
+                      `
+                  }
+                `}
+
+                style={{
+                  top: `${position}px`
+                }}
+
+              />
+
+            );
+
+          })}
+
+
+          {/* MOVING ACTIVE ORB */}
+
+          <motion.div
+
+            style={{
+              y: orbY
+            }}
+
+            className="
+              absolute
+              left-1/2
+              top-0
+
+              h-[30px]
+              w-[30px]
+
+              -translate-x-1/2
+              -translate-y-1/2
+
+              rounded-full
+
+              bg-violet-300
+
+              border-[7px]
+              border-violet-400/30
+
+              shadow-[
+                0_0_8px_rgba(196,181,253,.9),
+                0_0_18px_rgba(139,92,246,.45)
+              ]
+            "
+          >
+
+            {/* soft pulse */}
+
+            <motion.div
+
+              className="
+                absolute
+                inset-[-5px]
+                rounded-full
+                border
+                border-violet-300/30
+              "
+
+              animate={{
+                scale: [1, 1.35, 1],
+                opacity: [0.25, 0, 0.25]
+              }}
+
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeOut"
+              }}
+
+            />
+
+          </motion.div>
+
+
+        </div>
+
+      </motion.div>
+
+    </div>
+
   );
 }
