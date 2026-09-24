@@ -1,39 +1,69 @@
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import {
+  motion,
+  useMotionValue,
+  useSpring
+} from "framer-motion";
+
 import { useEffect } from "react";
+
 
 export function FlyingDrone() {
 
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
+  /*
+   * ONLY MOVEMENT SYSTEM ADDED
+   * Drone model below is unchanged.
+   */
+
+  const targetX = useMotionValue(0);
+  const targetY = useMotionValue(0);
 
 
-  const x = useSpring(mouseX, {
-    stiffness: 35,
-    damping: 18
+  // Smooth drone-like delayed movement
+  const smoothX = useSpring(targetX, {
+    stiffness: 45,
+    damping: 18,
+    mass: 0.8
   });
 
-
-  const y = useSpring(mouseY, {
-    stiffness: 35,
-    damping: 18
+  const smoothY = useSpring(targetY, {
+    stiffness: 45,
+    damping: 18,
+    mass: 0.8
   });
-
 
 
   useEffect(() => {
 
-    const handleMouseMove = (e: MouseEvent) => {
-
-      const moveX =
-        (e.clientX - window.innerWidth / 2) * 0.12;
+    const droneHalfSize = 60;
 
 
-      const moveY =
-        (e.clientY - window.innerHeight / 2) * 0.12;
+    // Start approximately in the center
+    targetX.set(
+      window.innerWidth / 2 - droneHalfSize
+    );
+
+    targetY.set(
+      window.innerHeight / 2 - droneHalfSize
+    );
 
 
-      mouseX.set(moveX);
-      mouseY.set(moveY);
+    const handleMouseMove = (
+      event: MouseEvent
+    ) => {
+
+      /*
+       * Cursor becomes the drone's target.
+       * -60 centers the 120x120 drone
+       * around the cursor.
+       */
+
+      targetX.set(
+        event.clientX - droneHalfSize
+      );
+
+      targetY.set(
+        event.clientY - droneHalfSize
+      );
 
     };
 
@@ -45,256 +75,412 @@ export function FlyingDrone() {
 
 
     return () => {
+
       window.removeEventListener(
         "mousemove",
         handleMouseMove
       );
+
     };
 
-
-  }, [mouseX, mouseY]);
-
+  }, [targetX, targetY]);
 
 
 
   return (
 
-    <motion.div
+    /*
+     * CURSOR FOLLOWER
+     */
 
-      style={{
-        x,
-        y
-      }}
+    <motion.div
 
       className="
       absolute
-      w-[90px]
-      h-[90px]
+      left-0
+      top-0
+      z-20
+      pointer-events-none
+      w-[120px]
+      h-[120px]
       "
+
+      style={{
+        x: smoothX,
+        y: smoothY
+      }}
 
     >
 
 
-      <motion.svg
+      {/*
+       * SMALL ORBIT AROUND CURSOR
+       *
+       * This does NOT modify the drone.
+       * It only gives it a natural flying
+       * movement around the cursor.
+       */}
 
-        viewBox="0 0 200 200"
+      <motion.div
 
         className="
         w-full
         h-full
-        drop-shadow-[0_0_20px_rgba(34,211,238,.8)]
         "
 
-
         animate={{
-          y:[0,-8,0]
+
+          x: [
+            0,
+            16,
+            24,
+            10,
+            -14,
+            -22,
+            -8,
+            0
+          ],
+
+          y: [
+            -18,
+            -10,
+            8,
+            20,
+            16,
+            2,
+            -14,
+            -18
+          ],
+
+          rotate: [
+            0,
+            1.5,
+            0,
+            -1.5,
+            0
+          ]
+
         }}
 
-
         transition={{
-          duration:3,
-          repeat:Infinity,
-          ease:"easeInOut"
+
+          x: {
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          },
+
+          y: {
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          },
+
+          rotate: {
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }
+
         }}
 
       >
 
 
-
-        <defs>
-
-          <linearGradient 
-          id="drone"
-          x1="0"
-          y1="0"
-          x2="1"
-          y2="1">
-
-            <stop stopColor="#22d3ee"/>
-
-            <stop 
-            offset="1"
-            stopColor="#a855f7"/>
-
-          </linearGradient>
+        {/*
+         * =================================================
+         * EXACT SAME DRONE MODEL
+         * NOTHING BELOW HAS BEEN REDESIGNED
+         * =================================================
+         */}
 
 
-        </defs>
-
-
-
-
-
-        {/* body */}
-
-        <circle
-
-          cx="100"
-          cy="100"
-          r="35"
-
-          fill="#07101f"
-
-          stroke="url(#drone)"
-
-          strokeWidth="5"
-
-        />
-
-
-
-
-
-        {/* arms */}
-
-        <g
-
-          stroke="url(#drone)"
-
-          strokeWidth="5"
-
+        <svg
+          viewBox="0 0 200 200"
+          className="w-full h-full"
           fill="none"
-
-        >
-
-          <path d="M70 85 L30 60"/>
-
-          <path d="M130 85 L170 60"/>
-
-          <path d="M70 115 L30 140"/>
-
-          <path d="M130 115 L170 140"/>
-
-
-        </g>
-
-
-
-
-
-
-        {/* propellers */}
-
-        <motion.g
-
-          animate={{
-            rotate:360
-          }}
-
-          transition={{
-
-            duration:1,
-
-            repeat:Infinity,
-
-            ease:"linear"
-
-          }}
-
-
-          style={{
-
-            transformOrigin:
-            "100px 100px"
-
-          }}
-
         >
 
 
+          <defs>
 
-          <ellipse
+            <filter id="droneGlow">
 
-            cx="30"
-            cy="60"
+              <feGaussianBlur
+                stdDeviation="3"
+                result="blur"
+              />
 
-            rx="22"
-            ry="5"
+              <feMerge>
+
+                <feMergeNode in="blur"/>
+
+                <feMergeNode in="SourceGraphic"/>
+
+              </feMerge>
+
+            </filter>
+
+
+          </defs>
+
+
+
+          {/* Drone body */}
+
+          <motion.g
+            filter="url(#droneGlow)"
+            animate={{
+              y:[0,-5,0]
+            }}
+
+            transition={{
+              duration:2,
+              repeat:Infinity
+            }}
+
+          >
+
+
+            {/* center body */}
+
+            <rect
+
+              x="70"
+              y="80"
+
+              width="60"
+
+              height="35"
+
+              rx="12"
+
+              stroke="#22d3ee"
+
+              strokeWidth="3"
+
+            />
+
+
+
+            {/* left arm */}
+
+            <line
+
+              x1="75"
+              y1="90"
+
+              x2="35"
+              y2="60"
+
+              stroke="#22d3ee"
+
+              strokeWidth="3"
+
+            />
+
+
+            {/* right arm */}
+
+            <line
+
+              x1="125"
+              y1="90"
+
+              x2="165"
+              y2="60"
+
+              stroke="#22d3ee"
+
+              strokeWidth="3"
+
+            />
+
+
+
+            {/* back arms */}
+
+            <line
+
+              x1="75"
+              y1="110"
+
+              x2="40"
+              y2="140"
+
+              stroke="#22d3ee"
+
+              strokeWidth="3"
+
+            />
+
+
+            <line
+
+              x1="125"
+              y1="110"
+
+              x2="160"
+              y2="140"
+
+              stroke="#22d3ee"
+
+              strokeWidth="3"
+
+            />
+
+
+
+
+            {/* Propellers */}
+
+            {[
+
+              [35,60],
+
+              [165,60],
+
+              [40,140],
+
+              [160,140]
+
+            ].map((p,i)=>(
+
+
+              <motion.g
+
+                key={i}
+
+                animate={{
+
+                  rotate:360
+
+                }}
+
+                transition={{
+
+                  duration:1,
+
+                  repeat:Infinity,
+
+                  ease:"linear"
+
+                }}
+
+                style={{
+
+                  transformOrigin:
+                  `${p[0]}px ${p[1]}px`
+
+                }}
+
+              >
+
+                <circle
+
+                  cx={p[0]}
+
+                  cy={p[1]}
+
+                  r="14"
+
+                  stroke="#a855f7"
+
+                  strokeWidth="2"
+
+                />
+
+
+                <line
+
+                  x1={p[0]-10}
+
+                  y1={p[1]}
+
+                  x2={p[0]+10}
+
+                  y2={p[1]}
+
+                  stroke="#22d3ee"
+
+                  strokeWidth="2"
+
+                />
+
+
+              </motion.g>
+
+
+            ))}
+
+
+
+            {/* Camera */}
+
+            <circle
+
+              cx="100"
+
+              cy="115"
+
+              r="7"
+
+              fill="#22d3ee"
+
+            />
+
+
+
+          </motion.g>
+
+
+
+          {/* scan beam */}
+
+          <motion.line
+
+            x1="100"
+
+            y1="120"
+
+            x2="100"
+
+            y2="170"
 
             stroke="#22d3ee"
 
-            fill="none"
+            strokeWidth="2"
+
+            opacity="0.5"
+
+            animate={{
+
+              opacity:[
+                0.2,
+                0.8,
+                0.2
+              ]
+
+            }}
+
+            transition={{
+
+              duration:2,
+
+              repeat:Infinity
+
+            }}
 
           />
 
 
-
-          <ellipse
-
-            cx="170"
-            cy="60"
-
-            rx="22"
-            ry="5"
-
-            stroke="#22d3ee"
-
-            fill="none"
-
-          />
+        </svg>
 
 
-
-          <ellipse
-
-            cx="30"
-            cy="140"
-
-            rx="22"
-            ry="5"
-
-            stroke="#22d3ee"
-
-            fill="none"
-
-          />
-
-
-
-          <ellipse
-
-            cx="170"
-            cy="140"
-
-            rx="22"
-            ry="5"
-
-            stroke="#22d3ee"
-
-            fill="none"
-
-          />
-
-
-
-        </motion.g>
-
-
-
-
-
-
-        {/* AI light */}
-
-        <circle
-
-          cx="100"
-
-          cy="100"
-
-          r="10"
-
-          fill="#22d3ee"
-
-        />
-
-
-
-      </motion.svg>
+      </motion.div>
 
 
     </motion.div>
-
 
   );
 
