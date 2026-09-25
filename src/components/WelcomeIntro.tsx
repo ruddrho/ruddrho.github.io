@@ -1187,8 +1187,7 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
               enterPortfolio
             }
             disabled={leaving}
-            className="group mt-10 inline-flex min-w-[300px] items-center justify-center gap-4 rounded-full border border-cyan-300/60 bg-[#03101b]/50 px-10 py-4 font-mono text-xs uppercase tracking-[.18em] text-white backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-cyan-200 hover:bg-cyan-300/[.08] disabled:pointer-events-none"
-          >
+            className="group mt-10 inline-flex min-w-[450px] max-w-[90vw] items-center justify-center gap-6 rounded-full border border-cyan-300/60 bg-[#03101b]/50 px-14 py-6 font-mono text-[16px] font-semibold uppercase tracking-[0.22em] text-white transition-all duration-300 hover:border-cyan-200 hover:bg-cyan-300/[0.06] hover:shadow-[0_0_30px_rgba(34,211,238,.18)]"
             Enter Portfolio
 
             <FiArrowRight className="text-cyan-300 transition-transform duration-300 group-hover:translate-x-2" />
