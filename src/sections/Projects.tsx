@@ -5,7 +5,6 @@ import {
   FiGithub,
   FiArrowUpRight,
   FiCpu,
-  FiPlus,
   FiX,
   FiClock,
 } from 'react-icons/fi'
@@ -124,6 +123,11 @@ const archiveProjects = [
 export function Projects() {
   const [archiveOpen, setArchiveOpen] = useState(false)
 
+  const [previewProject, setPreviewProject] = useState<{
+    image: string
+    title: string
+  } | null>(null)
+
   useEffect(() => {
     if (!archiveOpen) return
 
@@ -143,6 +147,26 @@ export function Projects() {
       window.removeEventListener('keydown', handleEscape)
     }
   }, [archiveOpen])
+
+  useEffect(() => {
+    if (!previewProject) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setPreviewProject(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleEscape)
+    }
+  }, [previewProject])
 
   return (
     <>
@@ -218,11 +242,16 @@ export function Projects() {
               ================================================== */}
 
               {project.image && (
-                <a
-                  href={project.github}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="relative mt-5 block overflow-hidden rounded-xl border border-cyan-300/20 bg-[#050816] shadow-[0_0_25px_rgba(34,211,238,.05)]"
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPreviewProject({
+                      image: project.image!,
+                      title: project.title,
+                    })
+                  }
+                  aria-label={`Open ${project.title} simulation preview`}
+                  className="relative mt-5 block w-full cursor-zoom-in overflow-hidden rounded-xl border border-cyan-300/20 bg-[#050816] text-left shadow-[0_0_25px_rgba(34,211,238,.05)]"
                 >
                   <img
                     src={project.image}
@@ -236,7 +265,7 @@ export function Projects() {
                   <div className="absolute bottom-2 left-2 rounded-md border border-cyan-300/20 bg-[#050816]/90 px-2.5 py-1 font-mono text-[8px] uppercase tracking-[.16em] text-cyan-300 backdrop-blur-md">
                     Simulation Demo
                   </div>
-                </a>
+                </button>
               )}
 
               {/* GitHub */}
@@ -257,7 +286,7 @@ export function Projects() {
             </motion.article>
           ))}
 
-                    {/* =====================================================
+          {/* =====================================================
               MORE PROJECTS / ARCHIVE BUTTON
           ====================================================== */}
 
@@ -347,13 +376,10 @@ export function Projects() {
                 <div className="absolute -right-3 top-6 h-8 w-3 rounded-r-md border border-cyan-300/30 bg-[#0b1723]" />
 
                 <div className="relative flex h-[82px] w-[108px] items-center justify-center rounded-[24px] border border-cyan-300/35 bg-[#091522]/95 shadow-[0_0_30px_rgba(34,211,238,.10)] transition duration-500 group-hover:border-cyan-300/60 group-hover:shadow-[0_0_40px_rgba(34,211,238,.18)]">
-
                   {/* Robot Face */}
                   <div className="relative flex h-[52px] w-[78px] items-center justify-center rounded-[17px] border border-cyan-300/15 bg-[#030914] shadow-inner">
-
                     {/* Eyes */}
                     <div className="flex items-center gap-5">
-
                       {/* Left Eye */}
                       <motion.div
                         animate={{
@@ -381,7 +407,6 @@ export function Projects() {
                         }}
                         className="h-[11px] w-[11px] rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,.95)]"
                       />
-
                     </div>
 
                     {/* Smile */}
@@ -400,7 +425,6 @@ export function Projects() {
 
               {/* Body */}
               <div className="relative mx-auto flex h-[44px] w-[72px] items-center justify-center rounded-b-[18px] rounded-t-lg border border-cyan-300/25 bg-[#091522]">
-
                 {/* Status Light */}
                 <motion.div
                   animate={{
@@ -449,24 +473,24 @@ export function Projects() {
             </p>
 
             {/* Open Archive CTA */}
-<div className="relative mt-7 inline-flex items-center justify-center gap-3 rounded-xl border border-cyan-300/25 bg-cyan-300/[.05] px-6 py-3 font-mono text-[11px] font-semibold uppercase tracking-[.20em] text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,.04)] transition-all duration-300 group-hover:border-cyan-300/50 group-hover:bg-cyan-300/[.10] group-hover:shadow-[0_0_28px_rgba(34,211,238,.10)]">
-  <span>Open Archive</span>
+            <div className="relative mt-7 inline-flex items-center justify-center gap-3 rounded-xl border border-cyan-300/25 bg-cyan-300/[.05] px-6 py-3 font-mono text-[11px] font-semibold uppercase tracking-[.20em] text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,.04)] transition-all duration-300 group-hover:border-cyan-300/50 group-hover:bg-cyan-300/[.10] group-hover:shadow-[0_0_28px_rgba(34,211,238,.10)]">
+              <span>Open Archive</span>
 
-  <motion.span
-    animate={{
-      x: [0, 4, 0],
-      y: [0, -2, 0],
-    }}
-    transition={{
-      duration: 1.6,
-      repeat: Infinity,
-      ease: 'easeInOut',
-    }}
-    className="text-[14px]"
-  >
-    <FiArrowUpRight />
-  </motion.span>
-</div>
+              <motion.span
+                animate={{
+                  x: [0, 4, 0],
+                  y: [0, -2, 0],
+                }}
+                transition={{
+                  duration: 1.6,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+                className="text-[14px]"
+              >
+                <FiArrowUpRight />
+              </motion.span>
+            </div>
 
             {/* Online Status */}
             <div className="absolute bottom-4 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.16em] text-slate-700">
@@ -484,7 +508,6 @@ export function Projects() {
               Archive Online
             </div>
           </motion.button>
-
         </div>
       </section>
 
@@ -642,13 +665,106 @@ export function Projects() {
                 ============================================== */}
 
                 <div className="relative flex shrink-0 items-center justify-between border-t border-white/[.07] px-5 py-4 font-mono text-[9px] uppercase tracking-[.18em] text-slate-600 sm:px-8">
-                  <span>
-                    Projects 09 — 17
-                  </span>
+                  <span>Projects 09 — 17</span>
 
                   <span className="text-cyan-300/70">
                     Development Pipeline
                   </span>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
+
+      {/* =========================================================
+          FULL SCREEN PROJECT GIF / IMAGE PREVIEW
+      ========================================================== */}
+
+      {createPortal(
+        <AnimatePresence>
+          {previewProject && (
+            <motion.div
+              initial={{
+                opacity: 0,
+              }}
+              animate={{
+                opacity: 1,
+              }}
+              exit={{
+                opacity: 0,
+              }}
+              transition={{
+                duration: 0.2,
+              }}
+              onClick={() => setPreviewProject(null)}
+              className="fixed inset-0 z-[999999] flex items-center justify-center bg-[#02050d]/95 p-4 backdrop-blur-xl sm:p-8"
+            >
+              {/* =========================================
+                  CLOSE BUTTON
+              ========================================== */}
+
+              <button
+                type="button"
+                onClick={() => setPreviewProject(null)}
+                aria-label="Close simulation preview"
+                title="Close"
+                className="fixed right-5 top-5 z-[1000000] grid h-12 w-12 place-items-center rounded-xl border border-slate-600/40 bg-[#0b101c]/90 text-[22px] text-slate-300 shadow-[0_0_30px_rgba(0,0,0,.5)] backdrop-blur-md transition-all duration-300 hover:border-cyan-300/50 hover:bg-cyan-300/[.08] hover:text-cyan-300 sm:right-8 sm:top-8"
+              >
+                <FiX />
+              </button>
+
+              {/* =========================================
+                  PREVIEW WINDOW
+              ========================================== */}
+
+              <motion.div
+                initial={{
+                  opacity: 0,
+                  scale: 0.92,
+                  y: 20,
+                }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  y: 0,
+                }}
+                exit={{
+                  opacity: 0,
+                  scale: 0.95,
+                  y: 10,
+                }}
+                transition={{
+                  duration: 0.25,
+                }}
+                onClick={(event) => event.stopPropagation()}
+                className="relative flex max-h-[92vh] max-w-[95vw] flex-col"
+              >
+                {/* Preview Header */}
+                <div className="mb-4 flex items-center gap-3 pr-16">
+                  <div className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,.8)]" />
+
+                  <div>
+                    <div className="font-mono text-[9px] uppercase tracking-[.2em] text-cyan-300">
+                      Simulation Preview
+                    </div>
+
+                    <h3 className="mt-1 text-sm font-medium text-slate-200 sm:text-base">
+                      {previewProject.title}
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Full Size GIF */}
+                <div className="relative overflow-hidden rounded-2xl border border-cyan-300/20 bg-[#050816] shadow-[0_0_80px_rgba(34,211,238,.08)]">
+                  <img
+                    src={previewProject.image}
+                    alt={`${previewProject.title} full simulation preview`}
+                    className="block max-h-[80vh] max-w-[92vw] object-contain"
+                  />
+
+                  <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/[.05]" />
                 </div>
               </motion.div>
             </motion.div>
