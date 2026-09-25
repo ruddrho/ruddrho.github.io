@@ -30,15 +30,17 @@ const projects = [
       'https://raw.githubusercontent.com/ruddrho/matlab-multi-algorithm-robot-navigation/main/matlab_multi_algorithm_robot_navigation%281%29.gif',
   },
 
-  {
-    number: '03',
-    title: 'Advanced Mobile Robot Navigation',
-    description:
-      'Advanced autonomous mobile robot navigation using Theta*, artificial potential fields, Pure Pursuit, LiDAR simulation and occupancy mapping.',
-    tags: ['MATLAB', 'Theta*', 'APF', 'LiDAR', 'SLAM'],
-    github:
-      'https://github.com/ruddrho/advanced-mobile-robot-navigation',
-  },
+ {
+  number: '03',
+  title: 'Advanced Mobile Robot Navigation',
+  description:
+    'Advanced autonomous mobile robot navigation using Theta*, artificial potential fields, Pure Pursuit, LiDAR simulation and occupancy mapping.',
+  tags: ['MATLAB', 'Theta*', 'APF', 'LiDAR', 'SLAM'],
+  github:
+    'https://github.com/ruddrho/advanced-mobile-robot-navigation',
+  image:
+    'https://raw.githubusercontent.com/ruddrho/advanced-mobile-robot-navigation/main/advanced_mobile_robot_navigation.gif',
+},
 
   {
     number: '04',
