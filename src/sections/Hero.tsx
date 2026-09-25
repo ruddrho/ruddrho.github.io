@@ -57,7 +57,7 @@ export function Hero() {
           <div className="mb-7 inline-flex items-center gap-3 rounded-full border border-cyan-300/20 bg-cyan-300/[.04] px-4 py-2 font-mono text-[10px] uppercase tracking-[.24em] text-cyan-200">
             <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300 shadow-[0_0_12px_#22d3ee]" />
 
-            Graduate Research Trajectory // 2026
+            Robotics & Control Systems // 2026
           </div>
 
           <p className="mb-3 font-mono text-sm tracking-[.18em] text-slate-400">
