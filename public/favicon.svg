@@ -16,15 +16,15 @@
 
   <!-- M -->
   <path
-    d="M34 47V17h7l7 13 7-13h6v30h-7V31l-6 12-7-12v16h-7z"
+    d="M33 47V17h6l6 13 6-13h5v30h-6V31l-5 11-6-11v16h-6z"
     fill="#67e8f9"
   />
 
-  <!-- Purple dot on M top-right -->
+  <!-- Purple dot with clear space at M top-right -->
   <circle
-    cx="57"
-    cy="16"
-    r="4"
+    cx="60"
+    cy="13"
+    r="3"
     fill="#a855f7"
   />
 
