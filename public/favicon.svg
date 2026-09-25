@@ -1,1 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#050816"/><path d="M18 47V17h15c9 0 14 5 14 12 0 5-3 9-8 11l9 7H37l-7-6h-3v6H18zm9-15h6c3 0 5-1 5-4s-2-4-5-4h-6v8z" fill="#67e8f9"/><circle cx="48" cy="16" r="4" fill="#a855f7"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+
+  <!-- Background -->
+  <rect
+    width="64"
+    height="64"
+    rx="15"
+    fill="#050816"
+  />
+
+  <!-- R -->
+  <path
+    d="M7 47V17h13c8 0 12 4 12 10 0 4-2 7-6 9l7 11h-9l-6-9h-3v9H7zm8-16h5c3 0 5-1 5-4s-2-4-5-4h-5v8z"
+    fill="#67e8f9"
+  />
+
+  <!-- M -->
+  <path
+    d="M34 47V17h7l7 13 7-13h6v30h-7V31l-6 12-7-12v16h-7z"
+    fill="#67e8f9"
+  />
+
+  <!-- Purple dot on M top-right -->
+  <circle
+    cx="57"
+    cy="16"
+    r="4"
+    fill="#a855f7"
+  />
+
+</svg>
