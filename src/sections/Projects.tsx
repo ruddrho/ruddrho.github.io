@@ -36,14 +36,16 @@ const projects = [
       'https://github.com/ruddrho/advanced-mobile-robot-navigation',
   },
   {
-    number: '04',
-    title: 'PID · LQR · Fuzzy Robot Trajectory Tracking',
-    description:
-      'Comparative implementation of PID, LQR and Fuzzy Logic control strategies for mobile robot trajectory tracking and control analysis.',
-    tags: ['MATLAB', 'PID', 'LQR', 'Fuzzy', 'Control'],
-    github:
-      'https://github.com/ruddrho/pid-lqr-fuzzy-mobile-robot-trajectory-tracking',
-  },
+  number: '04',
+  title: 'PID · LQR · Fuzzy Robot Trajectory Tracking',
+  description:
+    'Comparative implementation of PID, LQR and Fuzzy Logic control strategies for mobile robot trajectory tracking and control analysis.',
+  tags: ['MATLAB', 'PID', 'LQR', 'Fuzzy', 'Control'],
+  github:
+    'https://github.com/ruddrho/pid-lqr-fuzzy-mobile-robot-trajectory-tracking',
+  image:
+    'https://raw.githubusercontent.com/ruddrho/pid-lqr-fuzzy-mobile-robot-trajectory-tracking/main/pid_lqr_fuzzy_controller_comparison.gif',
+},
   {
     number: '05',
     title: 'SLAM Live Occupancy Map',
