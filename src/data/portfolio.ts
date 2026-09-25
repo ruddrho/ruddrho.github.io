@@ -12,7 +12,7 @@ export const portfolio = {
 
   degree: 'B.Sc. in Mechanical Engineering',
   university: 'Southwest Petroleum University',
-  graduation: '[Expected Graduation Year]',
+  graduation: '2027',
 
   email: 'ruddrhomollik333@gmail.com',
 
