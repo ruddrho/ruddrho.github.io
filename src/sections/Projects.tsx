@@ -61,6 +61,9 @@ const projects = [
     tags: ['MATLAB', 'Fuzzy Logic', 'Control', 'Robotics'],
     github:
       'https://github.com/ruddrho/Fuzzy-Line-Following-Robot-MATLAB',
+
+    image:
+      'https://raw.githubusercontent.com/ruddrho/Fuzzy-Line-Following-Robot-MATLAB/main/navigation_recording.gif',
   },
   {
     number: '07',
@@ -125,6 +128,26 @@ export function Projects() {
                 </span>
               ))}
             </div>
+
+            {/* Project Preview */}
+            {project.image && (
+              <div className="relative mt-5 overflow-hidden rounded-xl border border-cyan-300/20 bg-[#050816] shadow-[0_0_25px_rgba(34,211,238,.05)]">
+                <img
+                  src={project.image}
+                  alt={`${project.title} simulation demo`}
+                  loading="lazy"
+                  className="h-[200px] w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                />
+
+                {/* Subtle overlay */}
+                <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/[.04]" />
+
+                {/* Demo label */}
+                <div className="absolute bottom-2 left-2 rounded-md border border-cyan-300/20 bg-[#050816]/90 px-2.5 py-1 font-mono text-[8px] uppercase tracking-[.16em] text-cyan-300 backdrop-blur-md">
+                  Simulation Demo
+                </div>
+              </div>
+            )}
 
             {/* GitHub */}
             <div className="relative mt-auto pt-7">
