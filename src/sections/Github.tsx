@@ -36,30 +36,51 @@ export function Github() {
           text="My GitHub profile documents ongoing work in robotics, control systems, autonomous navigation and intelligent systems."
         />
 
-        {/* Decorative GitHub orb */}
-        <div className="pointer-events-none absolute right-8 top-[-35px] hidden lg:block">
-
+        {/* =========================
+            CLICKABLE GITHUB ORB
+        ========================== */}
+        <motion.a
+          href={portfolio.github}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Open Ruddrho Mollik GitHub profile"
+          className="absolute right-8 top-[-35px] hidden cursor-pointer lg:block"
+          whileHover={{
+            scale: 1.06,
+          }}
+          whileTap={{
+            scale: 0.96,
+          }}
+          transition={{
+            duration: 0.2,
+          }}
+        >
           <div className="relative grid h-36 w-36 place-items-center">
 
-            <div className="absolute inset-0 rounded-full bg-cyan-300/10 blur-3xl" />
+            {/* Outer glow */}
+            <div className="pointer-events-none absolute inset-0 rounded-full bg-cyan-300/10 blur-3xl" />
 
-            <div className="absolute inset-4 rounded-full border border-cyan-300/10" />
+            {/* Outer circle */}
+            <div className="pointer-events-none absolute inset-4 rounded-full border border-cyan-300/10" />
 
-            <div className="absolute inset-7 rounded-full border border-purple-400/10" />
+            {/* Inner circle */}
+            <div className="pointer-events-none absolute inset-7 rounded-full border border-purple-400/10" />
 
-            <div className="relative grid h-20 w-20 place-items-center rounded-full border border-cyan-300/30 bg-[#07101e]/80 shadow-[0_0_45px_rgba(34,211,238,.15)] backdrop-blur-xl">
+            {/* GitHub icon */}
+            <div className="relative grid h-20 w-20 place-items-center rounded-full border border-cyan-300/30 bg-[#07101e]/80 shadow-[0_0_45px_rgba(34,211,238,.15)] backdrop-blur-xl transition-all duration-300 hover:border-cyan-300/60 hover:shadow-[0_0_55px_rgba(34,211,238,.25)]">
 
               <FiGithub className="text-4xl text-cyan-300" />
 
             </div>
 
           </div>
-
-        </div>
+        </motion.a>
 
       </div>
 
-      {/* Loading */}
+      {/* =========================
+          LOADING
+      ========================== */}
       {loading && !profile && (
         <div className="glass-card p-8 font-mono text-sm text-cyan-300">
           SYNCING GITHUB PROFILE...
@@ -68,15 +89,25 @@ export function Github() {
 
       {profile && (
         <>
+
           {/* =========================
               MAIN PROFILE PANEL
           ========================== */}
-
           <motion.div
-            initial={{ opacity: 0, y: 25 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.55 }}
+            initial={{
+              opacity: 0,
+              y: 25,
+            }}
+            whileInView={{
+              opacity: 1,
+              y: 0,
+            }}
+            viewport={{
+              once: true,
+            }}
+            transition={{
+              duration: 0.55,
+            }}
             className="glass-card relative overflow-hidden p-7 sm:p-9"
           >
 
@@ -90,7 +121,6 @@ export function Github() {
               {/* =========================
                   LEFT PROFILE
               ========================== */}
-
               <div className="flex min-w-0 flex-1 flex-col gap-7 sm:flex-row sm:items-center">
 
                 {/* Avatar */}
@@ -146,6 +176,7 @@ export function Github() {
                   {/* Buttons */}
                   <div className="mt-6 flex flex-wrap gap-3">
 
+                    {/* GitHub profile button */}
                     <a
                       href={profile.html_url || portfolio.github}
                       target="_blank"
@@ -159,6 +190,7 @@ export function Github() {
                       <FiArrowUpRight className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </a>
 
+                    {/* Development status */}
                     <div className="inline-flex items-center gap-2 rounded-lg border border-white/[.08] bg-white/[.025] px-5 py-3 font-mono text-[10px] uppercase tracking-[.12em] text-slate-400">
 
                       <FiActivity className="text-cyan-300" />
@@ -176,7 +208,6 @@ export function Github() {
               {/* =========================
                   LIVE STATS
               ========================== */}
-
               <div className="grid grid-cols-3 gap-3 sm:gap-5 lg:min-w-[420px]">
 
                 {/* REPOSITORIES */}
@@ -245,12 +276,19 @@ export function Github() {
           {/* =========================
               BOTTOM STATUS LINE
           ========================== */}
-
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
+            initial={{
+              opacity: 0,
+            }}
+            whileInView={{
+              opacity: 1,
+            }}
+            viewport={{
+              once: true,
+            }}
+            transition={{
+              delay: 0.2,
+            }}
             className="mt-7 flex flex-col gap-4 border-t border-cyan-300/10 pt-6 font-mono text-[10px] uppercase tracking-[.18em] text-slate-500 sm:flex-row sm:items-center sm:justify-between"
           >
 
@@ -259,7 +297,7 @@ export function Github() {
             </span>
 
             <a
-              href="https://github.com/ruddrho"
+              href={portfolio.github}
               target="_blank"
               rel="noreferrer"
               className="group inline-flex items-center gap-2 transition hover:text-cyan-300"
@@ -270,6 +308,7 @@ export function Github() {
             </a>
 
           </motion.div>
+
         </>
       )}
 
