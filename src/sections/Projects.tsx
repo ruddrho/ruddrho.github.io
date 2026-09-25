@@ -257,7 +257,7 @@ export function Projects() {
             </motion.article>
           ))}
 
-          {/* =====================================================
+                    {/* =====================================================
               MORE PROJECTS / ARCHIVE BUTTON
           ====================================================== */}
 
@@ -287,31 +287,202 @@ export function Projects() {
             className="group glass-card relative flex min-h-[340px] cursor-pointer flex-col items-center justify-center overflow-hidden border-dashed p-8 text-center"
           >
             {/* Background Glow */}
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,.05),transparent_65%)] transition duration-500 group-hover:bg-[radial-gradient(circle_at_center,rgba(34,211,238,.09),transparent_65%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,.06),transparent_65%)] transition duration-500 group-hover:bg-[radial-gradient(circle_at_center,rgba(34,211,238,.10),transparent_65%)]" />
 
-            {/* Plus */}
-            <div className="relative grid h-14 w-14 place-items-center rounded-2xl border border-dashed border-cyan-300/30 bg-cyan-300/[.04] text-2xl text-cyan-300 transition duration-300 group-hover:scale-110 group-hover:border-cyan-300/60 group-hover:bg-cyan-300/[.08] group-hover:shadow-[0_0_30px_rgba(34,211,238,.12)]">
-              <FiPlus />
-            </div>
+            {/* Background Grid */}
+            <div
+              className="pointer-events-none absolute inset-0 opacity-[0.035]"
+              style={{
+                backgroundImage:
+                  'linear-gradient(rgba(103,232,249,.7) 1px, transparent 1px), linear-gradient(90deg, rgba(103,232,249,.7) 1px, transparent 1px)',
+                backgroundSize: '28px 28px',
+              }}
+            />
 
-            <div className="relative mt-5 font-mono text-[10px] uppercase tracking-[.22em] text-cyan-300">
+            {/* =========================
+                ANIMATED ROBOT
+            ========================== */}
+
+            <motion.div
+              animate={{
+                y: [0, -7, 0],
+              }}
+              transition={{
+                duration: 3.2,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+              className="relative"
+            >
+              {/* Robot Glow */}
+              <div className="pointer-events-none absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300/[.08] blur-2xl transition duration-500 group-hover:bg-cyan-300/[.15]" />
+
+              {/* Antenna */}
+              <div className="relative mx-auto h-7 w-[2px] bg-gradient-to-t from-cyan-300/70 to-purple-400/80">
+                <motion.div
+                  animate={{
+                    opacity: [0.5, 1, 0.5],
+                    scale: [0.85, 1.15, 0.85],
+                    boxShadow: [
+                      '0 0 5px rgba(192,132,252,.4)',
+                      '0 0 16px rgba(192,132,252,.9)',
+                      '0 0 5px rgba(192,132,252,.4)',
+                    ],
+                  }}
+                  transition={{
+                    duration: 1.8,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                  className="absolute -left-[5px] -top-2 h-3 w-3 rounded-full border border-purple-300/60 bg-purple-400"
+                />
+              </div>
+
+              {/* Robot Head */}
+              <div className="relative">
+                {/* Left Ear */}
+                <div className="absolute -left-3 top-6 h-8 w-3 rounded-l-md border border-cyan-300/30 bg-[#0b1723]" />
+
+                {/* Right Ear */}
+                <div className="absolute -right-3 top-6 h-8 w-3 rounded-r-md border border-cyan-300/30 bg-[#0b1723]" />
+
+                <div className="relative flex h-[82px] w-[108px] items-center justify-center rounded-[24px] border border-cyan-300/35 bg-[#091522]/95 shadow-[0_0_30px_rgba(34,211,238,.10)] transition duration-500 group-hover:border-cyan-300/60 group-hover:shadow-[0_0_40px_rgba(34,211,238,.18)]">
+
+                  {/* Robot Face */}
+                  <div className="relative flex h-[52px] w-[78px] items-center justify-center rounded-[17px] border border-cyan-300/15 bg-[#030914] shadow-inner">
+
+                    {/* Eyes */}
+                    <div className="flex items-center gap-5">
+
+                      {/* Left Eye */}
+                      <motion.div
+                        animate={{
+                          scaleY: [1, 1, 1, 0.08, 1, 1, 1],
+                        }}
+                        transition={{
+                          duration: 4,
+                          repeat: Infinity,
+                          times: [0, 0.42, 0.46, 0.48, 0.5, 0.54, 1],
+                          ease: 'easeInOut',
+                        }}
+                        className="h-[11px] w-[11px] rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,.95)]"
+                      />
+
+                      {/* Right Eye */}
+                      <motion.div
+                        animate={{
+                          scaleY: [1, 1, 1, 0.08, 1, 1, 1],
+                        }}
+                        transition={{
+                          duration: 4,
+                          repeat: Infinity,
+                          times: [0, 0.42, 0.46, 0.48, 0.5, 0.54, 1],
+                          ease: 'easeInOut',
+                        }}
+                        className="h-[11px] w-[11px] rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,.95)]"
+                      />
+
+                    </div>
+
+                    {/* Smile */}
+                    <div className="absolute bottom-[9px] left-1/2 h-[5px] w-[20px] -translate-x-1/2 rounded-b-full border-b-2 border-cyan-300/50" />
+                  </div>
+
+                  {/* Head Details */}
+                  <div className="absolute left-3 top-3 h-1.5 w-1.5 rounded-full bg-cyan-300/30" />
+
+                  <div className="absolute right-3 top-3 h-1.5 w-1.5 rounded-full bg-cyan-300/30" />
+                </div>
+              </div>
+
+              {/* Neck */}
+              <div className="mx-auto h-3 w-7 border-x border-cyan-300/25 bg-[#091522]" />
+
+              {/* Body */}
+              <div className="relative mx-auto flex h-[44px] w-[72px] items-center justify-center rounded-b-[18px] rounded-t-lg border border-cyan-300/25 bg-[#091522]">
+
+                {/* Status Light */}
+                <motion.div
+                  animate={{
+                    opacity: [0.4, 1, 0.4],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                  className="h-2 w-2 rounded-full bg-purple-400 shadow-[0_0_10px_rgba(192,132,252,.8)]"
+                />
+
+                <div className="absolute bottom-2 left-1/2 h-[1px] w-7 -translate-x-1/2 bg-cyan-300/20" />
+              </div>
+
+              {/* Floating Shadow */}
+              <motion.div
+                animate={{
+                  scaleX: [1, 0.75, 1],
+                  opacity: [0.25, 0.12, 0.25],
+                }}
+                transition={{
+                  duration: 3.2,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+                className="mx-auto mt-4 h-2 w-20 rounded-full bg-cyan-300/20 blur-md"
+              />
+            </motion.div>
+
+            {/* Project Archive */}
+            <div className="relative mt-4 font-mono text-[10px] uppercase tracking-[.22em] text-cyan-300">
               Project Archive
             </div>
 
+            {/* Title */}
             <h3 className="relative mt-3 text-xl font-medium text-white">
               More Projects
             </h3>
 
-            <p className="relative mt-3 max-w-[260px] text-sm leading-6 text-slate-500">
+            {/* Description */}
+            <p className="relative mt-3 max-w-[280px] text-sm leading-6 text-slate-500">
               Explore upcoming robotics, control systems and autonomous systems
               projects.
             </p>
 
-            <div className="relative mt-6 inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[.18em] text-slate-500 transition group-hover:text-cyan-300">
+            {/* Open Archive */}
+            <div className="relative mt-6 inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[.18em] text-slate-500 transition duration-300 group-hover:text-cyan-300">
               Open Archive
-              <FiArrowUpRight />
+
+              <motion.span
+                animate={{
+                  x: [0, 3, 0],
+                }}
+                transition={{
+                  duration: 1.6,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              >
+                <FiArrowUpRight />
+              </motion.span>
+            </div>
+
+            {/* Online Status */}
+            <div className="absolute bottom-4 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.16em] text-slate-700">
+              <motion.span
+                animate={{
+                  opacity: [0.35, 1, 0.35],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                }}
+                className="h-1.5 w-1.5 rounded-full bg-cyan-300"
+              />
+
+              Archive Online
             </div>
           </motion.button>
+
         </div>
       </section>
 
