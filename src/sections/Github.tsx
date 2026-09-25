@@ -1,10 +1,12 @@
-import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   FiGithub,
   FiFolder,
   FiUsers,
   FiArrowUpRight,
   FiActivity,
+  FiX,
 } from 'react-icons/fi'
 
 import { SectionTitle } from '../components/SectionTitle'
@@ -19,183 +21,221 @@ const researchAreas = [
   'ROS 2',
 ]
 
+const contributionReportUrl =
+  'https://raw.githubusercontent.com/ruddrho/ruddrho/main/assets/contribution-heatmap.svg'
+
 export function Github() {
   const { profile, loading } = useGithub(portfolio.githubUsername)
 
+  const [developmentOpen, setDevelopmentOpen] = useState(false)
+
+  /* =========================
+      MODAL CONTROLS
+  ========================== */
+  useEffect(() => {
+    if (!developmentOpen) return
+
+    const previousOverflow = document.body.style.overflow
+
+    document.body.style.overflow = 'hidden'
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setDevelopmentOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleEscape)
+    }
+  }, [developmentOpen])
+
   return (
-    <section id="github" className="section-wrap relative">
-
-      {/* =========================
-          HEADER
-      ========================== */}
-      <div className="relative">
-
-        <SectionTitle
-          eyebrow="06 // GitHub"
-          title="Engineering in public."
-          text="My GitHub profile documents ongoing work in robotics, control systems, autonomous navigation and intelligent systems."
-        />
+    <>
+      <section id="github" className="section-wrap relative">
 
         {/* =========================
-            CLICKABLE GITHUB ORB
+            HEADER
         ========================== */}
-        <motion.a
-          href={portfolio.github}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Open Ruddrho Mollik GitHub profile"
-          className="absolute right-8 top-[-35px] hidden cursor-pointer lg:block"
-          whileHover={{
-            scale: 1.06,
-          }}
-          whileTap={{
-            scale: 0.96,
-          }}
-          transition={{
-            duration: 0.2,
-          }}
-        >
-          <div className="relative grid h-36 w-36 place-items-center">
+        <div className="relative">
 
-            {/* Outer glow */}
-            <div className="pointer-events-none absolute inset-0 rounded-full bg-cyan-300/10 blur-3xl" />
-
-            {/* Outer circle */}
-            <div className="pointer-events-none absolute inset-4 rounded-full border border-cyan-300/10" />
-
-            {/* Inner circle */}
-            <div className="pointer-events-none absolute inset-7 rounded-full border border-purple-400/10" />
-
-            {/* GitHub icon */}
-            <div className="relative grid h-20 w-20 place-items-center rounded-full border border-cyan-300/30 bg-[#07101e]/80 shadow-[0_0_45px_rgba(34,211,238,.15)] backdrop-blur-xl transition-all duration-300 hover:border-cyan-300/60 hover:shadow-[0_0_55px_rgba(34,211,238,.25)]">
-
-              <FiGithub className="text-4xl text-cyan-300" />
-
-            </div>
-
-          </div>
-        </motion.a>
-
-      </div>
-
-      {/* =========================
-          LOADING
-      ========================== */}
-      {loading && !profile && (
-        <div className="glass-card p-8 font-mono text-sm text-cyan-300">
-          SYNCING GITHUB PROFILE...
-        </div>
-      )}
-
-      {profile && (
-        <>
+          <SectionTitle
+            eyebrow="06 // GitHub"
+            title="Engineering in public."
+            text="My GitHub profile documents ongoing work in robotics, control systems, autonomous navigation and intelligent systems."
+          />
 
           {/* =========================
-              MAIN PROFILE PANEL
+              CLICKABLE GITHUB ORB
           ========================== */}
-          <motion.div
-            initial={{
-              opacity: 0,
-              y: 25,
+          <motion.a
+            href={portfolio.github}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Open Ruddrho Mollik GitHub profile"
+            className="absolute right-8 top-[-35px] hidden cursor-pointer lg:block"
+            whileHover={{
+              scale: 1.06,
             }}
-            whileInView={{
-              opacity: 1,
-              y: 0,
-            }}
-            viewport={{
-              once: true,
+            whileTap={{
+              scale: 0.96,
             }}
             transition={{
-              duration: 0.55,
+              duration: 0.2,
             }}
-            className="glass-card relative overflow-hidden p-7 sm:p-9"
           >
+            <div className="relative grid h-36 w-36 place-items-center">
 
-            {/* Neon glows */}
-            <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-cyan-300/[.04] blur-3xl" />
+              {/* Outer glow */}
+              <div className="pointer-events-none absolute inset-0 rounded-full bg-cyan-300/10 blur-3xl" />
 
-            <div className="pointer-events-none absolute -bottom-32 right-20 h-72 w-72 rounded-full bg-purple-500/[.05] blur-3xl" />
+              {/* Outer circle */}
+              <div className="pointer-events-none absolute inset-4 rounded-full border border-cyan-300/10" />
 
-            <div className="relative flex flex-col gap-10 lg:flex-row lg:items-center">
+              {/* Inner circle */}
+              <div className="pointer-events-none absolute inset-7 rounded-full border border-purple-400/10" />
 
-              {/* =========================
-                  LEFT PROFILE
-              ========================== */}
-              <div className="flex min-w-0 flex-1 flex-col gap-7 sm:flex-row sm:items-center">
+              {/* GitHub icon */}
+              <div className="relative grid h-20 w-20 place-items-center rounded-full border border-cyan-300/30 bg-[#07101e]/80 shadow-[0_0_45px_rgba(34,211,238,.15)] backdrop-blur-xl transition-all duration-300 hover:border-cyan-300/60 hover:shadow-[0_0_55px_rgba(34,211,238,.25)]">
 
-                {/* Avatar */}
-                <div className="relative shrink-0">
+                <FiGithub className="text-4xl text-cyan-300" />
 
-                  <div className="absolute -inset-[2px] rounded-[22px] bg-gradient-to-br from-cyan-300 via-cyan-300/30 to-purple-500 opacity-80 blur-[1px]" />
+              </div>
 
-                  <img
-                    src={profile.avatar_url}
-                    alt={profile.name || portfolio.name}
-                    className="relative h-32 w-32 rounded-[20px] border border-[#050816] object-cover sm:h-36 sm:w-36"
-                  />
+            </div>
+          </motion.a>
 
-                  {/* Online indicator */}
-                  <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-[#080d1a] bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,.8)]" />
+        </div>
 
-                </div>
+        {/* =========================
+            LOADING
+        ========================== */}
+        {loading && !profile && (
+          <div className="glass-card p-8 font-mono text-sm text-cyan-300">
+            SYNCING GITHUB PROFILE...
+          </div>
+        )}
 
-                {/* Information */}
-                <div className="min-w-0">
+        {profile && (
+          <>
 
-                  <div className="flex flex-wrap items-center gap-3">
+            {/* =========================
+                MAIN PROFILE PANEL
+            ========================== */}
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: 25,
+              }}
+              whileInView={{
+                opacity: 1,
+                y: 0,
+              }}
+              viewport={{
+                once: true,
+              }}
+              transition={{
+                duration: 0.55,
+              }}
+              className="glass-card relative overflow-hidden p-7 sm:p-9"
+            >
 
-                    <h3 className="text-2xl font-semibold text-white sm:text-3xl">
-                      {profile.name || portfolio.name}
-                    </h3>
+              {/* Neon glows */}
+              <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-cyan-300/[.04] blur-3xl" />
 
-                    <span className="font-mono text-xs text-cyan-300">
-                      @{portfolio.githubUsername}
-                    </span>
+              <div className="pointer-events-none absolute -bottom-32 right-20 h-72 w-72 rounded-full bg-purple-500/[.05] blur-3xl" />
+
+              <div className="relative flex flex-col gap-10 lg:flex-row lg:items-center">
+
+                {/* =========================
+                    LEFT PROFILE
+                ========================== */}
+                <div className="flex min-w-0 flex-1 flex-col gap-7 sm:flex-row sm:items-center">
+
+                  {/* Avatar */}
+                  <div className="relative shrink-0">
+
+                    <div className="absolute -inset-[2px] rounded-[22px] bg-gradient-to-br from-cyan-300 via-cyan-300/30 to-purple-500 opacity-80 blur-[1px]" />
+
+                    <img
+                      src={profile.avatar_url}
+                      alt={profile.name || portfolio.name}
+                      className="relative h-32 w-32 rounded-[20px] border border-[#050816] object-cover sm:h-36 sm:w-36"
+                    />
+
+                    {/* Online indicator */}
+                    <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-[#080d1a] bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,.8)]" />
 
                   </div>
 
-                  <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-400 sm:text-base">
-                    {profile.bio ||
-                      'Robotics, control systems and autonomous systems development.'}
-                  </p>
+                  {/* Information */}
+                  <div className="min-w-0">
 
-                  {/* Research tags */}
-                  <div className="mt-5 flex flex-wrap gap-2">
+                    <div className="flex flex-wrap items-center gap-3">
 
-                    {researchAreas.map((area) => (
-                      <span
-                        key={area}
-                        className="rounded-full border border-cyan-300/20 bg-cyan-300/[.035] px-3 py-1 font-mono text-[10px] tracking-wide text-slate-300"
-                      >
-                        {area}
+                      <h3 className="text-2xl font-semibold text-white sm:text-3xl">
+                        {profile.name || portfolio.name}
+                      </h3>
+
+                      <span className="font-mono text-xs text-cyan-300">
+                        @{portfolio.githubUsername}
                       </span>
-                    ))}
 
-                  </div>
+                    </div>
 
-                  {/* Buttons */}
-                  <div className="mt-6 flex flex-wrap gap-3">
+                    <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-400 sm:text-base">
+                      {profile.bio ||
+                        'Robotics, control systems and autonomous systems development.'}
+                    </p>
 
-                    {/* GitHub profile button */}
-                    <a
-                      href={profile.html_url || portfolio.github}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="group inline-flex items-center gap-2 rounded-lg border border-cyan-300/40 bg-cyan-300/[.06] px-5 py-3 font-mono text-xs uppercase tracking-[.12em] text-cyan-300 transition duration-300 hover:-translate-y-0.5 hover:border-cyan-300/70 hover:bg-cyan-300/[.1] hover:shadow-[0_0_25px_rgba(34,211,238,.12)]"
-                    >
-                      <FiGithub className="text-base" />
+                    {/* Research tags */}
+                    <div className="mt-5 flex flex-wrap gap-2">
 
-                      View GitHub Profile
+                      {researchAreas.map((area) => (
+                        <span
+                          key={area}
+                          className="rounded-full border border-cyan-300/20 bg-cyan-300/[.035] px-3 py-1 font-mono text-[10px] tracking-wide text-slate-300"
+                        >
+                          {area}
+                        </span>
+                      ))}
 
-                      <FiArrowUpRight className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                    </a>
+                    </div>
 
-                    {/* Development status */}
-                    <div className="inline-flex items-center gap-2 rounded-lg border border-white/[.08] bg-white/[.025] px-5 py-3 font-mono text-[10px] uppercase tracking-[.12em] text-slate-400">
+                    {/* Buttons */}
+                    <div className="mt-6 flex flex-wrap gap-3">
 
-                      <FiActivity className="text-cyan-300" />
+                      {/* GitHub profile button */}
+                      <a
+                        href={profile.html_url || portfolio.github}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group inline-flex items-center gap-2 rounded-lg border border-cyan-300/40 bg-cyan-300/[.06] px-5 py-3 font-mono text-xs uppercase tracking-[.12em] text-cyan-300 transition duration-300 hover:-translate-y-0.5 hover:border-cyan-300/70 hover:bg-cyan-300/[.1] hover:shadow-[0_0_25px_rgba(34,211,238,.12)]"
+                      >
+                        <FiGithub className="text-base" />
 
-                      Active Development
+                        View GitHub Profile
+
+                        <FiArrowUpRight className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </a>
+
+                      {/* =========================
+                          ACTIVE DEVELOPMENT
+                          CLICKABLE
+                      ========================== */}
+                      <button
+                        type="button"
+                        onClick={() => setDevelopmentOpen(true)}
+                        className="group inline-flex items-center gap-2 rounded-lg border border-white/[.08] bg-white/[.025] px-5 py-3 font-mono text-[10px] uppercase tracking-[.12em] text-slate-400 transition duration-300 hover:-translate-y-0.5 hover:border-cyan-300/30 hover:bg-cyan-300/[.05] hover:text-cyan-200 hover:shadow-[0_0_25px_rgba(34,211,238,.08)]"
+                        aria-label="Open GitHub development activity report"
+                      >
+                        <FiActivity className="text-cyan-300 transition-transform duration-300 group-hover:scale-110" />
+
+                        Active Development
+                      </button>
 
                     </div>
 
@@ -203,115 +243,244 @@ export function Github() {
 
                 </div>
 
-              </div>
+                {/* =========================
+                    LIVE STATS
+                ========================== */}
+                <div className="grid grid-cols-3 gap-3 sm:gap-5 lg:min-w-[420px]">
 
-              {/* =========================
-                  LIVE STATS
-              ========================== */}
-              <div className="grid grid-cols-3 gap-3 sm:gap-5 lg:min-w-[420px]">
+                  {/* REPOSITORIES */}
+                  <a
+                    href="https://github.com/ruddrho?tab=repositories"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="View all GitHub repositories"
+                    className="group relative overflow-hidden rounded-2xl border border-white/[.08] bg-white/[.025] px-3 py-7 text-center transition duration-300 hover:-translate-y-1 hover:border-cyan-300/30 hover:bg-cyan-300/[.04] hover:shadow-[0_0_35px_rgba(34,211,238,.08)]"
+                  >
 
-                {/* REPOSITORIES */}
-                <a
-                  href="https://github.com/ruddrho?tab=repositories"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="View all GitHub repositories"
-                  className="group relative overflow-hidden rounded-2xl border border-white/[.08] bg-white/[.025] px-3 py-7 text-center transition duration-300 hover:-translate-y-1 hover:border-cyan-300/30 hover:bg-cyan-300/[.04] hover:shadow-[0_0_35px_rgba(34,211,238,.08)]"
-                >
+                    <FiFolder className="mx-auto text-2xl text-cyan-300 transition-transform group-hover:scale-110" />
 
-                  <FiFolder className="mx-auto text-2xl text-cyan-300 transition-transform group-hover:scale-110" />
+                    <b className="mt-4 block text-3xl font-semibold text-white">
+                      {profile.public_repos}
+                    </b>
 
-                  <b className="mt-4 block text-3xl font-semibold text-white">
-                    {profile.public_repos}
-                  </b>
+                    <span className="mt-2 block font-mono text-[9px] uppercase tracking-[.15em] text-slate-400">
+                      Repositories
+                    </span>
 
-                  <span className="mt-2 block font-mono text-[9px] uppercase tracking-[.15em] text-slate-400">
-                    Repositories
-                  </span>
+                    <div className="mx-auto mt-5 h-[2px] w-10 bg-cyan-300/80" />
 
-                  <div className="mx-auto mt-5 h-[2px] w-10 bg-cyan-300/80" />
+                  </a>
 
-                </a>
+                  {/* FOLLOWERS */}
+                  <div className="relative overflow-hidden rounded-2xl border border-white/[.08] bg-white/[.025] px-3 py-7 text-center">
 
-                {/* FOLLOWERS */}
-                <div className="relative overflow-hidden rounded-2xl border border-white/[.08] bg-white/[.025] px-3 py-7 text-center">
+                    <FiUsers className="mx-auto text-2xl text-cyan-300" />
 
-                  <FiUsers className="mx-auto text-2xl text-cyan-300" />
+                    <b className="mt-4 block text-3xl font-semibold text-white">
+                      {profile.followers}
+                    </b>
 
-                  <b className="mt-4 block text-3xl font-semibold text-white">
-                    {profile.followers}
-                  </b>
+                    <span className="mt-2 block font-mono text-[9px] uppercase tracking-[.15em] text-slate-400">
+                      Followers
+                    </span>
 
-                  <span className="mt-2 block font-mono text-[9px] uppercase tracking-[.15em] text-slate-400">
-                    Followers
-                  </span>
+                    <div className="mx-auto mt-5 h-[2px] w-10 bg-purple-400/80" />
 
-                  <div className="mx-auto mt-5 h-[2px] w-10 bg-purple-400/80" />
+                  </div>
+
+                  {/* FOLLOWING */}
+                  <div className="relative overflow-hidden rounded-2xl border border-white/[.08] bg-white/[.025] px-3 py-7 text-center">
+
+                    <FiUsers className="mx-auto text-2xl text-purple-300" />
+
+                    <b className="mt-4 block text-3xl font-semibold text-white">
+                      {profile.following}
+                    </b>
+
+                    <span className="mt-2 block font-mono text-[9px] uppercase tracking-[.15em] text-slate-400">
+                      Following
+                    </span>
+
+                    <div className="mx-auto mt-5 h-[2px] w-10 bg-cyan-300/80" />
+
+                  </div>
 
                 </div>
 
-                {/* FOLLOWING */}
-                <div className="relative overflow-hidden rounded-2xl border border-white/[.08] bg-white/[.025] px-3 py-7 text-center">
-
-                  <FiUsers className="mx-auto text-2xl text-purple-300" />
-
-                  <b className="mt-4 block text-3xl font-semibold text-white">
-                    {profile.following}
-                  </b>
-
-                  <span className="mt-2 block font-mono text-[9px] uppercase tracking-[.15em] text-slate-400">
-                    Following
-                  </span>
-
-                  <div className="mx-auto mt-5 h-[2px] w-10 bg-cyan-300/80" />
-
-                </div>
-
               </div>
 
-            </div>
+            </motion.div>
 
-          </motion.div>
+            {/* =========================
+                BOTTOM STATUS LINE
+            ========================== */}
+            <motion.div
+              initial={{
+                opacity: 0,
+              }}
+              whileInView={{
+                opacity: 1,
+              }}
+              viewport={{
+                once: true,
+              }}
+              transition={{
+                delay: 0.2,
+              }}
+              className="mt-7 flex flex-col gap-4 border-t border-cyan-300/10 pt-6 font-mono text-[10px] uppercase tracking-[.18em] text-slate-500 sm:flex-row sm:items-center sm:justify-between"
+            >
 
-          {/* =========================
-              BOTTOM STATUS LINE
-          ========================== */}
+              <span>
+                Open Source // Real Problems // Meaningful Solutions
+              </span>
+
+              <a
+                href={portfolio.github}
+                target="_blank"
+                rel="noreferrer"
+                className="group inline-flex items-center gap-2 transition hover:text-cyan-300"
+              >
+                github.com/ruddrho
+
+                <FiArrowUpRight className="text-cyan-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </a>
+
+            </motion.div>
+
+          </>
+        )}
+
+      </section>
+
+      {/* =================================================
+          ACTIVE DEVELOPMENT MODAL
+      ================================================= */}
+      <AnimatePresence>
+        {developmentOpen && (
           <motion.div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#02040b]/90 p-3 backdrop-blur-md sm:p-6"
             initial={{
               opacity: 0,
             }}
-            whileInView={{
+            animate={{
               opacity: 1,
             }}
-            viewport={{
-              once: true,
+            exit={{
+              opacity: 0,
             }}
             transition={{
-              delay: 0.2,
+              duration: 0.2,
             }}
-            className="mt-7 flex flex-col gap-4 border-t border-cyan-300/10 pt-6 font-mono text-[10px] uppercase tracking-[.18em] text-slate-500 sm:flex-row sm:items-center sm:justify-between"
+            onMouseDown={() => setDevelopmentOpen(false)}
           >
 
-            <span>
-              Open Source // Real Problems // Meaningful Solutions
-            </span>
-
-            <a
-              href={portfolio.github}
-              target="_blank"
-              rel="noreferrer"
-              className="group inline-flex items-center gap-2 transition hover:text-cyan-300"
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: 30,
+                scale: 0.97,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: 1,
+              }}
+              exit={{
+                opacity: 0,
+                y: 20,
+                scale: 0.98,
+              }}
+              transition={{
+                duration: 0.28,
+                ease: 'easeOut',
+              }}
+              onMouseDown={(event) => event.stopPropagation()}
+              className="relative flex max-h-[94vh] w-full max-w-[1500px] flex-col overflow-hidden rounded-2xl border border-cyan-300/20 bg-[#070b14] shadow-[0_0_80px_rgba(34,211,238,.12)]"
+              role="dialog"
+              aria-modal="true"
+              aria-label="GitHub active development report"
             >
-              github.com/ruddrho
 
-              <FiArrowUpRight className="text-cyan-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </a>
+              {/* =========================
+                  MODAL HEADER
+              ========================== */}
+              <div className="flex shrink-0 items-center justify-between border-b border-white/[.07] bg-[#080d18]/95 px-5 py-4 sm:px-7">
+
+                <div className="flex items-center gap-3">
+
+                  <div className="grid h-9 w-9 place-items-center rounded-lg border border-cyan-300/20 bg-cyan-300/[.05]">
+                    <FiActivity className="text-cyan-300" />
+                  </div>
+
+                  <div>
+                    <div className="font-mono text-[10px] uppercase tracking-[.22em] text-cyan-300">
+                      Active Development
+                    </div>
+
+                    <div className="mt-1 text-sm text-slate-400">
+                      GitHub Contribution Report
+                    </div>
+                  </div>
+
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setDevelopmentOpen(false)}
+                  className="grid h-10 w-10 place-items-center rounded-xl border border-white/[.08] bg-white/[.025] text-slate-400 transition hover:border-cyan-300/30 hover:bg-cyan-300/[.05] hover:text-cyan-300"
+                  aria-label="Close development report"
+                >
+                  <FiX className="text-xl" />
+                </button>
+
+              </div>
+
+              {/* =========================
+                  REPORT
+              ========================== */}
+              <div className="min-h-0 flex-1 overflow-auto bg-[#0d1117]">
+
+                <div className="mx-auto min-w-[720px]">
+
+                  <img
+                    src={contributionReportUrl}
+                    alt="Ruddrho Mollik detailed GitHub contribution report"
+                    className="block h-auto w-full"
+                  />
+
+                </div>
+
+              </div>
+
+              {/* =========================
+                  MODAL FOOTER
+              ========================== */}
+              <div className="flex shrink-0 flex-col gap-3 border-t border-white/[.07] bg-[#080d18]/95 px-5 py-4 font-mono text-[9px] uppercase tracking-[.16em] text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,.8)]" />
+
+                  Auto-updated via GitHub Actions
+                </div>
+
+                <a
+                  href={portfolio.github}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group inline-flex items-center gap-2 transition hover:text-cyan-300"
+                >
+                  View GitHub
+
+                  <FiArrowUpRight className="text-cyan-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </a>
+
+              </div>
+
+            </motion.div>
 
           </motion.div>
-
-        </>
-      )}
-
-    </section>
+        )}
+      </AnimatePresence>
+    </>
   )
 }
