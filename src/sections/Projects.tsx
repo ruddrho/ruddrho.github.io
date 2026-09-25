@@ -30,17 +30,17 @@ const projects = [
       'https://raw.githubusercontent.com/ruddrho/matlab-multi-algorithm-robot-navigation/main/matlab_multi_algorithm_robot_navigation%281%29.gif',
   },
 
- {
-  number: '03',
-  title: 'Advanced Mobile Robot Navigation',
-  description:
-    'Advanced autonomous mobile robot navigation using Theta*, artificial potential fields, Pure Pursuit, LiDAR simulation and occupancy mapping.',
-  tags: ['MATLAB', 'Theta*', 'APF', 'LiDAR', 'SLAM'],
-  github:
-    'https://github.com/ruddrho/advanced-mobile-robot-navigation',
-  image:
-    'https://raw.githubusercontent.com/ruddrho/advanced-mobile-robot-navigation/main/advanced_mobile_robot_navigation.gif',
-},
+  {
+    number: '03',
+    title: 'Advanced Mobile Robot Navigation',
+    description:
+      'Advanced autonomous mobile robot navigation using Theta*, artificial potential fields, Pure Pursuit, LiDAR simulation and occupancy mapping.',
+    tags: ['MATLAB', 'Theta*', 'APF', 'LiDAR', 'SLAM'],
+    github:
+      'https://github.com/ruddrho/advanced-mobile-robot-navigation',
+    image:
+      'https://raw.githubusercontent.com/ruddrho/advanced-mobile-robot-navigation/main/advanced_mobile_robot_navigation.gif',
+  },
 
   {
     number: '04',
@@ -84,6 +84,24 @@ const projects = [
     tags: ['MATLAB', 'Control Systems', 'Simulation', 'Dynamics'],
     github:
       'https://github.com/ruddrho/ball-on-plate-matlab-simulation',
+  },
+
+  {
+    number: '08',
+    title: 'Intelligent Drone Obstacle Avoidance',
+    description:
+      'Autonomous drone simulation featuring intelligent obstacle avoidance, live SLAM navigation, 3D visualization and real-time mission monitoring.',
+    tags: [
+      'MATLAB',
+      'UAV',
+      'SLAM',
+      'Obstacle Avoidance',
+      'Autonomous Navigation',
+    ],
+    github:
+      'https://github.com/ruddrho/Intelligent-Drone-Obstacle-Avoidance-MATLAB',
+    image:
+      'https://raw.githubusercontent.com/ruddrho/Intelligent-Drone-Obstacle-Avoidance-MATLAB/main/drone_mission_simulation.gif',
   },
 ]
 
@@ -235,7 +253,7 @@ export function Projects() {
             once: true,
           }}
           transition={{
-            delay: 0.35,
+            delay: 0.4,
           }}
           className="glass-card relative flex min-h-[340px] flex-col items-center justify-center overflow-hidden border-dashed p-8 text-center"
         >
