@@ -2,7 +2,7 @@ export const portfolio = {
   name: 'Ruddrho Mollik',
   githubUsername: 'ruddrho',
 
-  title: 'Robotics & Control Systems Undergraduate Student',
+  title: 'Mechanical Engineering Student',
 
   subtitle:
     'Exploring robotics, autonomous systems, control theory, intelligent machines, and computer vision through research, simulation, and hands-on engineering.',
