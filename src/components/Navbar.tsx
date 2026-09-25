@@ -34,12 +34,12 @@ export function Navbar() {
           </span>
 
           {/* NAME */}
-          <span className="hidden font-medium tracking-[.04em] sm:block">
-            RUDDRHO
-            <span className="text-cyan-300">
-              .SYS
-            </span>
-          </span>
+<span className="hidden font-medium tracking-[.04em] sm:block">
+  RUDDRHO
+  <span className="text-cyan-300">
+    {' '}MOLLIK
+  </span>
+</span>
         </a>
 
         {/* DESKTOP NAVIGATION */}
