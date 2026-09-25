@@ -1187,10 +1187,11 @@ export function WelcomeIntro({ onEnter }: WelcomeIntroProps) {
               enterPortfolio
             }
             disabled={leaving}
-            className="group mt-10 inline-flex h-[96px] w-[620px] max-w-[88vw] items-center justify-center gap-8 rounded-full border border-cyan-300/60 bg-[#03101b]/50 px-16 font-mono text-[19px] font-semibold uppercase tracking-[0.24em] text-white transition-all duration-300 hover:border-cyan-200 hover:bg-cyan-300/[0.06] hover:shadow-[0_0_35px_rgba(34,211,238,.20)]"
-
-            <FiArrowRight className="text-cyan-300 transition-transform duration-300 group-hover:translate-x-2" />
-          </motion.button>
+className="group mt-10 inline-flex h-[96px] w-[620px] max-w-[88vw] items-center justify-center gap-8 rounded-full border border-cyan-300/60 bg-[#03101b]/50 px-16 font-mono text-[19px] font-semibold uppercase tracking-[0.24em] text-white transition-all duration-300 hover:border-cyan-200 hover:bg-cyan-300/[0.06] hover:shadow-[0_0_35px_rgba(34,211,238,.20)]"
+>
+  Enter Portfolio
+  <FiArrowRight className="text-cyan-300 transition-transform duration-300 group-hover:translate-x-2" />
+</motion.button>
         </div>
       </div>
 
