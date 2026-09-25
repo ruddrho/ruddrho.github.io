@@ -448,23 +448,25 @@ export function Projects() {
               projects.
             </p>
 
-            {/* Open Archive */}
-            <div className="relative mt-6 inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[.18em] text-slate-500 transition duration-300 group-hover:text-cyan-300">
-              Open Archive
+            {/* Open Archive CTA */}
+<div className="relative mt-7 inline-flex items-center justify-center gap-3 rounded-xl border border-cyan-300/25 bg-cyan-300/[.05] px-6 py-3 font-mono text-[11px] font-semibold uppercase tracking-[.20em] text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,.04)] transition-all duration-300 group-hover:border-cyan-300/50 group-hover:bg-cyan-300/[.10] group-hover:shadow-[0_0_28px_rgba(34,211,238,.10)]">
+  <span>Open Archive</span>
 
-              <motion.span
-                animate={{
-                  x: [0, 3, 0],
-                }}
-                transition={{
-                  duration: 1.6,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                }}
-              >
-                <FiArrowUpRight />
-              </motion.span>
-            </div>
+  <motion.span
+    animate={{
+      x: [0, 4, 0],
+      y: [0, -2, 0],
+    }}
+    transition={{
+      duration: 1.6,
+      repeat: Infinity,
+      ease: 'easeInOut',
+    }}
+    className="text-[14px]"
+  >
+    <FiArrowUpRight />
+  </motion.span>
+</div>
 
             {/* Online Status */}
             <div className="absolute bottom-4 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[.16em] text-slate-700">
