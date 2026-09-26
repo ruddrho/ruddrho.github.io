@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 
 import { AnimatedBackground } from './components/AnimatedBackground'
-import { BB8ThemeToggle } from './components/BB8ThemeToggle'
 import { Footer } from './components/Footer'
 import { Navbar } from './components/Navbar'
 import { WelcomeIntro } from './components/WelcomeIntro'
@@ -69,8 +68,12 @@ export default function App() {
 
       {/* =====================================================
           NAVIGATION
+          BB-8 THEME TOGGLE IS NOW INSIDE NAVBAR
       ====================================================== */}
-      <Navbar />
+      <Navbar
+        theme={theme}
+        onThemeToggle={toggleTheme}
+      />
 
       {/* =====================================================
           MAIN WEBSITE
@@ -90,19 +93,6 @@ export default function App() {
           FOOTER
       ====================================================== */}
       <Footer />
-
-      {/* =====================================================
-          BB-8 DARK / LIGHT THEME TOGGLE
-
-          Hidden while cinematic intro is active.
-          Appears after entering the portfolio.
-      ====================================================== */}
-      {!showIntro && (
-        <BB8ThemeToggle
-          theme={theme}
-          onToggle={toggleTheme}
-        />
-      )}
 
       {/* =====================================================
           CINEMATIC WELCOME SCREEN
