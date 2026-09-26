@@ -86,11 +86,1148 @@ body {
 
 
 /* =========================================================
-   APP THEME TRANSITION
+   SELECTION
 ========================================================= */
 
-.portfolio-app {
+::selection {
+  background: rgba(34, 211, 238, 0.22);
+  color: #fff;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+::-webkit-scrollbar {
+  width: 9px;
+}
+
+::-webkit-scrollbar-track {
   background: var(--page-bg);
-  color: var(--page-text);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 20px;
+  border: 2px solid var(--page-bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+
+/* =========================================================
+   EXISTING COMPONENT STYLES
+========================================================= */
+
+@layer components {
+
+  .section-wrap {
+    @apply relative mx-auto max-w-7xl px-5 py-24 lg:px-8 lg:py-32;
+  }
+
+  .glass-card {
+    @apply rounded-2xl border border-white/[.08] bg-white/[.035] backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,.035)] transition duration-300 hover:border-cyan-300/[.16] hover:bg-white/[.05];
+  }
+
+  .nav-link {
+    @apply font-mono text-[10px] uppercase tracking-[.15em] text-slate-400 transition hover:text-cyan-300;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-xl border border-cyan-300/30 bg-cyan-300 px-5 py-3 text-sm font-semibold text-[#041016] shadow-[0_0_28px_rgba(34,211,238,.15)] transition hover:-translate-y-0.5 hover:bg-cyan-200;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[.035] px-5 py-3 text-sm text-slate-300 backdrop-blur transition hover:-translate-y-0.5 hover:border-purple-400/25 hover:text-white;
+  }
+
+  .tech-chip {
+    @apply rounded-lg border border-white/[.08] bg-white/[.03] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[.1em] text-slate-400 transition hover:border-cyan-300/20 hover:text-cyan-200;
+  }
+
+  .orb {
+    @apply pointer-events-none absolute h-96 w-96 rounded-full blur-[120px];
+  }
+
+  .orb-cyan {
+    @apply bg-cyan-400/[.08];
+  }
+
+  .orb-purple {
+    @apply bg-purple-500/[.08];
+  }
+}
+
+
+/* =========================================================
+   LIGHT THEME — WEBSITE
+========================================================= */
+
+html[data-theme='light'] body,
+html[data-theme='light'] #root,
+html[data-theme='light'] #root > div {
+  background: #eef4f7 !important;
+  color: #172033 !important;
+}
+
+
+/* =========================================================
+   LIGHT THEME — TEXT
+========================================================= */
+
+html[data-theme='light'] .text-white {
+  color: #111827 !important;
+}
+
+html[data-theme='light'] .text-slate-200 {
+  color: #1e293b !important;
+}
+
+html[data-theme='light'] .text-slate-300 {
+  color: #334155 !important;
+}
+
+html[data-theme='light'] .text-slate-400 {
+  color: #526277 !important;
+}
+
+html[data-theme='light'] .text-slate-500 {
+  color: #64748b !important;
+}
+
+html[data-theme='light'] .text-slate-600 {
+  color: #64748b !important;
+}
+
+
+/* =========================================================
+   LIGHT THEME — GLASS CARDS
+========================================================= */
+
+html[data-theme='light'] .glass-card {
+  background: rgba(255, 255, 255, 0.7) !important;
+
+  border-color: rgba(15, 23, 42, 0.1) !important;
+
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+html[data-theme='light'] .glass-card:hover {
+  background: rgba(255, 255, 255, 0.88) !important;
+
+  border-color: rgba(34, 211, 238, 0.28) !important;
+
+  box-shadow:
+    0 22px 55px rgba(15, 23, 42, 0.09),
+    0 0 30px rgba(34, 211, 238, 0.05) !important;
+}
+
+
+/* =========================================================
+   LIGHT THEME — TECH CHIPS
+========================================================= */
+
+html[data-theme='light'] .tech-chip {
+  background: rgba(15, 23, 42, 0.035) !important;
+
+  border-color: rgba(15, 23, 42, 0.1) !important;
+
+  color: #526277 !important;
+}
+
+html[data-theme='light'] .tech-chip:hover {
+  border-color: rgba(8, 145, 178, 0.28) !important;
+
+  color: #0891b2 !important;
+}
+
+
+/* =========================================================
+   LIGHT THEME — NAV LINKS
+========================================================= */
+
+html[data-theme='light'] .nav-link {
+  color: #64748b !important;
+}
+
+html[data-theme='light'] .nav-link:hover {
+  color: #0891b2 !important;
+}
+
+
+/* =========================================================
+   LIGHT THEME — SECONDARY BUTTON
+========================================================= */
+
+html[data-theme='light'] .btn-secondary {
+  background: rgba(255, 255, 255, 0.7) !important;
+
+  border-color: rgba(15, 23, 42, 0.1) !important;
+
+  color: #334155 !important;
+}
+
+html[data-theme='light'] .btn-secondary:hover {
+  background: #ffffff !important;
+
+  border-color: rgba(192, 132, 252, 0.35) !important;
+
+  color: #111827 !important;
+}
+
+
+/* =========================================================
+   LIGHT THEME — ORBS
+========================================================= */
+
+html[data-theme='light'] .orb-cyan {
+  background: rgba(34, 211, 238, 0.08) !important;
+}
+
+html[data-theme='light'] .orb-purple {
+  background: rgba(168, 85, 247, 0.06) !important;
+}
+
+
+/* =========================================================
+   LIGHT THEME — GRID
+========================================================= */
+
+html[data-theme='light'] .portfolio-grid {
+  opacity: 0.55;
+
+  background-image:
+    linear-gradient(
+      rgba(15, 23, 42, 0.04) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(15, 23, 42, 0.04) 1px,
+      transparent 1px
+    ) !important;
+}
+
+
+/* =========================================================
+   NAVBAR
+========================================================= */
+
+.site-navbar {
+  background: rgba(5, 8, 22, 0.78);
 
   transition:
+    background-color 0.55s ease,
+    border-color 0.55s ease;
+}
+
+html[data-theme='light'] .site-navbar {
+  background: rgba(238, 244, 247, 0.82) !important;
+
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+
+/* =========================================================
+   BB-8 WRAPPER
+========================================================= */
+
+.navbar-bb8-wrapper {
+  position: relative;
+
+  flex: 0 0 auto;
+
+  transform: translateX(120px);
+
+  z-index: 60;
+}
+
+
+/* =========================================================
+   BB-8 BUTTON
+========================================================= */
+
+.bb8-theme-toggle-root {
+  position: relative;
+
+  display: block;
+
+  width: 100px;
+  height: 44px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+
+  outline: none;
+
+  border-radius: 999px;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  user-select: none;
+
+  -webkit-tap-highlight-color: transparent;
+
+  overflow: visible;
+
+  filter:
+    drop-shadow(
+      0 7px 16px rgba(0, 0, 0, 0.24)
+    );
+
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
+}
+
+.bb8-theme-toggle-root:hover {
+  transform:
+    translateY(-1px)
+    scale(1.035);
+
+  filter:
+    drop-shadow(
+      0 8px 20px rgba(34, 211, 238, 0.15)
+    );
+}
+
+.bb8-theme-toggle-root:active {
+  transform: scale(0.97);
+}
+
+.bb8-theme-toggle-root:focus-visible {
+  outline:
+    2px solid rgba(103, 232, 249, 0.85);
+
+  outline-offset: 4px;
+}
+
+
+/* =========================================================
+   BB-8 TOGGLE
+========================================================= */
+
+.bb8-toggle {
+  position: relative;
+
+  display: block;
+
+  width: 100px;
+  height: 44px;
+
+  overflow: visible;
+
+  border-radius: 999px;
+}
+
+
+/* =========================================================
+   BB-8 SCENERY
+========================================================= */
+
+.bb8-toggle__scenery {
+  position: absolute;
+
+  inset: 0;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  border:
+    1px solid rgba(103, 232, 249, 0.28);
+
+  background:
+    linear-gradient(
+      180deg,
+      #06131e 0%,
+      #0a2a40 64%,
+      #6f5848 65%,
+      #594536 100%
+    );
+
+  box-shadow:
+    inset 0 0 16px rgba(0, 0, 0, 0.42),
+    0 0 16px rgba(34, 211, 238, 0.05);
+
+  transition:
+    background 0.72s ease,
+    border-color 0.72s ease,
+    box-shadow 0.72s ease;
+}
+
+
+/* GROUND */
+
+.bb8-toggle__scenery::before {
+  content: '';
+
+  position: absolute;
+
+  z-index: 1;
+
+  left: 0;
+  bottom: 0;
+
+  width: 100%;
+  height: 29%;
+
+  background: #594536;
+
+  transition:
+    background 0.72s ease;
+}
+
+
+/* NIGHT STARS */
+
+.bb8-toggle__scenery::after {
+  content: '';
+
+  position: absolute;
+
+  z-index: 1;
+
+  width: 2px;
+  height: 2px;
+
+  left: 58px;
+  top: 10px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255, 255, 255, 0.9);
+
+  box-shadow:
+    11px 8px 0 rgba(255, 255, 255, 0.55),
+    25px 1px 0 rgba(255, 255, 255, 0.75),
+    31px 15px 0 rgba(255, 255, 255, 0.45),
+    5px 19px 0 rgba(255, 255, 255, 0.45);
+
+  opacity: 1;
+
+  transition:
+    opacity 0.55s ease;
+}
+
+
+/* =========================================================
+   CLOUDS
+========================================================= */
+
+.bb8-toggle__cloud {
+  position: absolute;
+
+  z-index: 2;
+
+  border-radius: 999px;
+
+  background:
+    rgba(255, 255, 255, 0.72);
+
+  filter:
+    blur(0.45px);
+
+  transition:
+    opacity 0.65s ease,
+    transform 0.72s ease;
+}
+
+
+/* CLOUD 1 */
+
+.bb8-toggle__cloud--1 {
+  width: 19px;
+  height: 5px;
+
+  right: 14px;
+  top: 13px;
+
+  opacity: 0.18;
+}
+
+.bb8-toggle__cloud--1::before,
+.bb8-toggle__cloud--1::after {
+  content: '';
+
+  position: absolute;
+
+  bottom: 0;
+
+  border-radius: 50%;
+
+  background: inherit;
+}
+
+.bb8-toggle__cloud--1::before {
+  width: 8px;
+  height: 8px;
+
+  left: 3px;
+  bottom: 1px;
+}
+
+.bb8-toggle__cloud--1::after {
+  width: 10px;
+  height: 7px;
+
+  right: 2px;
+}
+
+
+/* CLOUD 2 */
+
+.bb8-toggle__cloud--2 {
+  width: 15px;
+  height: 4px;
+
+  right: 31px;
+  top: 25px;
+
+  opacity: 0.12;
+}
+
+
+/* =========================================================
+   MOON / SUN
+========================================================= */
+
+.bb8-toggle__star {
+  position: absolute;
+
+  z-index: 3;
+
+  width: 12px;
+  height: 12px;
+
+  right: 24px;
+  top: 7px;
+
+  border-radius: 50%;
+
+  background: #f4f7fb;
+
+  box-shadow:
+    0 0 9px rgba(255, 255, 255, 0.85);
+
+  transition:
+    transform 0.72s cubic-bezier(0.34, 1.25, 0.64, 1),
+    background 0.72s ease,
+    box-shadow 0.72s ease,
+    opacity 0.55s ease;
+}
+
+
+/* ORANGE PLANET / SUN */
+
+.bb8-toggle__star--2 {
+  width: 9px;
+  height: 9px;
+
+  right: 9px;
+  top: 24px;
+
+  background: #f59a3d;
+
+  box-shadow:
+    0 0 8px rgba(245, 154, 61, 0.82);
+}
+
+
+/* =========================================================
+   BB-8 ROBOT
+========================================================= */
+
+.bb8 {
+  position: absolute;
+
+  z-index: 20;
+
+  left: 1px;
+  bottom: 0;
+
+  width: 46px;
+  height: 50px;
+
+  pointer-events: none;
+
+  transform-origin:
+    left bottom;
+
+  transform:
+    scale(1.08);
+
+  transition:
+    left 0.78s cubic-bezier(0.34, 1.25, 0.64, 1);
+}
+
+
+/* =========================================================
+   BB-8 BODY
+========================================================= */
+
+.bb8__body {
+  position: absolute;
+
+  z-index: 22;
+
+  left: 6px;
+  bottom: 0;
+
+  width: 36px;
+  height: 36px;
+
+  border:
+    1.5px solid #cbd2d6;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      #f5f4ed 0 15%,
+      transparent 16%
+    ),
+
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 0 24%,
+      #92999f 25% 28%,
+      transparent 29%
+    ),
+
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 0 31%,
+      #dd8b24 32% 45%,
+      transparent 46%
+    ),
+
+    conic-gradient(
+      from 0deg,
+      #f7f6ef 0deg 25deg,
+      #df8b23 25deg 57deg,
+      #f7f6ef 57deg 112deg,
+      #df8b23 112deg 145deg,
+      #f7f6ef 145deg 205deg,
+      #df8b23 205deg 238deg,
+      #f7f6ef 238deg 292deg,
+      #df8b23 292deg 326deg,
+      #f7f6ef 326deg 360deg
+    );
+
+  box-shadow:
+    inset -4px -5px 6px rgba(0, 0, 0, 0.18),
+    inset 3px 2px 5px rgba(255, 255, 255, 0.72),
+    0 2px 4px rgba(0, 0, 0, 0.32);
+
+  filter:
+    brightness(1.06);
+
+  transition:
+    transform 0.78s cubic-bezier(0.34, 1.25, 0.64, 1);
+}
+
+
+/* BODY DETAILS */
+
+.bb8__body::before {
+  content: '';
+
+  position: absolute;
+
+  width: 6px;
+  height: 6px;
+
+  left: 2px;
+  top: 13px;
+
+  border:
+    1.4px solid #69737a;
+
+  border-radius: 50%;
+
+  background: #ecece7;
+
+  box-shadow:
+    25px 3px 0 -1px #ecece7,
+    25px 3px 0 0 #69737a;
+}
+
+.bb8__body::after {
+  content: '';
+
+  position: absolute;
+
+  left: 13px;
+  top: 4px;
+
+  width: 8px;
+  height: 2px;
+
+  border-radius: 4px;
+
+  background: #6b747a;
+
+  box-shadow:
+    0 26px 0 #6b747a;
+}
+
+
+/* =========================================================
+   BB-8 HEAD
+========================================================= */
+
+.bb8__head {
+  position: absolute;
+
+  z-index: 30;
+
+  left: 7px;
+  top: 0;
+
+  width: 34px;
+  height: 19px;
+
+  overflow: visible;
+
+  border:
+    1.5px solid #cbd2d6;
+
+  border-radius:
+    18px 18px 7px 7px;
+
+  background:
+    linear-gradient(
+      to bottom,
+      #faf9f3 0%,
+      #f4f3ec 52%,
+      #d8d9d4 53%,
+      #eeeeea 100%
+    );
+
+  box-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.32);
+
+  filter:
+    brightness(1.08);
+
+  transform-origin:
+    50% 100%;
+
+  transition:
+    left 0.72s cubic-bezier(0.34, 1.25, 0.64, 1),
+    transform 0.55s cubic-bezier(0.34, 1.25, 0.64, 1);
+}
+
+
+/* HEAD ORANGE STRIPES */
+
+.bb8__head::before {
+  content: '';
+
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  top: 4px;
+
+  height: 2px;
+
+  background: #d98924;
+
+  box-shadow:
+    0 10px 0 #d98924;
+}
+
+
+/* HEAD SMALL DETAILS */
+
+.bb8__head::after {
+  content: '';
+
+  position: absolute;
+
+  left: 4px;
+  bottom: 2px;
+
+  width: 3px;
+  height: 2px;
+
+  background: #8a9195;
+
+  box-shadow:
+    5px 0 0 #d98924,
+    10px 0 0 #8a9195,
+    15px 0 0 #d98924,
+    20px 0 0 #8a9195;
+}
+
+
+/* =========================================================
+   BB-8 MAIN EYE
+========================================================= */
+
+.bb8__eye {
+  position: absolute;
+
+  z-index: 35;
+
+  left: 13px;
+  top: 3px;
+
+  width: 8px;
+  height: 8px;
+
+  border:
+    1px solid #596168;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle at 35% 28%,
+      #fff 0 9%,
+      #e25555 10% 18%,
+      #111820 19% 100%
+    );
+}
+
+.bb8__eye::after {
+  content: '';
+
+  position: absolute;
+
+  width: 2px;
+  height: 2px;
+
+  left: 1px;
+  top: 1px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255, 255, 255, 0.9);
+}
+
+
+/* =========================================================
+   BB-8 SECOND SENSOR
+========================================================= */
+
+.bb8__sensor {
+  position: absolute;
+
+  z-index: 35;
+
+  right: 6px;
+  top: 7px;
+
+  width: 6px;
+  height: 6px;
+
+  border:
+    1px solid #6d7478;
+
+  border-radius: 50%;
+
+  background: #0a1016;
+
+  box-shadow:
+    inset 1px 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+
+/* =========================================================
+   BB-8 ANTENNA
+========================================================= */
+
+.bb8__antenna {
+  position: absolute;
+
+  z-index: 28;
+
+  left: 23px;
+  top: -8px;
+
+  width: 1.5px;
+  height: 10px;
+
+  border-radius: 2px;
+
+  background: #d8dadd;
+
+  box-shadow:
+    0 -1px 0 #1b252d;
+
+  transition:
+    left 0.72s cubic-bezier(0.34, 1.25, 0.64, 1),
+    transform 0.55s cubic-bezier(0.34, 1.25, 0.64, 1);
+
+  transform-origin:
+    bottom center;
+}
+
+
+/* SECOND ANTENNA */
+
+.bb8__antenna::after {
+  content: '';
+
+  position: absolute;
+
+  left: -5px;
+  top: 3px;
+
+  width: 1px;
+  height: 7px;
+
+  background: #d8dadd;
+}
+
+
+/* =========================================================
+   DARK / NIGHT POSITION
+========================================================= */
+
+html[data-theme='dark'] .bb8 {
+  left: 1px;
+}
+
+html[data-theme='dark'] .bb8__body {
+  transform:
+    rotate(0deg);
+}
+
+html[data-theme='dark'] .bb8__head {
+  left: 4px;
+
+  transform:
+    rotate(-7deg)
+    translateY(0);
+}
+
+html[data-theme='dark'] .bb8__antenna {
+  left: 20px;
+
+  transform:
+    rotate(-7deg);
+}
+
+
+/* =========================================================
+   LIGHT / DAY SCENERY
+========================================================= */
+
+html[data-theme='light'] .bb8-toggle__scenery {
+  border-color:
+    rgba(14, 116, 144, 0.3);
+
+  background:
+    linear-gradient(
+      180deg,
+      #72b9df 0%,
+      #b7e2f3 64%,
+      #d0ae86 65%,
+      #c39a70 100%
+    );
+
+  box-shadow:
+    inset 0 0 14px rgba(255, 255, 255, 0.28),
+    0 5px 18px rgba(15, 23, 42, 0.1);
+}
+
+
+/* DAY GROUND */
+
+html[data-theme='light'] .bb8-toggle__scenery::before {
+  background: #c39a70;
+}
+
+
+/* REMOVE NIGHT STARS */
+
+html[data-theme='light'] .bb8-toggle__scenery::after {
+  opacity: 0;
+}
+
+
+/* DAY CLOUDS */
+
+html[data-theme='light'] .bb8-toggle__cloud--1 {
+  opacity: 0.9;
+
+  transform:
+    translateX(-4px);
+}
+
+html[data-theme='light'] .bb8-toggle__cloud--2 {
+  opacity: 0.68;
+
+  transform:
+    translateX(4px);
+}
+
+
+/* DAY SUN */
+
+html[data-theme='light'] .bb8-toggle__star {
+  transform:
+    translate(-2px, 1px)
+    scale(1.08);
+
+  background: #fff7c2;
+
+  box-shadow:
+    0 0 12px rgba(255, 220, 92, 0.98);
+}
+
+
+/* ORANGE PLANET */
+
+html[data-theme='light'] .bb8-toggle__star--2 {
+  transform:
+    translate(-2px, -2px)
+    scale(1.04);
+
+  background: #f59a3d;
+
+  box-shadow:
+    0 0 9px rgba(245, 154, 61, 0.85);
+}
+
+
+/* =========================================================
+   LIGHT / DAY BB-8 MOVEMENT
+========================================================= */
+
+html[data-theme='light'] .bb8 {
+  left: 51px;
+}
+
+
+/* BODY ROLLS */
+
+html[data-theme='light'] .bb8__body {
+  transform:
+    rotate(720deg);
+}
+
+
+/* HEAD MOVES RIGHT */
+
+html[data-theme='light'] .bb8__head {
+  left: 11px;
+
+  transform:
+    rotate(7deg)
+    translateY(-1px);
+}
+
+
+/* ANTENNA FOLLOWS HEAD */
+
+html[data-theme='light'] .bb8__antenna {
+  left: 27px;
+
+  transform:
+    rotate(7deg);
+}
+
+
+/* =========================================================
+   BB-8 HEAD LOOK ANIMATION
+========================================================= */
+
+.bb8-theme-toggle-root:hover .bb8__head {
+  animation:
+    bb8-head-look 0.85s ease-in-out;
+}
+
+@keyframes bb8-head-look {
+
+  0%,
+  100% {
+    margin-left: 0;
+  }
+
+  45% {
+    margin-left: 2px;
+  }
+
+  70% {
+    margin-left: -1px;
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET
+========================================================= */
+
+@media (max-width: 1279px) {
+
+  .navbar-bb8-wrapper {
+    transform:
+      translateX(24px);
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVE — MOBILE
+========================================================= */
+
+@media (max-width: 1023px) {
+
+  .navbar-bb8-wrapper {
+    transform: none;
+
+    margin-left: auto;
+  }
+
+  .bb8-theme-toggle-root {
+    width: 94px;
+    height: 42px;
+  }
+
+  .bb8-toggle {
+    width: 94px;
+    height: 42px;
+  }
+
+  html[data-theme='light'] .bb8 {
+    left: 46px;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
