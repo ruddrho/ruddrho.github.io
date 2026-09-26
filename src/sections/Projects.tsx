@@ -57,15 +57,17 @@ const projects = [
       'https://raw.githubusercontent.com/ruddrho/pid-lqr-fuzzy-mobile-robot-trajectory-tracking/main/pid_lqr_fuzzy_controller_comparison.gif',
   },
 
-  {
-    number: '05',
-    title: 'SLAM Live Occupancy Map',
-    description:
-      'Autonomous differential-drive robot navigation with path planning, dynamic obstacle avoidance, 360° LiDAR and live occupancy mapping.',
-    tags: ['MATLAB', 'SLAM', 'LiDAR', 'A*', 'DWA'],
-    github:
-      'https://github.com/ruddrho/slam_live_occupancy_map',
-  },
+ {
+  number: '05',
+  title: 'SLAM Live Occupancy Map',
+  description:
+    'Autonomous differential-drive robot navigation with path planning, dynamic obstacle avoidance, 360° LiDAR and live occupancy mapping.',
+  tags: ['MATLAB', 'SLAM', 'LiDAR', 'A*', 'DWA'],
+  github:
+    'https://github.com/ruddrho/slam_live_occupancy_map',
+  image:
+    'https://raw.githubusercontent.com/ruddrho/slam_live_occupancy_map/main/combined_astar_navigation.gif',
+},
 
   {
     number: '06',
