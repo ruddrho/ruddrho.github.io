@@ -1661,3 +1661,65 @@ html[data-theme='light'] .bb8 {
     transform-origin: left bottom;
   }
 }
+/* =========================================================
+   FIX BB-8 HEAD + ANTENNA VISIBILITY
+   Keep current position and robot size unchanged
+========================================================= */
+
+/* Allow BB-8 head/antenna to extend above the pill */
+.bb8-theme-toggle-root,
+.navbar-bb8-wrapper,
+.bb8-toggle,
+.bb8-toggle__scenery {
+  overflow: visible !important;
+}
+
+
+/* Make sure complete robot stays above scenery */
+.bb8 {
+  z-index: 50 !important;
+}
+
+
+/* Head must stay above spherical body */
+.bb8__head {
+  z-index: 60 !important;
+  overflow: visible !important;
+}
+
+
+/* Eye and sensor above head */
+.bb8__eye,
+.bb8__sensor {
+  z-index: 70 !important;
+}
+
+
+/* Antenna must not be clipped */
+.bb8__antenna {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+
+  z-index: 80 !important;
+
+  top: -8px !important;
+
+  height: 11px !important;
+}
+
+
+/* Second small antenna */
+.bb8__antenna::after {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+
+  height: 7px !important;
+}
+
+
+/* Keep body below the head */
+.bb8__body {
+  z-index: 40 !important;
+}
