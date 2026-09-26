@@ -1602,3 +1602,62 @@ html[data-theme='light'] .bb8-toggle__cloud {
     left: 47px;
   }
 }
+/* =========================================================
+   FINAL BB-8 POSITION + SIZE TUNING
+========================================================= */
+
+/* Move complete BB-8 toggle farther right */
+.navbar-bb8-wrapper {
+  position: relative;
+  transform: translateX(120px);
+}
+
+
+/* Make BB-8 robot larger and clearer */
+.bb8 {
+  transform: scale(1.22);
+  transform-origin: left bottom;
+}
+
+
+/* Keep robot head above the body */
+.bb8__head {
+  z-index: 10;
+}
+
+
+/* Slightly stronger robot visibility */
+.bb8__body {
+  filter:
+    drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45))
+    brightness(1.06);
+}
+
+.bb8__head {
+  filter:
+    drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45))
+    brightness(1.08);
+}
+
+
+/* Keep desktop animation smooth */
+html[data-theme='dark'] .bb8 {
+  left: 2px;
+}
+
+html[data-theme='light'] .bb8 {
+  left: 43px;
+}
+
+
+/* Do not push toggle outside screen on mobile/tablet */
+@media (max-width: 1023px) {
+  .navbar-bb8-wrapper {
+    transform: none;
+  }
+
+  .bb8 {
+    transform: scale(1.12);
+    transform-origin: left bottom;
+  }
+}
