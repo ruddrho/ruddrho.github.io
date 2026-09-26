@@ -82,14 +82,16 @@ const projects = [
   },
 
   {
-    number: '07',
-    title: 'Ball-on-Plate MATLAB Simulation',
-    description:
-      'Control-system simulation for ball stabilization and trajectory behaviour on a two-axis plate platform using MATLAB.',
-    tags: ['MATLAB', 'Control Systems', 'Simulation', 'Dynamics'],
-    github:
-      'https://github.com/ruddrho/ball-on-plate-matlab-simulation',
-  },
+  number: '07',
+  title: 'Ball-on-Plate MATLAB Simulation',
+  description:
+    'Control-system simulation for ball stabilization and trajectory behaviour on a two-axis plate platform using MATLAB.',
+  tags: ['MATLAB', 'Control Systems', 'Simulation', 'Dynamics'],
+  github:
+    'https://github.com/ruddrho/ball-on-plate-matlab-simulation',
+  image:
+    'https://raw.githubusercontent.com/ruddrho/ball-on-plate-matlab-simulation/main/ball_on_plate_research_grade.gif',
+},
 
   {
     number: '08',
