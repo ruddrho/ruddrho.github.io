@@ -913,3 +913,692 @@ html[data-theme='light'] .bb8__head {
     transition-duration: 0.01ms !important;
   }
 }
+/* =========================================================
+   FINAL BB-8 NAVBAR OVERRIDES
+   Position + detailed BB-8 + rolling animation
+========================================================= */
+
+
+/* ---------------------------------------------------------
+   1. MOVE THE TOGGLE SLIGHTLY RIGHT
+--------------------------------------------------------- */
+
+.navbar-bb8-wrapper {
+  position: relative;
+  transform: translateX(16px);
+}
+
+
+/* ---------------------------------------------------------
+   TOGGLE SIZE
+--------------------------------------------------------- */
+
+.bb8-theme-toggle-root {
+  position: relative;
+
+  width: 92px;
+  height: 42px;
+
+  margin-left: 0;
+
+  overflow: visible;
+
+  border: 0;
+  padding: 0;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+
+/* ---------------------------------------------------------
+   OUTER PILL
+--------------------------------------------------------- */
+
+.bb8-toggle {
+  position: relative;
+
+  width: 92px;
+  height: 42px;
+
+  overflow: visible;
+
+  border-radius: 999px;
+
+  border: 1px solid rgba(103, 232, 249, 0.28);
+
+  background: transparent;
+
+  box-shadow:
+    0 0 18px rgba(34, 211, 238, 0.06);
+}
+
+
+/* ---------------------------------------------------------
+   SCENERY — THIS PART STAYS CLIPPED
+--------------------------------------------------------- */
+
+.bb8-toggle__scenery {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #0a2638 0%,
+      #17425b 66%,
+      #9b7555 67%,
+      #8b674c 100%
+    );
+
+  box-shadow:
+    inset 0 0 15px rgba(0, 0, 0, 0.38);
+
+  transition:
+    background 0.55s ease;
+}
+
+
+/* ---------------------------------------------------------
+   GROUND
+--------------------------------------------------------- */
+
+.bb8-toggle__scenery::before {
+  content: '';
+
+  position: absolute;
+
+  left: 0;
+  bottom: 0;
+
+  width: 100%;
+  height: 28%;
+
+  background: #8b674c;
+
+  z-index: 1;
+
+  transition:
+    background 0.55s ease;
+}
+
+
+/* ---------------------------------------------------------
+   CLOUDS
+--------------------------------------------------------- */
+
+.bb8-toggle__cloud {
+  position: absolute;
+
+  z-index: 2;
+
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.72);
+
+  filter: blur(0.6px);
+
+  transition:
+    opacity 0.55s ease,
+    transform 0.55s ease;
+}
+
+.bb8-toggle__cloud--1 {
+  width: 19px;
+  height: 5px;
+
+  right: 13px;
+  top: 13px;
+
+  opacity: 0.42;
+}
+
+.bb8-toggle__cloud--1::before,
+.bb8-toggle__cloud--1::after {
+  content: '';
+
+  position: absolute;
+
+  bottom: 0;
+
+  border-radius: 50%;
+
+  background: inherit;
+}
+
+.bb8-toggle__cloud--1::before {
+  width: 8px;
+  height: 8px;
+
+  left: 3px;
+  bottom: 1px;
+}
+
+.bb8-toggle__cloud--1::after {
+  width: 10px;
+  height: 7px;
+
+  right: 2px;
+  bottom: 0;
+}
+
+
+.bb8-toggle__cloud--2 {
+  width: 15px;
+  height: 4px;
+
+  right: 27px;
+  top: 25px;
+
+  opacity: 0.28;
+}
+
+
+/* ---------------------------------------------------------
+   WHITE SUN / MOON
+--------------------------------------------------------- */
+
+.bb8-toggle__star {
+  position: absolute;
+
+  z-index: 3;
+
+  width: 12px;
+  height: 12px;
+
+  right: 23px;
+  top: 7px;
+
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 0 8px rgba(255, 255, 255, 0.85);
+
+  transition:
+    transform 0.55s ease,
+    background 0.55s ease,
+    box-shadow 0.55s ease;
+}
+
+
+/* ---------------------------------------------------------
+   ORANGE SUN
+--------------------------------------------------------- */
+
+.bb8-toggle__star--2 {
+  width: 9px;
+  height: 9px;
+
+  right: 9px;
+  top: 23px;
+
+  background: #f59a3d;
+
+  box-shadow:
+    0 0 8px rgba(245, 154, 61, 0.8);
+}
+
+
+/* =========================================================
+   DETAILED BB-8
+========================================================= */
+
+.bb8 {
+  position: absolute;
+
+  z-index: 20;
+
+  left: 2px;
+  bottom: 1px;
+
+  width: 43px;
+  height: 46px;
+
+  pointer-events: none;
+
+  transition:
+    left 0.72s cubic-bezier(.34, 1.25, .64, 1);
+}
+
+
+/* =========================================================
+   BB-8 SPHERICAL BODY
+========================================================= */
+
+.bb8__body {
+  position: absolute;
+
+  z-index: 4;
+
+  left: 5px;
+  bottom: 0;
+
+  width: 35px;
+  height: 35px;
+
+  border-radius: 50%;
+
+  border: 1.5px solid #cbd2d6;
+
+  background:
+
+    /* center white hub */
+    radial-gradient(
+      circle at 50% 50%,
+      #f5f4ed 0 16%,
+      transparent 17%
+    ),
+
+    /* grey inner ring */
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 0 25%,
+      #9ca3a8 26% 29%,
+      transparent 30%
+    ),
+
+    /* orange ring */
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 0 31%,
+      #dc8b25 32% 45%,
+      transparent 46%
+    ),
+
+    /* BB-8 orange panels */
+    conic-gradient(
+      from 0deg,
+      #f7f6ef 0deg 25deg,
+      #df8b23 25deg 57deg,
+      #f7f6ef 57deg 112deg,
+      #df8b23 112deg 145deg,
+      #f7f6ef 145deg 205deg,
+      #df8b23 205deg 238deg,
+      #f7f6ef 238deg 292deg,
+      #df8b23 292deg 326deg,
+      #f7f6ef 326deg 360deg
+    );
+
+  box-shadow:
+    inset -4px -5px 6px rgba(0, 0, 0, 0.18),
+    inset 3px 2px 5px rgba(255, 255, 255, 0.7),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+
+  transform: rotate(0deg);
+
+  transition:
+    transform 0.72s cubic-bezier(.34, 1.25, .64, 1);
+}
+
+
+/* ---------------------------------------------------------
+   BODY SIDE DETAILS
+--------------------------------------------------------- */
+
+.bb8__body::before {
+  content: '';
+
+  position: absolute;
+
+  width: 6px;
+  height: 6px;
+
+  left: 2px;
+  top: 13px;
+
+  border-radius: 50%;
+
+  border: 1.5px solid #69737a;
+
+  background: #ecece7;
+
+  box-shadow:
+    24px 3px 0 -1px #ecece7,
+    24px 3px 0 0 #69737a;
+}
+
+
+.bb8__body::after {
+  content: '';
+
+  position: absolute;
+
+  left: 13px;
+  top: 4px;
+
+  width: 8px;
+  height: 2px;
+
+  border-radius: 4px;
+
+  background: #6b747a;
+
+  box-shadow:
+    0 25px 0 #6b747a;
+}
+
+
+/* =========================================================
+   BB-8 HEAD
+========================================================= */
+
+.bb8__head {
+  position: absolute;
+
+  z-index: 8;
+
+  left: 6px;
+  top: 1px;
+
+  width: 33px;
+  height: 18px;
+
+  overflow: hidden;
+
+  border: 1.5px solid #cbd2d6;
+
+  border-radius:
+    18px
+    18px
+    7px
+    7px;
+
+  background:
+    linear-gradient(
+      to bottom,
+      #f8f7f1 0%,
+      #f4f3ec 53%,
+      #d8d9d4 54%,
+      #eeeeea 100%
+    );
+
+  box-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.32);
+
+  transform-origin: 50% 100%;
+
+  transition:
+    transform 0.45s ease;
+}
+
+
+/* ---------------------------------------------------------
+   HEAD ORANGE STRIPES
+--------------------------------------------------------- */
+
+.bb8__head::before {
+  content: '';
+
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  top: 4px;
+
+  height: 2px;
+
+  background: #d98924;
+
+  box-shadow:
+    0 9px 0 #d98924;
+}
+
+
+/* ---------------------------------------------------------
+   HEAD LOWER DETAIL
+--------------------------------------------------------- */
+
+.bb8__head::after {
+  content: '';
+
+  position: absolute;
+
+  left: 4px;
+  bottom: 2px;
+
+  width: 3px;
+  height: 2px;
+
+  background: #8a9195;
+
+  box-shadow:
+    5px 0 0 #d98924,
+    10px 0 0 #8a9195,
+    15px 0 0 #d98924,
+    20px 0 0 #8a9195;
+}
+
+
+/* =========================================================
+   BB-8 MAIN BLACK EYE
+========================================================= */
+
+.bb8__eye {
+  position: absolute;
+
+  z-index: 12;
+
+  left: 13px;
+  top: 3px;
+
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  border: 1px solid #596168;
+
+  background:
+    radial-gradient(
+      circle at 35% 28%,
+      #ffffff 0 9%,
+      #e25555 10% 18%,
+      #111820 19% 100%
+    );
+
+  box-shadow:
+    0 0 2px rgba(0, 0, 0, 0.7);
+}
+
+
+/* Remove previous cyan eye highlight */
+
+.bb8__eye::after {
+  content: '';
+
+  position: absolute;
+
+  width: 2px;
+  height: 2px;
+
+  left: 1px;
+  top: 1px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.85);
+
+  box-shadow: none;
+}
+
+
+/* =========================================================
+   BB-8 SECOND SENSOR
+========================================================= */
+
+.bb8__sensor {
+  position: absolute;
+
+  z-index: 12;
+
+  right: 6px;
+  top: 7px;
+
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  border: 1px solid #6d7478;
+
+  background: #0a1016;
+
+  box-shadow:
+    inset 1px 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+
+/* =========================================================
+   BB-8 ANTENNAS
+========================================================= */
+
+.bb8__antenna {
+  position: absolute;
+
+  z-index: 7;
+
+  left: 22px;
+  top: -7px;
+
+  width: 1.5px;
+  height: 9px;
+
+  border-radius: 2px;
+
+  background: #d8dadd;
+
+  box-shadow:
+    0 -1px 0 #1b252d;
+}
+
+
+.bb8__antenna::after {
+  content: '';
+
+  position: absolute;
+
+  left: -5px;
+  top: 3px;
+
+  width: 1px;
+  height: 6px;
+
+  background: #d8dadd;
+}
+
+
+/* =========================================================
+   DARK MODE POSITION
+========================================================= */
+
+html[data-theme='dark'] .bb8 {
+  left: 2px;
+}
+
+html[data-theme='dark'] .bb8__body {
+  transform: rotate(0deg);
+}
+
+html[data-theme='dark'] .bb8__head {
+  transform: rotate(-2deg);
+}
+
+
+/* =========================================================
+   LIGHT MODE — ROLL BB-8 TO THE RIGHT
+========================================================= */
+
+html[data-theme='light'] .bb8 {
+  left: 47px;
+}
+
+html[data-theme='light'] .bb8__body {
+  transform: rotate(720deg);
+}
+
+html[data-theme='light'] .bb8__head {
+  transform: rotate(3deg);
+}
+
+
+/* =========================================================
+   ROLL BACK TO DARK
+========================================================= */
+
+html[data-theme='dark'] .bb8__body {
+  transform: rotate(0deg);
+}
+
+
+/* =========================================================
+   LIGHT SCENERY
+========================================================= */
+
+html[data-theme='light'] .bb8-toggle__scenery {
+  background:
+    linear-gradient(
+      180deg,
+      #79b9db 0%,
+      #a8d5e9 66%,
+      #c9a47d 67%,
+      #c19a72 100%
+    );
+}
+
+html[data-theme='light'] .bb8-toggle__scenery::before {
+  background: #c19a72;
+}
+
+html[data-theme='light'] .bb8-toggle__cloud {
+  opacity: 0.82;
+
+  background: rgba(255, 255, 255, 0.92);
+}
+
+
+/* =========================================================
+   SMALL HOVER EFFECT
+========================================================= */
+
+.navbar-bb8-wrapper:hover .bb8__head {
+  transform: rotate(-5deg);
+}
+
+
+/* =========================================================
+   MOBILE — DON'T PUSH OUTSIDE MENU
+========================================================= */
+
+@media (max-width: 1023px) {
+
+  .navbar-bb8-wrapper {
+    transform: none;
+  }
+
+  .navbar-bb8-mobile {
+    transform: none;
+  }
+
+  .bb8-theme-toggle-root {
+    width: 92px;
+    height: 42px;
+
+    margin-right: 0;
+  }
+
+  html[data-theme='light'] .bb8 {
+    left: 47px;
+  }
+}
