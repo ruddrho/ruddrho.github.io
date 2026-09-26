@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { AnimatedBackground } from './components/AnimatedBackground'
+import { BB8ThemeToggle } from './components/BB8ThemeToggle'
 import { Footer } from './components/Footer'
 import { Navbar } from './components/Navbar'
 import { WelcomeIntro } from './components/WelcomeIntro'
@@ -51,18 +52,29 @@ export default function App() {
         showIntro ? 'h-screen overflow-hidden' : 'overflow-hidden'
       }`}
     >
-      {/* EXISTING WEBSITE BACKGROUND */}
+      {/* =====================================================
+          EXISTING WEBSITE BACKGROUND
+      ====================================================== */}
       <AnimatedBackground />
 
-      {/* ANIMATED SCROLL PROGRESS */}
+      {/* =====================================================
+          ANIMATED SCROLL PROGRESS
+      ====================================================== */}
       {!showIntro && <ScrollProgress />}
 
-      {/* EXISTING GRID BACKGROUND */}
+      {/* =====================================================
+          EXISTING GRID BACKGROUND
+      ====================================================== */}
       <div className="portfolio-grid fixed inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:70px_70px] [mask-image:linear-gradient(to_bottom,black,transparent_90%)]" />
 
-      {/* EXISTING WEBSITE */}
+      {/* =====================================================
+          NAVIGATION
+      ====================================================== */}
       <Navbar />
 
+      {/* =====================================================
+          MAIN WEBSITE
+      ====================================================== */}
       <main className="relative z-10">
         <Hero />
         <About />
@@ -74,35 +86,27 @@ export default function App() {
         <Contact />
       </main>
 
+      {/* =====================================================
+          FOOTER
+      ====================================================== */}
       <Footer />
 
       {/* =====================================================
-          BB-8 THEME TOGGLE MOUNT POINT
-          Visual BB-8 toggle will be added in the next step.
-      ====================================================== */}
+          BB-8 DARK / LIGHT THEME TOGGLE
 
+          Hidden while cinematic intro is active.
+          Appears after entering the portfolio.
+      ====================================================== */}
       {!showIntro && (
-        <div
-          id="bb8-theme-toggle-root"
-          data-theme={theme}
-          data-theme-toggle-ready="true"
-          onClick={toggleTheme}
-          className="bb8-theme-toggle-root"
-          role="button"
-          tabIndex={0}
-          aria-label={`Switch to ${
-            theme === 'dark' ? 'light' : 'dark'
-          } theme`}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault()
-              toggleTheme()
-            }
-          }}
+        <BB8ThemeToggle
+          theme={theme}
+          onToggle={toggleTheme}
         />
       )}
 
-      {/* CINEMATIC WELCOME SCREEN */}
+      {/* =====================================================
+          CINEMATIC WELCOME SCREEN
+      ====================================================== */}
       {showIntro && (
         <WelcomeIntro
           onEnter={() => {
