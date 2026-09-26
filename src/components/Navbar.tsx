@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { FiMenu, FiX } from 'react-icons/fi'
+import { BB8ThemeToggle } from './BB8ThemeToggle'
 
 const links = [
   'About',
@@ -12,14 +13,24 @@ const links = [
   'Contact',
 ]
 
-export function Navbar() {
+type NavbarProps = {
+  theme: 'dark' | 'light'
+  onThemeToggle: () => void
+}
+
+export function Navbar({
+  theme,
+  onThemeToggle,
+}: NavbarProps) {
   const [open, setOpen] = useState(false)
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[.06] bg-[#050816]/75 backdrop-blur-xl">
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
 
-        {/* BRAND */}
+        {/* =====================================================
+            BRAND
+        ====================================================== */}
         <a
           href="#top"
           className="group flex items-center gap-4 font-mono text-base text-white"
@@ -34,28 +45,51 @@ export function Navbar() {
           </span>
 
           {/* NAME */}
-<span className="hidden font-medium tracking-[.04em] sm:block">
-  RUDDRHO
-  <span className="text-cyan-300">
-    {' '}MOLLIK
-  </span>
-</span>
+          <span className="hidden font-medium tracking-[.04em] sm:block">
+            RUDDRHO
+            <span className="text-cyan-300">
+              {' '}MOLLIK
+            </span>
+          </span>
         </a>
 
-        {/* DESKTOP NAVIGATION */}
-        <div className="hidden items-center gap-8 lg:flex">
-          {links.map((link) => (
-            <a
-              key={link}
-              href={`#${link.toLowerCase()}`}
-              className="nav-link text-[11px] tracking-[.18em]"
-            >
-              {link}
-            </a>
-          ))}
+
+        {/* =====================================================
+            DESKTOP NAVIGATION
+        ====================================================== */}
+        <div className="hidden items-center lg:flex">
+
+          {/* NAV LINKS */}
+          <div className="flex items-center gap-8">
+            {links.map((link) => (
+              <a
+                key={link}
+                href={`#${link.toLowerCase()}`}
+                className="nav-link text-[11px] tracking-[.18em]"
+              >
+                {link}
+              </a>
+            ))}
+          </div>
+
+
+          {/* ===================================================
+              BB-8 DARK / LIGHT TOGGLE
+              EXACTLY AFTER CONTACT
+          ==================================================== */}
+          <div className="navbar-bb8-wrapper ml-5 flex items-center">
+            <BB8ThemeToggle
+              theme={theme}
+              onToggle={onThemeToggle}
+            />
+          </div>
+
         </div>
 
-        {/* MOBILE MENU BUTTON */}
+
+        {/* =====================================================
+            MOBILE MENU BUTTON
+        ====================================================== */}
         <button
           onClick={() => setOpen((v) => !v)}
           className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 text-lg text-slate-200 transition hover:border-cyan-300/20 hover:text-cyan-300 lg:hidden"
@@ -67,7 +101,10 @@ export function Navbar() {
 
       </nav>
 
-      {/* MOBILE MENU */}
+
+      {/* =====================================================
+          MOBILE MENU
+      ====================================================== */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -86,6 +123,7 @@ export function Navbar() {
             className="overflow-hidden border-t border-white/[.06] bg-[#050816]/95 lg:hidden"
           >
             <div className="space-y-1 px-5 py-4">
+
               {links.map((link) => (
                 <a
                   onClick={() => setOpen(false)}
@@ -96,6 +134,24 @@ export function Navbar() {
                   {link}
                 </a>
               ))}
+
+
+              {/* MOBILE THEME TOGGLE */}
+              <div className="flex items-center justify-between px-3 pb-2 pt-4">
+
+                <span className="font-mono text-[10px] uppercase tracking-[.16em] text-slate-500">
+                  Theme
+                </span>
+
+                <div className="navbar-bb8-wrapper navbar-bb8-mobile">
+                  <BB8ThemeToggle
+                    theme={theme}
+                    onToggle={onThemeToggle}
+                  />
+                </div>
+
+              </div>
+
             </div>
           </motion.div>
         )}
