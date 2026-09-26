@@ -1723,3 +1723,49 @@ html[data-theme='light'] .bb8 {
 .bb8__body {
   z-index: 40 !important;
 }
+/* Keep body below the head */
+.bb8__body {
+  z-index: 40 !important;
+}
+
+
+/* =========================================================
+   BB-8 HEAD LEFT / RIGHT MOVEMENT
+========================================================= */
+
+.bb8__head {
+  transition:
+    left 0.72s cubic-bezier(.34, 1.25, .64, 1),
+    transform 0.45s ease !important;
+}
+
+/* Dark mode — head moves left */
+html[data-theme='dark'] .bb8__head {
+  left: 3px !important;
+  transform: rotate(-6deg) !important;
+}
+
+/* Light mode — head moves right */
+html[data-theme='light'] .bb8__head {
+  left: 10px !important;
+  transform: rotate(6deg) !important;
+}
+
+/* Antenna follows the head */
+.bb8__antenna {
+  transition:
+    left 0.72s cubic-bezier(.34, 1.25, .64, 1),
+    transform 0.45s ease !important;
+}
+
+html[data-theme='dark'] .bb8__antenna {
+  left: 19px !important;
+  transform: rotate(-5deg);
+  transform-origin: bottom center;
+}
+
+html[data-theme='light'] .bb8__antenna {
+  left: 25px !important;
+  transform: rotate(5deg);
+  transform-origin: bottom center;
+}
