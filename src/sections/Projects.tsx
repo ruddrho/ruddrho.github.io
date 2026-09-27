@@ -135,13 +135,79 @@ const archiveProjects = [
   { number: '18', title: 'Coming Soon' },
 ]
 
+function ArchiveCodeAnimation({ large = false }: { large?: boolean }) {
+  const lines = [
+    { text: '.project_preview {', tone: 'text-emerald-300' },
+    { text: '  display: grid;', tone: 'text-cyan-200' },
+    { text: '  place-items: center;', tone: 'text-cyan-200' },
+    { text: '  animation: scan 2.4s infinite;', tone: 'text-purple-300' },
+    { text: '}', tone: 'text-slate-300' },
+    { text: '.system_status::after {', tone: 'text-emerald-300' },
+    { text: '  content: "ONLINE";', tone: 'text-amber-300' },
+    { text: '  color: #67e8f9;', tone: 'text-cyan-200' },
+    { text: '}', tone: 'text-slate-300' },
+  ]
+
+  return (
+    <div
+      className={`relative w-full overflow-hidden rounded-xl border border-white/[.10] bg-[#0b0f19] shadow-[0_0_35px_rgba(34,211,238,.06)] ${
+        large ? 'min-h-[520px] p-6 sm:p-8' : 'h-[190px] p-4'
+      }`}
+    >
+      <div className="mb-4 flex items-center gap-2">
+        <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
+        <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+        <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+      </div>
+
+      <div className={`relative font-mono ${large ? 'text-sm sm:text-base' : 'text-[9px] sm:text-[10px]'} leading-relaxed`}>
+        {lines.map((line, lineIndex) => (
+          <motion.div
+            key={`${line.text}-${lineIndex}`}
+            initial={{ opacity: 0.2, x: -8 }}
+            animate={{ opacity: [0.25, 1, 1], x: 0 }}
+            transition={{
+              duration: 1.4,
+              delay: lineIndex * 0.12,
+              repeat: Infinity,
+              repeatDelay: 1.7,
+            }}
+            className={line.tone}
+          >
+            {line.text}
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-300/80 to-transparent shadow-[0_0_14px_rgba(103,232,249,.7)]"
+        animate={{ top: ['18%', '88%', '18%'] }}
+        transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+      />
+
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:100%_5px] opacity-40" />
+
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-4 right-4 rounded-md border border-cyan-300/20 bg-cyan-300/[.05] px-2.5 py-1 font-mono text-[8px] uppercase tracking-[.18em] text-cyan-300"
+        animate={{ opacity: [0.45, 1, 0.45] }}
+        transition={{ duration: 1.8, repeat: Infinity }}
+      >
+        Live Code
+      </motion.div>
+    </div>
+  )
+}
+
 export function Projects() {
   const [archiveOpen, setArchiveOpen] = useState(false)
 
-  const [previewProject, setPreviewProject] = useState<{
-    image: string
-    title: string
-  } | null>(null)
+  const [previewProject, setPreviewProject] = useState<
+    | { kind: 'image'; image: string; title: string }
+    | { kind: 'code'; title: string }
+    | null
+  >(null)
 
   useEffect(() => {
     if (!archiveOpen) return
@@ -261,6 +327,7 @@ export function Projects() {
                   type="button"
                   onClick={() =>
                     setPreviewProject({
+                      kind: 'image',
                       image: project.image!,
                       title: project.title,
                     })
@@ -685,6 +752,7 @@ export function Projects() {
                                 type="button"
                                 onClick={() =>
                                   setPreviewProject({
+                                    kind: 'image',
                                     image: project.image,
                                     title: project.title,
                                   })
@@ -761,8 +829,23 @@ export function Projects() {
                             </span>
                           </div>
 
+                          {/* Animated Code Preview */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setPreviewProject({
+                                kind: 'code',
+                                title: `Project ${project.number} Code Animation`,
+                              })
+                            }
+                            aria-label={`Open Project ${project.number} code animation`}
+                            className="relative mt-7 block w-full cursor-zoom-in text-left transition duration-300 hover:scale-[1.01]"
+                          >
+                            <ArchiveCodeAnimation />
+                          </button>
+
                           {/* Coming Soon */}
-                          <div className="relative mt-auto pt-8">
+                          <div className="relative mt-auto pt-6">
                             <div className="inline-flex items-center gap-2 rounded-full border border-purple-400/20 bg-purple-400/[.05] px-3 py-1.5 font-mono text-[9px] uppercase tracking-[.18em] text-purple-300">
                               <FiClock />
                               Coming Soon
@@ -870,7 +953,9 @@ export function Projects() {
 
                   <div>
                     <div className="font-mono text-[9px] uppercase tracking-[.2em] text-cyan-300">
-                      Simulation Preview
+                      {previewProject.kind === 'code'
+                        ? 'Code Animation Preview'
+                        : 'Simulation Preview'}
                     </div>
 
                     <h3 className="mt-1 text-sm font-medium text-slate-200 sm:text-base">
@@ -879,16 +964,23 @@ export function Projects() {
                   </div>
                 </div>
 
-                {/* Full Size GIF */}
-                <div className="relative overflow-hidden rounded-2xl border border-cyan-300/20 bg-[#050816] shadow-[0_0_80px_rgba(34,211,238,.08)]">
-                  <img
-                    src={previewProject.image}
-                    alt={`${previewProject.title} full simulation preview`}
-                    className="block max-h-[80vh] max-w-[92vw] object-contain"
-                  />
+                {previewProject.kind === 'image' ? (
+                  /* Full Size GIF */
+                  <div className="relative overflow-hidden rounded-2xl border border-cyan-300/20 bg-[#050816] shadow-[0_0_80px_rgba(34,211,238,.08)]">
+                    <img
+                      src={previewProject.image}
+                      alt={`${previewProject.title} full simulation preview`}
+                      className="block max-h-[80vh] max-w-[92vw] object-contain"
+                    />
 
-                  <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/[.05]" />
-                </div>
+                    <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/[.05]" />
+                  </div>
+                ) : (
+                  /* Full Size Animated Code */
+                  <div className="w-[92vw] max-w-4xl">
+                    <ArchiveCodeAnimation large />
+                  </div>
+                )}
               </motion.div>
             </motion.div>
           )}
