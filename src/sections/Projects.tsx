@@ -113,7 +113,17 @@ const projects = [
 ]
 
 const archiveProjects = [
-  { number: '09', title: 'Coming Soon' },
+  {
+  number: '09',
+  title: 'PID-Controlled Quadcopter Simulation',
+  description:
+    'MATLAB-based quadcopter simulation using PID control for stable flight, attitude control and autonomous trajectory behaviour.',
+  tags: ['MATLAB', 'PID', 'Quadcopter', 'Control Systems', 'Simulation'],
+  github:
+    'https://github.com/ruddrho/PID-Controlled-Quadcopter-Simulation',
+  image:
+    'https://raw.githubusercontent.com/ruddrho/PID-Controlled-Quadcopter-Simulation/main/quadcopter_simulation.gif',
+},
   { number: '10', title: 'Coming Soon' },
   { number: '11', title: 'Coming Soon' },
   { number: '12', title: 'Coming Soon' },
