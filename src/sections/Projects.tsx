@@ -670,7 +670,7 @@ export function Projects() {
                             {/* Tags */}
                             {'tags' in project && (
                               <div className="relative mt-5 flex flex-wrap gap-2">
-                                {project.tags.map((tag) => (
+                                {(project.tags ?? []).map((tag) => (
                                   <span key={tag} className="tech-chip">
                                     {tag}
                                   </span>
