@@ -151,15 +151,24 @@ function ArchiveCodeAnimation({ large = false }: { large?: boolean }) {
         src="https://codepen.io/dsenneff/full/mjZgmN"
         title="Yeti 404 animated page"
         loading="lazy"
-        className={`absolute inset-0 h-full w-full border-0 ${
+        className={`absolute left-0 border-0 ${
           large ? '' : 'pointer-events-none'
         }`}
-        style={{
-          transform: large ? 'none' : 'scale(0.48)',
-          transformOrigin: 'top left',
-          width: large ? '100%' : '208.333%',
-          height: large ? '100%' : '208.333%',
-        }}
+        style={
+          large
+            ? {
+                top: '-96px',
+                width: '100%',
+                height: 'calc(100% + 96px)',
+              }
+            : {
+                top: '-46px',
+                transform: 'scale(0.48)',
+                transformOrigin: 'top left',
+                width: '208.333%',
+                height: 'calc(208.333% + 96px)',
+              }
+        }
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
       />
 
