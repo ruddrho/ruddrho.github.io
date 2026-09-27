@@ -136,66 +136,200 @@ const archiveProjects = [
 ]
 
 function ArchiveCodeAnimation({ large = false }: { large?: boolean }) {
-  const lines = [
-    { text: '.project_preview {', tone: 'text-emerald-300' },
-    { text: '  display: grid;', tone: 'text-cyan-200' },
-    { text: '  place-items: center;', tone: 'text-cyan-200' },
-    { text: '  animation: scan 2.4s infinite;', tone: 'text-purple-300' },
-    { text: '}', tone: 'text-slate-300' },
-    { text: '.system_status::after {', tone: 'text-emerald-300' },
-    { text: '  content: "ONLINE";', tone: 'text-amber-300' },
-    { text: '  color: #67e8f9;', tone: 'text-cyan-200' },
-    { text: '}', tone: 'text-slate-300' },
-  ]
-
   return (
     <div
-      className={`relative w-full overflow-hidden rounded-xl border border-white/[.10] bg-[#0b0f19] shadow-[0_0_35px_rgba(34,211,238,.06)] ${
-        large ? 'min-h-[520px] p-6 sm:p-8' : 'h-[190px] p-4'
+      className={`relative w-full overflow-hidden rounded-xl border border-white/[.10] bg-white shadow-[0_0_35px_rgba(34,211,238,.05)] ${
+        large ? 'h-[560px] p-6 sm:p-10' : 'h-[190px] p-3'
       }`}
     >
-      <div className="mb-4 flex items-center gap-2">
-        <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
-        <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-        <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-      </div>
+      {/* 404 ANIMATION ONLY */}
+      <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden">
+        {/* 404 */}
+        <motion.div
+          className={`relative z-10 font-serif font-medium tracking-[.04em] text-[#202020] ${
+            large ? 'text-[82px] leading-none' : 'text-[34px] leading-none'
+          }`}
+          animate={{ y: [0, -4, 0] }}
+          transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          404
+        </motion.div>
 
-      <div className={`relative font-mono ${large ? 'text-sm sm:text-base' : 'text-[9px] sm:text-[10px]'} leading-relaxed`}>
-        {lines.map((line, lineIndex) => (
-          <motion.div
-            key={`${line.text}-${lineIndex}`}
-            initial={{ opacity: 0.2, x: -8 }}
-            animate={{ opacity: [0.25, 1, 1], x: 0 }}
-            transition={{
-              duration: 1.4,
-              delay: lineIndex * 0.12,
-              repeat: Infinity,
-              repeatDelay: 1.7,
-            }}
-            className={line.tone}
+        {/* Animated illustration */}
+        <div
+          className={`relative z-10 ${
+            large ? 'mt-5 h-[250px] w-full max-w-[680px]' : 'mt-2 h-[82px] w-full max-w-[260px]'
+          }`}
+        >
+          <svg
+            viewBox="0 0 680 250"
+            className="h-full w-full"
+            role="img"
+            aria-label="Animated 404 lost page illustration"
           >
-            {line.text}
-          </motion.div>
-        ))}
+            {/* Background stones */}
+            <motion.ellipse
+              cx="520"
+              cy="160"
+              rx="62"
+              ry="90"
+              fill="#f1f2f3"
+              animate={{ cy: [160, 156, 160] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <ellipse cx="110" cy="183" rx="34" ry="20" fill="#e5e7e9" />
+            <rect x="88" y="160" width="45" height="28" rx="14" fill="#e5e7e9" />
+
+            {/* Grass / bushes */}
+            <motion.path
+              d="M45 210 C55 188 72 190 78 210 C88 194 105 197 110 210 Z"
+              fill="#48a83f"
+              animate={{ scaleY: [1, 1.08, 1] }}
+              style={{ transformOrigin: '78px 210px' }}
+              transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <path
+              d="M180 210 C188 198 198 198 204 210 C214 202 226 202 232 210 Z"
+              fill="#48a83f"
+            />
+            <path
+              d="M570 210 C578 192 594 194 600 210 C610 198 625 200 630 210 Z"
+              fill="#48a83f"
+            />
+
+            {/* Ground */}
+            <line
+              x1="35"
+              y1="212"
+              x2="645"
+              y2="212"
+              stroke="#e7e8e9"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+
+            {/* Cable */}
+            <motion.path
+              d="M350 183 C390 190 390 215 438 216 C485 217 505 198 544 201"
+              fill="none"
+              stroke="#202020"
+              strokeWidth="4"
+              strokeLinecap="round"
+              animate={{
+                d: [
+                  'M350 183 C390 190 390 215 438 216 C485 217 505 198 544 201',
+                  'M350 183 C392 184 402 222 444 216 C487 210 508 204 544 201',
+                  'M350 183 C390 190 390 215 438 216 C485 217 505 198 544 201',
+                ],
+              }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+            />
+
+            {/* Person legs */}
+            <motion.g
+              animate={{ rotate: [-1, 1, -1] }}
+              style={{ transformOrigin: '326px 170px' }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <path
+                d="M305 157 L300 207 L315 207 L326 166"
+                fill="#f0ad7f"
+              />
+              <path
+                d="M338 160 L348 207 L362 207 L356 158"
+                fill="#f0ad7f"
+              />
+
+              {/* Body */}
+              <path
+                d="M292 92 C308 80 346 82 362 98 L350 164 C330 171 304 167 287 155 Z"
+                fill="#f5a623"
+              />
+              <circle cx="306" cy="108" r="3" fill="#d97814" />
+              <circle cx="327" cy="101" r="3" fill="#d97814" />
+              <circle cx="345" cy="116" r="3" fill="#d97814" />
+              <circle cx="315" cy="133" r="3" fill="#d97814" />
+              <circle cx="339" cy="145" r="3" fill="#d97814" />
+
+              {/* Head */}
+              <circle cx="300" cy="72" r="25" fill="#f0ad7f" />
+              <path
+                d="M278 67 C278 42 308 35 326 53 C318 52 313 60 311 68 C300 58 289 62 278 67 Z"
+                fill="#5b2d1d"
+              />
+              <path
+                d="M280 67 C269 79 274 99 291 102 C282 91 284 79 292 72 Z"
+                fill="#5b2d1d"
+              />
+
+              {/* Raised arm */}
+              <motion.path
+                d="M316 88 C337 72 351 66 365 62 C374 59 380 68 373 75 C357 88 344 96 332 108"
+                fill="none"
+                stroke="#f0ad7f"
+                strokeWidth="13"
+                strokeLinecap="round"
+                animate={{ rotate: [-4, 3, -4] }}
+                style={{ transformOrigin: '321px 91px' }}
+                transition={{ duration: 2.1, repeat: Infinity, ease: 'easeInOut' }}
+              />
+
+              {/* Searching hand / face detail */}
+              <circle cx="307" cy="72" r="4" fill="#1f2937" />
+              <path d="M294 82 Q302 88 310 82" fill="none" stroke="#7c3f2a" strokeWidth="2" />
+
+              {/* Lower arm holding cable */}
+              <path
+                d="M295 119 C282 143 284 170 298 187"
+                fill="none"
+                stroke="#f0ad7f"
+                strokeWidth="12"
+                strokeLinecap="round"
+              />
+              <circle cx="300" cy="188" r="7" fill="#f0ad7f" />
+            </motion.g>
+
+            {/* Small moving search spark */}
+            <motion.circle
+              cx="380"
+              cy="58"
+              r="5"
+              fill="#f5a623"
+              animate={{ opacity: [0.2, 1, 0.2], scale: [0.8, 1.35, 0.8] }}
+              transition={{ duration: 1.8, repeat: Infinity }}
+            />
+          </svg>
+        </div>
+
+        {/* Message */}
+        <motion.div
+          className={`relative z-10 text-center font-serif font-medium text-[#202020] ${
+            large ? 'mt-3 text-[28px]' : 'mt-1 text-[11px]'
+          }`}
+          animate={{ opacity: [0.82, 1, 0.82] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          Look like you're lost
+        </motion.div>
+
+        <div
+          className={`relative z-10 text-center text-slate-500 ${
+            large ? 'mt-2 text-sm' : 'mt-0.5 text-[5px] sm:text-[6px]'
+          }`}
+        >
+          the page you are looking for is not available!
+        </div>
+
+        <motion.div
+          className={`relative z-10 bg-[#39ac31] font-medium uppercase tracking-wide text-white ${
+            large ? 'mt-5 rounded px-6 py-3 text-xs' : 'mt-1.5 rounded-[2px] px-2 py-1 text-[4px] sm:text-[5px]'
+          }`}
+          animate={{ scale: [1, 1.04, 1] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          Go to Home
+        </motion.div>
       </div>
-
-      <motion.div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-300/80 to-transparent shadow-[0_0_14px_rgba(103,232,249,.7)]"
-        animate={{ top: ['18%', '88%', '18%'] }}
-        transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
-      />
-
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.018)_1px,transparent_1px)] bg-[size:100%_5px] opacity-40" />
-
-      <motion.div
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-4 right-4 rounded-md border border-cyan-300/20 bg-cyan-300/[.05] px-2.5 py-1 font-mono text-[8px] uppercase tracking-[.18em] text-cyan-300"
-        animate={{ opacity: [0.45, 1, 0.45] }}
-        transition={{ duration: 1.8, repeat: Infinity }}
-      >
-        Live Code
-      </motion.div>
     </div>
   )
 }
@@ -835,10 +969,10 @@ export function Projects() {
                             onClick={() =>
                               setPreviewProject({
                                 kind: 'code',
-                                title: `Project ${project.number} Code Animation`,
+                                title: `Project ${project.number} 404 Animation`,
                               })
                             }
-                            aria-label={`Open Project ${project.number} code animation`}
+                            aria-label={`Open Project ${project.number} 404 animation`}
                             className="relative mt-7 block w-full cursor-zoom-in text-left transition duration-300 hover:scale-[1.01]"
                           >
                             <ArchiveCodeAnimation />
@@ -954,7 +1088,7 @@ export function Projects() {
                   <div>
                     <div className="font-mono text-[9px] uppercase tracking-[.2em] text-cyan-300">
                       {previewProject.kind === 'code'
-                        ? 'Code Animation Preview'
+                        ? '404 Animation Preview'
                         : 'Simulation Preview'}
                     </div>
 
@@ -976,7 +1110,7 @@ export function Projects() {
                     <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/[.05]" />
                   </div>
                 ) : (
-                  /* Full Size Animated Code */
+                  /* Full Size 404 Animation */
                   <div className="w-[92vw] max-w-4xl">
                     <ArchiveCodeAnimation large />
                   </div>
