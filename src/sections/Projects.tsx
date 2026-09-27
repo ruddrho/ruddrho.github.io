@@ -917,23 +917,6 @@ export function Projects() {
                 onClick={(event) => event.stopPropagation()}
                 className="relative flex max-h-[92vh] max-w-[95vw] flex-col"
               >
-                {/* Preview Header */}
-                <div className="mb-4 flex items-center gap-3 pr-16">
-                  <div className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,.8)]" />
-
-                  <div>
-                    <div className="font-mono text-[9px] uppercase tracking-[.2em] text-cyan-300">
-                      {previewProject.kind === 'code'
-                        ? '404 Animation Preview'
-                        : 'Simulation Preview'}
-                    </div>
-
-                    <h3 className="mt-1 text-sm font-medium text-slate-200 sm:text-base">
-                      {previewProject.title}
-                    </h3>
-                  </div>
-                </div>
-
                 {previewProject.kind === 'image' ? (
                   /* Full Size GIF */
                   <div className="relative overflow-hidden rounded-2xl border border-cyan-300/20 bg-[#050816] shadow-[0_0_80px_rgba(34,211,238,.08)]">
