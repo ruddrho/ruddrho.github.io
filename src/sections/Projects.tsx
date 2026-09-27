@@ -620,57 +620,165 @@ export function Projects() {
 
                 <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 sm:p-8">
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {archiveProjects.map((project, index) => (
-                      <motion.article
-                        key={project.number}
-                        initial={{
-                          opacity: 0,
-                          y: 18,
-                        }}
-                        animate={{
-                          opacity: 1,
-                          y: 0,
-                        }}
-                        transition={{
-                          delay: index * 0.04,
-                        }}
-                        whileHover={{
-                          y: -4,
-                        }}
-                        className="group relative flex min-h-[270px] flex-col overflow-hidden rounded-2xl border border-white/[.08] bg-white/[.025] p-6 transition duration-300 hover:border-cyan-300/20 hover:bg-cyan-300/[.025]"
-                      >
-                        {/* Card Glow */}
-                        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-cyan-300/[.03] blur-3xl transition duration-500 group-hover:bg-purple-400/[.07]" />
+                    {archiveProjects.map((project, index) => {
+                      if (project.number === '09') {
+                        return (
+                          <motion.article
+                            key={project.number}
+                            initial={{
+                              opacity: 0,
+                              y: 18,
+                            }}
+                            animate={{
+                              opacity: 1,
+                              y: 0,
+                            }}
+                            transition={{
+                              delay: index * 0.04,
+                            }}
+                            whileHover={{
+                              y: -4,
+                            }}
+                            className="group glass-card relative flex min-h-[340px] flex-col overflow-hidden p-6"
+                          >
+                            {/* Glow */}
+                            <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-cyan-300/[.04] blur-3xl transition duration-500 group-hover:bg-purple-400/[.08]" />
 
-                        {/* Top */}
-                        <div className="relative flex items-start justify-between">
-                          <div className="grid h-11 w-11 place-items-center rounded-xl border border-cyan-300/15 bg-cyan-300/[.04] text-xl text-cyan-300/70">
-                            <FiCpu />
+                            {/* Top */}
+                            <div className="relative flex items-start justify-between">
+                              <div className="grid h-11 w-11 place-items-center rounded-xl border border-cyan-300/20 bg-cyan-300/[.05] text-xl text-cyan-300">
+                                <FiCpu />
+                              </div>
+
+                              <span className="font-mono text-[10px] uppercase tracking-[.2em] text-slate-600">
+                                Project // {project.number}
+                              </span>
+                            </div>
+
+                            {/* Title */}
+                            <h3 className="relative mt-6 text-xl font-medium leading-snug text-white">
+                              {project.title}
+                            </h3>
+
+                            {/* Description */}
+                            {'description' in project && (
+                              <p className="relative mt-3 text-sm leading-6 text-slate-400">
+                                {project.description}
+                              </p>
+                            )}
+
+                            {/* Tags */}
+                            {'tags' in project && (
+                              <div className="relative mt-5 flex flex-wrap gap-2">
+                                {project.tags.map((tag) => (
+                                  <span key={tag} className="tech-chip">
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Project GIF / Image */}
+                            {'image' in project && project.image && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setPreviewProject({
+                                    image: project.image,
+                                    title: project.title,
+                                  })
+                                }
+                                aria-label={`Open ${project.title} simulation preview`}
+                                className="relative mt-5 block w-full cursor-zoom-in overflow-hidden rounded-xl border border-cyan-300/20 bg-[#050816] text-left shadow-[0_0_25px_rgba(34,211,238,.05)]"
+                              >
+                                <img
+                                  src={project.image}
+                                  alt={`${project.title} simulation demo`}
+                                  loading="lazy"
+                                  className="h-[200px] w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                                />
+
+                                <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/[.04]" />
+
+                                <div className="absolute bottom-2 left-2 rounded-md border border-cyan-300/20 bg-[#050816]/90 px-2.5 py-1 font-mono text-[8px] uppercase tracking-[.16em] text-cyan-300 backdrop-blur-md">
+                                  Simulation Demo
+                                </div>
+                              </button>
+                            )}
+
+                            {/* GitHub */}
+                            {'github' in project && (
+                              <div className="relative mt-auto pt-7">
+                                <a
+                                  href={project.github}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[.14em] text-cyan-300 transition hover:text-purple-300"
+                                >
+                                  <FiGithub className="text-base" />
+
+                                  View Repository
+
+                                  <FiArrowUpRight />
+                                </a>
+                              </div>
+                            )}
+                          </motion.article>
+                        )
+                      }
+
+                      return (
+                        <motion.article
+                          key={project.number}
+                          initial={{
+                            opacity: 0,
+                            y: 18,
+                          }}
+                          animate={{
+                            opacity: 1,
+                            y: 0,
+                          }}
+                          transition={{
+                            delay: index * 0.04,
+                          }}
+                          whileHover={{
+                            y: -4,
+                          }}
+                          className="group relative flex min-h-[270px] flex-col overflow-hidden rounded-2xl border border-white/[.08] bg-white/[.025] p-6 transition duration-300 hover:border-cyan-300/20 hover:bg-cyan-300/[.025]"
+                        >
+                          {/* Card Glow */}
+                          <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-cyan-300/[.03] blur-3xl transition duration-500 group-hover:bg-purple-400/[.07]" />
+
+                          {/* Top */}
+                          <div className="relative flex items-start justify-between">
+                            <div className="grid h-11 w-11 place-items-center rounded-xl border border-cyan-300/15 bg-cyan-300/[.04] text-xl text-cyan-300/70">
+                              <FiCpu />
+                            </div>
+
+                            <span className="font-mono text-[10px] uppercase tracking-[.2em] text-slate-600">
+                              Project // {project.number}
+                            </span>
                           </div>
 
-                          <span className="font-mono text-[10px] uppercase tracking-[.2em] text-slate-600">
-                            Project // {project.number}
-                          </span>
-                        </div>
+                          {/* Coming Soon */}
+                          <div className="relative mt-auto pt-8">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-purple-400/20 bg-purple-400/[.05] px-3 py-1.5 font-mono text-[9px] uppercase tracking-[.18em] text-purple-300">
+                              <FiClock />
+                              Coming Soon
+                            </div>
 
-                        {/* Coming Soon */}
-                        <div className="relative mt-auto pt-8">
-                          <div className="inline-flex items-center gap-2 rounded-full border border-purple-400/20 bg-purple-400/[.05] px-3 py-1.5 font-mono text-[9px] uppercase tracking-[.18em] text-purple-300">
-                            <FiClock />
-                            Coming Soon
+                            <h3 className="mt-4 text-xl font-medium text-white">
+                              {project.title}
+                            </h3>
+
+                            <p className="mt-3 text-sm leading-6 text-slate-500">
+                              Project details, simulation results and repository
+                              will be added as development progresses.
+                            </p>
                           </div>
-
-                          <h3 className="mt-4 text-xl font-medium text-white">
-                            {project.title}
-                          </h3>
-
-                          <p className="mt-3 text-sm leading-6 text-slate-500">
-                            Project details, simulation results and repository
-                            will be added as development progresses.
-                          </p>
-                        </div>
-                      </motion.article>
-                    ))}
+                        </motion.article>
+                      )
+                    })}
                   </div>
                 </div>
 
