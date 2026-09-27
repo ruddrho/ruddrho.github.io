@@ -132,6 +132,7 @@ const archiveProjects = [
   { number: '15', title: 'Coming Soon' },
   { number: '16', title: 'Coming Soon' },
   { number: '17', title: 'Coming Soon' },
+  { number: '18', title: 'Coming Soon' },
 ]
 
 export function Projects() {
@@ -595,7 +596,7 @@ export function Projects() {
                     </h2>
 
                     <p className="mt-2 font-mono text-[10px] uppercase tracking-[.16em] text-slate-500">
-                      Projects 09 — 17
+                      Projects 09 — 18
                     </p>
                   </div>
 
@@ -619,7 +620,7 @@ export function Projects() {
                 ============================================== */}
 
                 <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 sm:p-8">
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid auto-rows-fr gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {archiveProjects.map((project, index) => {
                       if (project.number === '09') {
                         return (
@@ -744,7 +745,7 @@ export function Projects() {
                           whileHover={{
                             y: -4,
                           }}
-                          className="group relative flex min-h-[270px] flex-col overflow-hidden rounded-2xl border border-white/[.08] bg-white/[.025] p-6 transition duration-300 hover:border-cyan-300/20 hover:bg-cyan-300/[.025]"
+                          className="group relative flex h-full min-h-[340px] flex-col overflow-hidden rounded-2xl border border-white/[.08] bg-white/[.025] p-6 transition duration-300 hover:border-cyan-300/20 hover:bg-cyan-300/[.025]"
                         >
                           {/* Card Glow */}
                           <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-cyan-300/[.03] blur-3xl transition duration-500 group-hover:bg-purple-400/[.07]" />
@@ -787,7 +788,7 @@ export function Projects() {
                 ============================================== */}
 
                 <div className="relative flex shrink-0 items-center justify-between border-t border-white/[.07] px-5 py-4 font-mono text-[9px] uppercase tracking-[.18em] text-slate-600 sm:px-8">
-                  <span>Projects 09 — 17</span>
+                  <span>Projects 09 — 18</span>
 
                   <span className="text-cyan-300/70">
                     Development Pipeline
