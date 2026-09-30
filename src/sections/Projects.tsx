@@ -41,6 +41,8 @@ const projects = [
     tags: ['MATLAB', 'Vehicle Dynamics', 'PID', 'LQR', 'MPC', 'EKF'],
     github:
       'https://github.com/ruddrho/Nonlinear-High-Sideslip-Vehicle-Control',
+    image:
+      'https://raw.githubusercontent.com/ruddrho/Nonlinear-High-Sideslip-Vehicle-Control/main/drift_simulation_16x9_github.gif',
   },
 
   {
