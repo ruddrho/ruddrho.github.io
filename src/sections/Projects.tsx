@@ -35,14 +35,12 @@ const projects = [
 
   {
     number: '03',
-    title: 'Advanced Mobile Robot Navigation',
+    title: 'Nonlinear High-Sideslip Vehicle Control',
     description:
-      'Advanced autonomous mobile robot navigation using Theta*, artificial potential fields, Pure Pursuit, LiDAR simulation and occupancy mapping.',
-    tags: ['MATLAB', 'Theta*', 'APF', 'LiDAR', 'SLAM'],
+      'MATLAB research framework for nonlinear high-sideslip vehicle stabilization comparing PID, fixed LQR, gain-scheduled LQR and constrained MPC with EKF state estimation.',
+    tags: ['MATLAB', 'Vehicle Dynamics', 'PID', 'LQR', 'MPC', 'EKF'],
     github:
-      'https://github.com/ruddrho/advanced-mobile-robot-navigation',
-    image:
-      'https://raw.githubusercontent.com/ruddrho/advanced-mobile-robot-navigation/main/advanced_mobile_robot_navigation.gif',
+      'https://github.com/ruddrho/Nonlinear-High-Sideslip-Vehicle-Control',
   },
 
   {
@@ -124,7 +122,17 @@ const archiveProjects = [
   image:
     'https://raw.githubusercontent.com/ruddrho/PID-Controlled-Quadcopter-Simulation/main/quadcopter_simulation.gif',
 },
-  { number: '10', title: 'Coming Soon' },
+  {
+    number: '10',
+    title: 'Advanced Mobile Robot Navigation',
+    description:
+      'Advanced autonomous mobile robot navigation using Theta*, artificial potential fields, Pure Pursuit, LiDAR simulation and occupancy mapping.',
+    tags: ['MATLAB', 'Theta*', 'APF', 'LiDAR', 'SLAM'],
+    github:
+      'https://github.com/ruddrho/advanced-mobile-robot-navigation',
+    image:
+      'https://raw.githubusercontent.com/ruddrho/advanced-mobile-robot-navigation/main/advanced_mobile_robot_navigation.gif',
+  },
   { number: '11', title: 'Coming Soon' },
   { number: '12', title: 'Coming Soon' },
   { number: '13', title: 'Coming Soon' },
@@ -668,7 +676,7 @@ export function Projects() {
                 <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 sm:p-8">
                   <div className="grid auto-rows-fr gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {archiveProjects.map((project, index) => {
-                      if (project.number === '09') {
+                      if (project.number === '09' || project.number === '10') {
                         return (
                           <motion.article
                             key={project.number}
