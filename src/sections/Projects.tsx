@@ -12,15 +12,16 @@ import { SectionTitle } from '../components/SectionTitle'
 
 const projects = [
   {
-    number: '01',
-    title: 'ROS 2 Vision-Guided Robot Arm Color Sorting',
-    description:
-      'Vision-guided robotic arm system for autonomous color detection, classification and pick-and-place sorting using ROS 2, OpenCV and Gazebo.',
-    tags: ['ROS 2', 'OpenCV', 'Gazebo', 'C++', 'Robotics'],
-    github:
-      'https://github.com/ruddrho/ros2-vision-guided-robot-arm-color-sorting-robot',
-  },
-
+  number: '01',
+  title: 'ROS 2 Vision-Guided Robot Arm Color Sorting',
+  description:
+    'Vision-guided robotic arm system for autonomous color detection, classification and pick-and-place sorting using ROS 2, OpenCV and Gazebo.',
+  tags: ['ROS 2', 'OpenCV', 'Gazebo', 'C++', 'Robotics'],
+  github:
+    'https://github.com/ruddrho/ros2-vision-guided-robot-arm-color-sorting-robot',
+  image:
+    'https://raw.githubusercontent.com/ruddrho/ros2-vision-guided-robot-arm-color-sorting-robot/main/project-demo-gif.gif',
+},
   {
     number: '02',
     title: 'MATLAB Multi-Algorithm Robot Navigation',
