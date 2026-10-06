@@ -98,7 +98,7 @@ const projects = [
   github:
     'https://github.com/ruddrho/matlab-mobile-manipulator-slam-control',
   image:
-    'https://raw.githubusercontent.com/ruddrho/matlab-mobile-manipulator-slam-control/main/simulation%20gif.gif',
+    'https://github.com/ruddrho/matlab-mobile-manipulator-slam-control/blob/main/assets/mobile_manipulator_demo.gif',
 },
 
   {
