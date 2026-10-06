@@ -162,6 +162,20 @@ const archiveProjects = [
   { number: '17', title: 'Coming Soon' },
   { number: '18', title: 'Coming Soon' },
 ]
+// =========================================================
+// AUTOMATIC PROJECT INDEX DATA
+// =========================================================
+
+const allProjects = [...projects, ...archiveProjects]
+  .filter(
+    (project) =>
+      'github' in project &&
+      typeof project.github === 'string' &&
+      project.github.length > 0
+  )
+  .sort((a, b) => Number(a.number) - Number(b.number))
+
+const totalProjects = allProjects.length
 
 function ArchiveCodeAnimation({ large = false }: { large?: boolean }) {
   return (
