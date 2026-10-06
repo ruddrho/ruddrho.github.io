@@ -136,7 +136,24 @@ const archiveProjects = [
     image:
       'https://raw.githubusercontent.com/ruddrho/advanced-mobile-robot-navigation/main/advanced_mobile_robot_navigation.gif',
   },
-  { number: '11', title: 'Coming Soon' },
+  {
+  number: '11',
+  title: 'MATLAB Mobile Manipulator SLAM & Control',
+  description:
+    'MATLAB mobile manipulator simulation integrating autonomous navigation, SLAM, LiDAR-based occupancy mapping, robotic manipulation and control for mobile manipulation tasks.',
+  tags: [
+    'MATLAB',
+    'Mobile Manipulator',
+    'SLAM',
+    'LiDAR',
+    'Navigation',
+    'Control',
+  ],
+  github:
+    'https://github.com/ruddrho/matlab-mobile-manipulator-slam-control',
+  image:
+    'https://raw.githubusercontent.com/ruddrho/matlab-mobile-manipulator-slam-control/main/simulation%20gif.gif',
+},
   { number: '12', title: 'Coming Soon' },
   { number: '13', title: 'Coming Soon' },
   { number: '14', title: 'Coming Soon' },
