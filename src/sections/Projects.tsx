@@ -273,6 +273,42 @@ export function Projects() {
 
   return (
     <>
+      <style>{`
+        @property --project-border-angle {
+          syntax: '<angle>';
+          initial-value: 0deg;
+          inherits: false;
+        }
+
+        .project-index-border-spin {
+          padding: 1.5px;
+          background: conic-gradient(
+            from var(--project-border-angle),
+            transparent 0deg,
+            transparent 258deg,
+            rgba(34, 211, 238, 0.10) 274deg,
+            #67e8f9 294deg,
+            #c084fc 316deg,
+            #fb7185 338deg,
+            #4ade80 356deg,
+            transparent 360deg
+          );
+          -webkit-mask:
+            linear-gradient(#fff 0 0) content-box,
+            linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          animation: project-border-orbit 3.8s linear infinite;
+          filter: drop-shadow(0 0 6px rgba(103, 232, 249, 0.30)) drop-shadow(0 0 8px rgba(192, 132, 252, 0.16)) drop-shadow(0 0 9px rgba(251, 113, 133, 0.14)) drop-shadow(0 0 8px rgba(74, 222, 128, 0.16));
+        }
+
+        @keyframes project-border-orbit {
+          to {
+            --project-border-angle: 360deg;
+          }
+        }
+      `}</style>
+
       <section id="projects" className="section-wrap">
       {/* =====================================================
     PROJECTS HEADER + PROJECT INDEX
@@ -293,16 +329,10 @@ export function Projects() {
           ====================================================== */}
 
           <div className="relative mt-8 overflow-hidden rounded-2xl border border-cyan-300/20 bg-white/[0.025] shadow-[0_0_35px_rgba(34,211,238,.04)]">
-            {/* Animated accent line */}
-            <motion.div
+            {/* Animated border light — travels continuously around all 4 sides */}
+            <div
               aria-hidden="true"
-              className="pointer-events-none absolute left-0 top-0 z-10 h-[2px] w-[32%] bg-gradient-to-r from-transparent via-cyan-300 to-purple-400 blur-[0.2px]"
-              animate={{ x: ['-120%', '420%'] }}
-              transition={{
-                duration: 5.5,
-                repeat: Infinity,
-                ease: 'linear',
-              }}
+              className="project-index-border-spin pointer-events-none absolute inset-0 z-10 rounded-2xl"
             />
 
             {/* Soft animated glow */}
