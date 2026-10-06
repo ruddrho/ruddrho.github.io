@@ -696,7 +696,7 @@ export function Projects() {
                 <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 sm:p-8">
                   <div className="grid auto-rows-fr gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {archiveProjects.map((project, index) => {
-                      if (project.number === '09' || project.number === '10') {
+                      if ('github' in project && project.github) {
                         return (
                           <motion.article
                             key={project.number}
