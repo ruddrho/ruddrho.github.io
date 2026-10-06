@@ -273,11 +273,72 @@ export function Projects() {
   return (
     <>
       <section id="projects" className="section-wrap">
-        <SectionTitle
-          eyebrow="05 // Selected Work"
-          title="Robotics & control engineering projects."
-          text="Selected projects exploring autonomous navigation, robotic perception, SLAM, intelligent control and dynamic systems."
-        />
+      {/* =====================================================
+    PROJECTS HEADER + PROJECT INDEX
+====================================================== */}
+
+<div className="relative mb-10">
+  <SectionTitle
+    eyebrow="05 // Selected Work"
+    title="Robotics & control engineering projects."
+    text="Selected projects exploring autonomous navigation, robotic perception, SLAM, intelligent control and dynamic systems."
+  />
+
+  {/* PROJECT INDEX */}
+  <button
+    type="button"
+    className="
+      group
+      mt-6
+      w-full
+      overflow-hidden
+      rounded-2xl
+      border
+      border-cyan-300/20
+      bg-white/[0.025]
+      px-6
+      py-5
+      text-left
+      transition-all
+      duration-300
+      hover:border-cyan-300/40
+      hover:bg-white/[0.04]
+      md:absolute
+      md:right-0
+      md:top-0
+      md:mt-0
+      md:w-[280px]
+    "
+  >
+    <div className="flex items-center justify-between gap-6">
+      <div>
+        <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-cyan-300">
+          Project Index
+        </div>
+
+        <div className="mt-2 font-mono text-[9px] uppercase tracking-[0.20em] text-slate-500">
+          Engineering Archive
+        </div>
+      </div>
+
+      <div className="flex items-end gap-3">
+        <div className="text-right">
+          <div className="text-3xl font-semibold leading-none text-white transition-colors duration-300 group-hover:text-cyan-300">
+            {totalProjects.toString().padStart(2, '0')}
+          </div>
+
+          <div className="mt-2 font-mono text-[8px] uppercase tracking-[0.18em] text-slate-500">
+            Projects
+          </div>
+        </div>
+
+        <span className="mb-4 font-mono text-sm text-cyan-300/70 transition-transform duration-300 group-hover:translate-x-1">
+          ↗
+        </span>
+      </div>
+    </div>
+  </button>
+</div>
 
         {/* =====================================================
             MAIN PROJECT GRID
