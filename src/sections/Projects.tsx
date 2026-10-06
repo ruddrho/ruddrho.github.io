@@ -82,16 +82,23 @@ const projects = [
       'https://raw.githubusercontent.com/ruddrho/Fuzzy-Line-Following-Robot-MATLAB/main/navigation_recording.gif',
   },
 
-  {
+   {
   number: '07',
-  title: 'Ball-on-Plate MATLAB Simulation',
+  title: 'MATLAB Mobile Manipulator SLAM & Control',
   description:
-    'Control-system simulation for ball stabilization and trajectory behaviour on a two-axis plate platform using MATLAB.',
-  tags: ['MATLAB', 'Control Systems', 'Simulation', 'Dynamics'],
+    'MATLAB mobile manipulator simulation integrating autonomous navigation, SLAM, LiDAR-based occupancy mapping, robotic manipulation and control for mobile manipulation tasks.',
+  tags: [
+    'MATLAB',
+    'Mobile Manipulator',
+    'SLAM',
+    'LiDAR',
+    'Navigation',
+    'Control',
+  ],
   github:
-    'https://github.com/ruddrho/ball-on-plate-matlab-simulation',
+    'https://github.com/ruddrho/matlab-mobile-manipulator-slam-control',
   image:
-    'https://raw.githubusercontent.com/ruddrho/ball-on-plate-matlab-simulation/main/ball_on_plate_research_grade.gif',
+    'https://raw.githubusercontent.com/ruddrho/matlab-mobile-manipulator-slam-control/main/simulation%20gif.gif',
 },
 
   {
@@ -138,21 +145,14 @@ const archiveProjects = [
   },
   {
   number: '11',
-  title: 'MATLAB Mobile Manipulator SLAM & Control',
+  title: 'Ball-on-Plate MATLAB Simulation',
   description:
-    'MATLAB mobile manipulator simulation integrating autonomous navigation, SLAM, LiDAR-based occupancy mapping, robotic manipulation and control for mobile manipulation tasks.',
-  tags: [
-    'MATLAB',
-    'Mobile Manipulator',
-    'SLAM',
-    'LiDAR',
-    'Navigation',
-    'Control',
-  ],
+    'Control-system simulation for ball stabilization and trajectory behaviour on a two-axis plate platform using MATLAB.',
+  tags: ['MATLAB', 'Control Systems', 'Simulation', 'Dynamics'],
   github:
-    'https://github.com/ruddrho/matlab-mobile-manipulator-slam-control',
+    'https://github.com/ruddrho/ball-on-plate-matlab-simulation',
   image:
-    'https://raw.githubusercontent.com/ruddrho/matlab-mobile-manipulator-slam-control/main/simulation%20gif.gif',
+    'https://raw.githubusercontent.com/ruddrho/ball-on-plate-matlab-simulation/main/ball_on_plate_research_grade.gif',
 },
   { number: '12', title: 'Coming Soon' },
   { number: '13', title: 'Coming Soon' },
