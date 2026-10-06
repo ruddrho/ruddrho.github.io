@@ -223,6 +223,7 @@ function ArchiveCodeAnimation({ large = false }: { large?: boolean }) {
 
 export function Projects() {
   const [archiveOpen, setArchiveOpen] = useState(false)
+  const [projectIndexOpen, setProjectIndexOpen] = useState(false)
 
   const [previewProject, setPreviewProject] = useState<
     | { kind: 'image'; image: string; title: string }
@@ -277,68 +278,136 @@ export function Projects() {
     PROJECTS HEADER + PROJECT INDEX
 ====================================================== */}
 
-<div className="relative mb-10">
-  <SectionTitle
-    eyebrow="05 // Selected Work"
-    title="Robotics & control engineering projects."
-    text="Selected projects exploring autonomous navigation, robotic perception, SLAM, intelligent control and dynamic systems."
-  />
+<div className="mb-10">
+          <SectionTitle
+            eyebrow="05 // Selected Work"
+            title="Robotics & control engineering projects."
+            text="Selected projects exploring autonomous navigation, robotic perception, SLAM, intelligent control and dynamic systems."
+          />
 
-  {/* PROJECT INDEX */}
-  <button
-    type="button"
-    className="
-      group
-      mt-6
-      w-full
-      overflow-hidden
-      rounded-2xl
-      border
-      border-cyan-300/20
-      bg-white/[0.025]
-      px-6
-      py-5
-      text-left
-      transition-all
-      duration-300
-      hover:border-cyan-300/40
-      hover:bg-white/[0.04]
-      md:absolute
-      md:right-0
-      md:top-0
-      md:mt-0
-      md:w-[280px]
-    "
-  >
-    <div className="flex items-center justify-between gap-6">
-      <div>
-        <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-cyan-300">
-          Project Index
-        </div>
+          {/* =====================================================
+              FULL-WIDTH PROJECT INDEX TAB
+              - Automatically counts real projects
+              - Click to expand/collapse project list
+              - Every project title opens its GitHub repository
+          ====================================================== */}
 
-        <div className="mt-2 font-mono text-[9px] uppercase tracking-[0.20em] text-slate-500">
-          Engineering Archive
-        </div>
-      </div>
+          <div className="relative mt-8 overflow-hidden rounded-2xl border border-cyan-300/20 bg-white/[0.025] shadow-[0_0_35px_rgba(34,211,238,.04)]">
+            {/* Animated accent line */}
+            <motion.div
+              aria-hidden="true"
+              className="pointer-events-none absolute left-0 top-0 z-10 h-[2px] w-[32%] bg-gradient-to-r from-transparent via-cyan-300 to-purple-400 blur-[0.2px]"
+              animate={{ x: ['-120%', '420%'] }}
+              transition={{
+                duration: 5.5,
+                repeat: Infinity,
+                ease: 'linear',
+              }}
+            />
 
-      <div className="flex items-end gap-3">
-        <div className="text-right">
-          <div className="text-3xl font-semibold leading-none text-white transition-colors duration-300 group-hover:text-cyan-300">
-            {totalProjects.toString().padStart(2, '0')}
+            {/* Soft animated glow */}
+            <motion.div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,.06),transparent_60%)]"
+              animate={{ opacity: [0.35, 0.8, 0.35] }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+            />
+
+            <button
+              type="button"
+              onClick={() => setProjectIndexOpen((current) => !current)}
+              aria-expanded={projectIndexOpen}
+              aria-controls="project-index-list"
+              className="group relative z-[1] flex w-full items-center justify-between gap-6 px-6 py-5 text-left transition-all duration-300 hover:bg-white/[0.035] sm:px-8"
+            >
+              <div className="flex min-w-0 items-center gap-4 sm:gap-6">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-cyan-300/20 bg-cyan-300/[.05] text-lg text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,.05)]">
+                  <FiCpu />
+                </div>
+
+                <div className="min-w-0">
+                  <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.28em] text-cyan-300 sm:text-[11px]">
+                    Project Index
+                  </div>
+
+                  <div className="mt-1.5 font-mono text-[8px] uppercase tracking-[0.20em] text-slate-500 sm:text-[9px]">
+                    Engineering Project Archive
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-4 sm:gap-6">
+                <div className="text-right">
+                  <div className="text-3xl font-semibold leading-none text-white transition-colors duration-300 group-hover:text-cyan-300 sm:text-4xl">
+                    {totalProjects.toString().padStart(2, '0')}
+                  </div>
+
+                  <div className="mt-2 font-mono text-[8px] uppercase tracking-[0.18em] text-slate-500">
+                    Projects
+                  </div>
+                </div>
+
+                <motion.span
+                  animate={{ rotate: projectIndexOpen ? 180 : 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="grid h-9 w-9 place-items-center rounded-lg border border-cyan-300/15 bg-cyan-300/[.04] font-mono text-sm text-cyan-300/80 transition-colors duration-300 group-hover:border-cyan-300/30 group-hover:bg-cyan-300/[.08]"
+                >
+                  ↓
+                </motion.span>
+              </div>
+            </button>
+
+            <AnimatePresence initial={false}>
+              {projectIndexOpen && (
+                <motion.div
+                  id="project-index-list"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  className="relative z-[1] overflow-hidden"
+                >
+                  <div className="border-t border-white/[.07] px-4 py-4 sm:px-6 sm:py-5">
+                    <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                      {allProjects.map((project, index) => (
+                        <motion.a
+                          key={project.github}
+                          href={project.github}
+                          target="_blank"
+                          rel="noreferrer"
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.025 }}
+                          className="group/item flex min-h-[70px] items-center gap-4 rounded-xl border border-white/[.07] bg-white/[.02] px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300/30 hover:bg-cyan-300/[.05]"
+                        >
+                          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-cyan-300/15 bg-[#07111d] font-mono text-[10px] font-semibold text-cyan-300">
+                            {project.number}
+                          </span>
+
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-medium leading-5 text-slate-300 transition-colors duration-300 group-hover/item:text-white">
+                              {project.title}
+                            </span>
+
+                            <span className="mt-1 block font-mono text-[8px] uppercase tracking-[.15em] text-slate-600 transition-colors duration-300 group-hover/item:text-cyan-300/70">
+                              GitHub Repository
+                            </span>
+                          </span>
+
+                          <FiArrowUpRight className="shrink-0 text-sm text-slate-600 transition-all duration-300 group-hover/item:-translate-y-0.5 group-hover/item:translate-x-0.5 group-hover/item:text-cyan-300" />
+                        </motion.a>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-
-          <div className="mt-2 font-mono text-[8px] uppercase tracking-[0.18em] text-slate-500">
-            Projects
-          </div>
         </div>
-
-        <span className="mb-4 font-mono text-sm text-cyan-300/70 transition-transform duration-300 group-hover:translate-x-1">
-          ↗
-        </span>
-      </div>
-    </div>
-  </button>
-</div>
 
         {/* =====================================================
             MAIN PROJECT GRID
