@@ -66,8 +66,14 @@ export function Skills() {
     return offset
   }
 
+  // =========================================================
+  // CARD POSITION
+  // Active card remains EXACTLY in the center.
+  // Other cards move around the center card.
+  // =========================================================
+
   const getCardAnimation = (offset: number) => {
-    // CENTER CARD
+    // CENTER
     if (offset === 0) {
       return {
         x: 0,
@@ -75,54 +81,49 @@ export function Skills() {
         scale: 1,
         opacity: 1,
         rotateY: 0,
-        zIndex: 50,
       }
     }
 
-    // LEFT CARD
+    // LEFT
     if (offset === -1) {
       return {
-        x: -430,
-        y: 45,
-        scale: 0.82,
-        opacity: 0.38,
+        x: -440,
+        y: 50,
+        scale: 0.8,
+        opacity: 0.32,
         rotateY: 10,
-        zIndex: 30,
       }
     }
 
-    // RIGHT CARD
+    // RIGHT
     if (offset === 1) {
       return {
-        x: 430,
-        y: 45,
-        scale: 0.82,
-        opacity: 0.38,
+        x: 440,
+        y: 50,
+        scale: 0.8,
+        opacity: 0.32,
         rotateY: -10,
-        zIndex: 30,
       }
     }
 
     // FAR LEFT
     if (offset <= -2) {
       return {
-        x: -690,
-        y: 105,
-        scale: 0.64,
-        opacity: 0.08,
+        x: -700,
+        y: 110,
+        scale: 0.62,
+        opacity: 0.06,
         rotateY: 18,
-        zIndex: 10,
       }
     }
 
     // FAR RIGHT
     return {
-      x: 690,
-      y: 105,
-      scale: 0.64,
-      opacity: 0.08,
+      x: 700,
+      y: 110,
+      scale: 0.62,
+      opacity: 0.06,
       rotateY: -18,
-      zIndex: 10,
     }
   }
 
@@ -146,27 +147,29 @@ export function Skills() {
       />
 
       {/* =====================================================
-          CAROUSEL AREA
+          CAROUSEL
       ====================================================== */}
 
       <div className="relative mt-10">
-        {/* BACKGROUND GLOW */}
+        {/* ===================================================
+            BACKGROUND GLOW
+        ==================================================== */}
 
-        <div className="pointer-events-none absolute left-1/2 top-[42%] h-[420px] w-[760px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/[0.035] blur-[100px]" />
+        <div className="pointer-events-none absolute left-1/2 top-[40%] h-[420px] w-[760px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/[0.025] blur-[110px]" />
 
         <motion.div
-          className="pointer-events-none absolute left-1/2 top-[42%] h-[330px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px]"
+          className="pointer-events-none absolute left-1/2 top-[40%] h-[350px] w-[550px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px]"
           animate={{
             backgroundColor: [
-              'rgba(34,211,238,0.08)',
-              'rgba(168,85,247,0.08)',
-              'rgba(236,72,153,0.08)',
-              'rgba(34,197,94,0.08)',
-              'rgba(34,211,238,0.08)',
+              'rgba(34,211,238,0.07)',
+              'rgba(168,85,247,0.07)',
+              'rgba(236,72,153,0.07)',
+              'rgba(34,197,94,0.07)',
+              'rgba(34,211,238,0.07)',
             ],
           }}
           transition={{
-            duration: 7,
+            duration: 8,
             repeat: Infinity,
             ease: 'linear',
           }}
@@ -177,235 +180,284 @@ export function Skills() {
         ====================================================== */}
 
         <div
-          className="relative hidden h-[430px] md:block"
+          className="relative hidden h-[440px] w-full md:block"
           style={{
             perspective: '1400px',
           }}
         >
           {skillGroups.map((group, index) => {
             const Icon = icons[index] || FiCpu
+
             const offset = getOffset(index)
+
             const position = getCardAnimation(offset)
+
             const isActive = offset === 0
 
             return (
-              <motion.div
+              /*
+                IMPORTANT:
+
+                This wrapper is always full width.
+
+                flex + justify-center keeps the active card
+                mathematically centered on the page.
+
+                Framer Motion only moves the INNER card.
+
+                Therefore motion x cannot break centering.
+              */
+
+              <div
                 key={group.title}
-                className="absolute left-1/2 top-4 w-[min(560px,52vw)] -translate-x-1/2"
-                initial={false}
-                animate={position}
-                transition={{
-                  type: 'spring',
-                  stiffness: 115,
-                  damping: 20,
-                  mass: 0.85,
-                }}
-                onClick={() => setActiveIndex(index)}
+                className="pointer-events-none absolute inset-x-0 top-4 flex justify-center"
                 style={{
-                  transformStyle: 'preserve-3d',
-                  cursor: isActive ? 'default' : 'pointer',
+                  zIndex: isActive
+                    ? 50
+                    : Math.abs(offset) === 1
+                      ? 30
+                      : 10,
                 }}
               >
-                {/* =============================================
-                    ACTIVE ANIMATED BORDER
-                ============================================== */}
+                <motion.div
+                  className="pointer-events-auto w-[min(560px,52vw)]"
+                  initial={false}
+                  animate={position}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 115,
+                    damping: 20,
+                    mass: 0.85,
+                  }}
+                  onClick={() => {
+                    if (!isActive) {
+                      setActiveIndex(index)
+                    }
+                  }}
+                  style={{
+                    transformStyle: 'preserve-3d',
+                    cursor: isActive ? 'default' : 'pointer',
+                  }}
+                >
+                  {/* ===========================================
+                      ANIMATED BORDER WRAPPER
+                  ============================================ */}
 
-                <div className="relative overflow-hidden rounded-[24px] p-[1px]">
-                  {isActive && (
-                    <motion.div
-                      className="absolute -inset-[65%]"
-                      style={{
-                        background:
-                          'conic-gradient(from 0deg, #22d3ee, #a855f7, #ec4899, #22c55e, #22d3ee)',
-                      }}
-                      animate={{
-                        rotate: 360,
-                      }}
-                      transition={{
-                        duration: 4.5,
-                        repeat: Infinity,
-                        ease: 'linear',
-                      }}
-                    />
-                  )}
-
-                  {!isActive && (
-                    <div className="absolute inset-0 rounded-[24px] border border-white/[0.08]" />
-                  )}
-
-                  {/* =============================================
-                      CARD
-                  ============================================== */}
-
-                  <div
-                    className={`relative min-h-[315px] overflow-hidden rounded-[23px] border border-white/[0.06] bg-[#101725]/95 p-8 backdrop-blur-xl ${
-                      isActive
-                        ? 'shadow-[0_25px_90px_rgba(0,0,0,.45)]'
-                        : ''
-                    }`}
-                  >
-                    {/* MOVING CARD GLOW */}
-
-                    {isActive && (
-                      <>
-                        <motion.div
-                          className="pointer-events-none absolute -left-24 -top-24 h-56 w-56 rounded-full blur-[80px]"
-                          animate={{
-                            backgroundColor: [
-                              'rgba(34,211,238,.20)',
-                              'rgba(168,85,247,.20)',
-                              'rgba(236,72,153,.18)',
-                              'rgba(34,197,94,.18)',
-                              'rgba(34,211,238,.20)',
-                            ],
-                            x: [0, 300, 300, 0, 0],
-                            y: [0, 0, 200, 200, 0],
-                          }}
-                          transition={{
-                            duration: 8,
-                            repeat: Infinity,
-                            ease: 'linear',
-                          }}
-                        />
-
-                        <motion.div
-                          className="pointer-events-none absolute -bottom-28 -right-20 h-56 w-56 rounded-full blur-[90px]"
-                          animate={{
-                            backgroundColor: [
-                              'rgba(168,85,247,.16)',
-                              'rgba(236,72,153,.16)',
-                              'rgba(34,197,94,.16)',
-                              'rgba(34,211,238,.16)',
-                              'rgba(168,85,247,.16)',
-                            ],
-                          }}
-                          transition={{
-                            duration: 7,
-                            repeat: Infinity,
-                            ease: 'linear',
-                          }}
-                        />
-                      </>
-                    )}
-
-                    {/* CARD HEADER */}
-
-                    <div className="relative z-10 flex items-center justify-between">
-                      <motion.div
-                        className="grid h-14 w-14 place-items-center rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.05] text-2xl text-cyan-300"
-                        animate={
-                          isActive
-                            ? {
-                                boxShadow: [
-                                  '0 0 0px rgba(34,211,238,0)',
-                                  '0 0 22px rgba(34,211,238,.16)',
-                                  '0 0 0px rgba(34,211,238,0)',
-                                ],
-                              }
-                            : {}
-                        }
-                        transition={{
-                          duration: 2.8,
-                          repeat: Infinity,
-                        }}
-                      >
-                        <Icon />
-                      </motion.div>
-
-                      <span
-                        className={`font-mono text-[11px] font-semibold tracking-[.25em] ${
-                          isActive
-                            ? 'text-cyan-300'
-                            : 'text-slate-600'
-                        }`}
-                      >
-                        {group.code}
-                      </span>
-                    </div>
-
-                    {/* TITLE */}
-
-                    <h3 className="relative z-10 mt-8 text-[25px] font-semibold text-white">
-                      {group.title}
-                    </h3>
-
-                    {/* SKILLS */}
-
-                    <div className="relative z-10 mt-7 flex flex-wrap gap-2.5">
-                      {group.skills.map((skill) => (
-                        <span
-                          key={skill}
-                          className={`rounded-lg border px-3 py-2 font-mono text-[10px] uppercase tracking-[.16em] transition ${
-                            isActive
-                              ? 'border-cyan-300/20 bg-cyan-300/[0.035] text-slate-300'
-                              : 'border-white/[0.07] bg-white/[0.025] text-slate-500'
-                          }`}
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* BOTTOM ACTIVE LINE */}
+                  <div className="relative overflow-hidden rounded-[24px] p-[1px]">
+                    {/* ACTIVE MULTICOLOR BORDER */}
 
                     {isActive && (
                       <motion.div
-                        className="absolute bottom-0 left-0 h-[2px] w-[35%]"
+                        className="absolute -inset-[70%]"
                         style={{
                           background:
-                            'linear-gradient(90deg,#22d3ee,#a855f7,#ec4899,#22c55e)',
+                            'conic-gradient(from 0deg, #22d3ee, #a855f7, #ec4899, #22c55e, #22d3ee)',
                         }}
                         animate={{
-                          left: ['-35%', '100%'],
+                          rotate: 360,
                         }}
                         transition={{
-                          duration: 3,
+                          duration: 4.5,
                           repeat: Infinity,
                           ease: 'linear',
                         }}
                       />
                     )}
+
+                    {/* INACTIVE BORDER */}
+
+                    {!isActive && (
+                      <div className="absolute inset-0 rounded-[24px] border border-white/[0.08]" />
+                    )}
+
+                    {/* ===========================================
+                        MAIN CARD
+                    ============================================ */}
+
+                    <div
+                      className={`relative min-h-[315px] overflow-hidden rounded-[23px] border border-white/[0.06] bg-[#101725]/95 p-8 backdrop-blur-xl ${
+                        isActive
+                          ? 'shadow-[0_25px_90px_rgba(0,0,0,.48)]'
+                          : ''
+                      }`}
+                    >
+                      {/* =========================================
+                          ACTIVE MOVING COLOR GLOW
+                      ========================================== */}
+
+                      {isActive && (
+                        <>
+                          <motion.div
+                            className="pointer-events-none absolute -left-24 -top-24 h-56 w-56 rounded-full blur-[80px]"
+                            animate={{
+                              backgroundColor: [
+                                'rgba(34,211,238,.20)',
+                                'rgba(168,85,247,.20)',
+                                'rgba(236,72,153,.18)',
+                                'rgba(34,197,94,.18)',
+                                'rgba(34,211,238,.20)',
+                              ],
+
+                              x: [0, 300, 300, 0, 0],
+
+                              y: [0, 0, 200, 200, 0],
+                            }}
+                            transition={{
+                              duration: 8,
+                              repeat: Infinity,
+                              ease: 'linear',
+                            }}
+                          />
+
+                          <motion.div
+                            className="pointer-events-none absolute -bottom-28 -right-20 h-56 w-56 rounded-full blur-[90px]"
+                            animate={{
+                              backgroundColor: [
+                                'rgba(168,85,247,.16)',
+                                'rgba(236,72,153,.16)',
+                                'rgba(34,197,94,.16)',
+                                'rgba(34,211,238,.16)',
+                                'rgba(168,85,247,.16)',
+                              ],
+                            }}
+                            transition={{
+                              duration: 7,
+                              repeat: Infinity,
+                              ease: 'linear',
+                            }}
+                          />
+                        </>
+                      )}
+
+                      {/* =========================================
+                          HEADER
+                      ========================================== */}
+
+                      <div className="relative z-10 flex items-center justify-between">
+                        <motion.div
+                          className="grid h-14 w-14 place-items-center rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.05] text-2xl text-cyan-300"
+                          animate={
+                            isActive
+                              ? {
+                                  boxShadow: [
+                                    '0 0 0px rgba(34,211,238,0)',
+                                    '0 0 24px rgba(34,211,238,.18)',
+                                    '0 0 0px rgba(34,211,238,0)',
+                                  ],
+                                }
+                              : {}
+                          }
+                          transition={{
+                            duration: 2.8,
+                            repeat: Infinity,
+                          }}
+                        >
+                          <Icon />
+                        </motion.div>
+
+                        <span
+                          className={`font-mono text-[11px] font-semibold tracking-[.25em] ${
+                            isActive
+                              ? 'text-cyan-300'
+                              : 'text-slate-600'
+                          }`}
+                        >
+                          {group.code}
+                        </span>
+                      </div>
+
+                      {/* =========================================
+                          TITLE
+                      ========================================== */}
+
+                      <h3 className="relative z-10 mt-8 text-[25px] font-semibold text-white">
+                        {group.title}
+                      </h3>
+
+                      {/* =========================================
+                          SKILLS
+                      ========================================== */}
+
+                      <div className="relative z-10 mt-7 flex flex-wrap gap-2.5">
+                        {group.skills.map((skill) => (
+                          <span
+                            key={skill}
+                            className={`rounded-lg border px-3 py-2 font-mono text-[10px] uppercase tracking-[.16em] transition ${
+                              isActive
+                                ? 'border-cyan-300/20 bg-cyan-300/[0.035] text-slate-300'
+                                : 'border-white/[0.07] bg-white/[0.025] text-slate-500'
+                            }`}
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* =========================================
+                          MOVING BOTTOM LIGHT
+                      ========================================== */}
+
+                      {isActive && (
+                        <motion.div
+                          className="absolute bottom-0 h-[2px] w-[35%]"
+                          style={{
+                            background:
+                              'linear-gradient(90deg,#22d3ee,#a855f7,#ec4899,#22c55e)',
+                          }}
+                          animate={{
+                            left: ['-35%', '100%'],
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: 'linear',
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              </div>
             )
           })}
 
           {/* ===================================================
-              LEFT BUTTON
+              LEFT ARROW
           ==================================================== */}
 
           <button
             type="button"
             onClick={previousSlide}
             aria-label="Previous skill"
-            className="absolute left-[4%] top-1/2 z-[80] grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full border border-cyan-300/20 bg-[#0b1422]/90 text-xl text-cyan-300 backdrop-blur-xl transition hover:border-cyan-300/50 hover:bg-cyan-300/10"
+            className="absolute left-[5%] top-[42%] z-[80] grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full border border-cyan-300/20 bg-[#0b1422]/90 text-xl text-cyan-300 backdrop-blur-xl transition duration-300 hover:border-cyan-300/50 hover:bg-cyan-300/10 hover:shadow-[0_0_25px_rgba(34,211,238,.15)]"
           >
             <FiChevronLeft />
           </button>
 
           {/* ===================================================
-              RIGHT BUTTON
+              RIGHT ARROW
           ==================================================== */}
 
           <button
             type="button"
             onClick={nextSlide}
             aria-label="Next skill"
-            className="absolute right-[4%] top-1/2 z-[80] grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full border border-cyan-300/20 bg-[#0b1422]/90 text-xl text-cyan-300 backdrop-blur-xl transition hover:border-cyan-300/50 hover:bg-cyan-300/10"
+            className="absolute right-[5%] top-[42%] z-[80] grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full border border-cyan-300/20 bg-[#0b1422]/90 text-xl text-cyan-300 backdrop-blur-xl transition duration-300 hover:border-cyan-300/50 hover:bg-cyan-300/10 hover:shadow-[0_0_25px_rgba(34,211,238,.15)]"
           >
             <FiChevronRight />
           </button>
         </div>
 
         {/* =====================================================
-            MOBILE VERSION
+            MOBILE CAROUSEL
         ====================================================== */}
 
         <div className="relative md:hidden">
           <AnimatePresence mode="wait">
             {skillGroups.map((group, index) => {
-              if (index !== activeIndex) return null
+              if (index !== activeIndex) {
+                return null
+              }
 
               const Icon = icons[index] || FiCpu
 
@@ -433,7 +485,7 @@ export function Skills() {
                   }}
                   className="relative overflow-hidden rounded-[22px] p-[1px]"
                 >
-                  {/* MOBILE ANIMATED BORDER */}
+                  {/* MOBILE MULTICOLOR BORDER */}
 
                   <motion.div
                     className="absolute -inset-[70%]"
@@ -451,7 +503,11 @@ export function Skills() {
                     }}
                   />
 
+                  {/* MOBILE CARD */}
+
                   <div className="relative min-h-[290px] rounded-[21px] border border-white/[0.06] bg-[#101725]/95 p-6 backdrop-blur-xl">
+                    {/* MOBILE GLOW */}
+
                     <motion.div
                       className="pointer-events-none absolute -left-20 -top-20 h-48 w-48 rounded-full blur-[75px]"
                       animate={{
@@ -466,8 +522,11 @@ export function Skills() {
                       transition={{
                         duration: 6,
                         repeat: Infinity,
+                        ease: 'linear',
                       }}
                     />
+
+                    {/* MOBILE HEADER */}
 
                     <div className="relative z-10 flex items-center justify-between">
                       <div className="grid h-12 w-12 place-items-center rounded-xl border border-cyan-300/20 bg-cyan-300/[0.05] text-xl text-cyan-300">
@@ -479,9 +538,13 @@ export function Skills() {
                       </span>
                     </div>
 
+                    {/* MOBILE TITLE */}
+
                     <h3 className="relative z-10 mt-7 text-xl font-semibold text-white">
                       {group.title}
                     </h3>
+
+                    {/* MOBILE SKILLS */}
 
                     <div className="relative z-10 mt-6 flex flex-wrap gap-2">
                       {group.skills.map((skill) => (
@@ -499,7 +562,7 @@ export function Skills() {
             })}
           </AnimatePresence>
 
-          {/* MOBILE BUTTONS */}
+          {/* MOBILE ARROWS */}
 
           <div className="mt-6 flex items-center justify-center gap-5">
             <button
@@ -558,7 +621,7 @@ export function Skills() {
         </div>
 
         {/* =====================================================
-            CURRENT SKILL INFO
+            CURRENT SKILL INFORMATION
         ====================================================== */}
 
         <div className="mt-2 text-center font-mono text-[10px] uppercase tracking-[.28em] text-slate-600">
@@ -568,11 +631,15 @@ export function Skills() {
 
           <span className="mx-3">/</span>
 
-          <span>{String(total).padStart(2, '0')}</span>
+          <span>
+            {String(total).padStart(2, '0')}
+          </span>
 
           <span className="mx-3">·</span>
 
-          <span>{skillGroups[activeIndex]?.title}</span>
+          <span>
+            {skillGroups[activeIndex]?.title}
+          </span>
         </div>
       </div>
     </section>
