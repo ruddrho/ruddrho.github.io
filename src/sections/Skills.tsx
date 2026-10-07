@@ -1,337 +1,433 @@
 import { useEffect, useState } from 'react'
-import {
-  motion,
-  useReducedMotion,
-} from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   FiCpu,
   FiCode,
   FiActivity,
   FiBox,
   FiEye,
+  FiChevronLeft,
+  FiChevronRight,
 } from 'react-icons/fi'
 import { SectionTitle } from '../components/SectionTitle'
 import { skillGroups } from '../data/portfolio'
 
-const icons = [
-  FiCpu,
-  FiActivity,
-  FiCode,
-  FiBox,
-  FiEye,
-]
+const icons = [FiCpu, FiActivity, FiCode, FiBox, FiEye]
 
 export function Skills() {
   const [activeIndex, setActiveIndex] = useState(0)
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  const reduceMotion = useReducedMotion()
+  const [paused, setPaused] = useState(false)
+
+  const total = skillGroups.length
+
+  /* ==========================================
+     AUTO CIRCULAR ROTATION
+  ========================================== */
+  useEffect(() => {
+    if (paused || total <= 1) return
+
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % total)
+    }, 2800)
+
+    return () => window.clearInterval(timer)
+  }, [paused, total])
+
+  const previous = () => {
+    setActiveIndex((current) => (current - 1 + total) % total)
+  }
+
+  const next = () => {
+    setActiveIndex((current) => (current + 1) % total)
+  }
 
   /*
-    Automatic sequential animation:
-    01 → 02 → 03 → 04 → 05 → repeat
+    Converts every card into a circular position relative
+    to the currently selected card.
+
+    0  = center
+    -1 = left
+    +1 = right
+    -2 = far left
+    +2 = far right
   */
-  useEffect(() => {
-    if (reduceMotion || hoveredIndex !== null) return
+  const getRelativePosition = (index: number) => {
+    let diff = index - activeIndex
 
-    const interval = window.setInterval(() => {
-      setActiveIndex((current) => {
-        if (skillGroups.length === 0) return 0
-        return (current + 1) % skillGroups.length
-      })
-    }, 2400)
-
-    return () => {
-      window.clearInterval(interval)
+    if (diff > total / 2) {
+      diff -= total
     }
-  }, [hoveredIndex, reduceMotion])
+
+    if (diff < -total / 2) {
+      diff += total
+    }
+
+    return diff
+  }
+
+  const getCardAnimation = (position: number) => {
+    if (position === 0) {
+      return {
+        x: '0%',
+        y: 0,
+        scale: 1,
+        opacity: 1,
+        rotateY: 0,
+        zIndex: 50,
+        filter: 'blur(0px)',
+      }
+    }
+
+    if (position === -1) {
+      return {
+        x: '-78%',
+        y: 32,
+        scale: 0.82,
+        opacity: 0.58,
+        rotateY: 15,
+        zIndex: 30,
+        filter: 'blur(0px)',
+      }
+    }
+
+    if (position === 1) {
+      return {
+        x: '78%',
+        y: 32,
+        scale: 0.82,
+        opacity: 0.58,
+        rotateY: -15,
+        zIndex: 30,
+        filter: 'blur(0px)',
+      }
+    }
+
+    if (position === -2) {
+      return {
+        x: '-125%',
+        y: 65,
+        scale: 0.66,
+        opacity: 0.18,
+        rotateY: 24,
+        zIndex: 10,
+        filter: 'blur(1px)',
+      }
+    }
+
+    if (position === 2) {
+      return {
+        x: '125%',
+        y: 65,
+        scale: 0.66,
+        opacity: 0.18,
+        rotateY: -24,
+        zIndex: 10,
+        filter: 'blur(1px)',
+      }
+    }
+
+    return {
+      x: position < 0 ? '-145%' : '145%',
+      y: 80,
+      scale: 0.55,
+      opacity: 0,
+      rotateY: position < 0 ? 30 : -30,
+      zIndex: 0,
+      filter: 'blur(2px)',
+    }
+  }
 
   return (
-    <section id="skills" className="section-wrap">
+    <section
+      id="skills"
+      className="section-wrap relative overflow-hidden"
+    >
       <SectionTitle
         eyebrow="02 // Technical Stack"
         title="Systems thinking across the robotics pipeline."
         text="Core areas are organized around the full sense–plan–control–act loop."
       />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {skillGroups.map((g, i) => {
-          const Icon = icons[i] ?? FiCpu
+      {/* ==========================================
+          CAROUSEL AREA
+      ========================================== */}
 
-          const isActive =
-            hoveredIndex !== null
-              ? hoveredIndex === i
-              : activeIndex === i
+      <div
+        className="relative mt-10"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        {/* background glow */}
 
-          return (
-            <motion.div
-              key={g.title}
-              initial={{
-                opacity: 0,
-                y: 25,
-              }}
-              whileInView={{
-                opacity: 1,
-                y: 0,
-              }}
-              viewport={{
-                once: true,
-                amount: 0.2,
-              }}
-              transition={{
-                delay: i * 0.06,
-                duration: 0.55,
-              }}
-              onMouseEnter={() => {
-                setHoveredIndex(i)
-              }}
-              onMouseLeave={() => {
-                setHoveredIndex(null)
-                setActiveIndex(i)
-              }}
-              animate={
-                reduceMotion
-                  ? undefined
-                  : {
-                      y: isActive ? -7 : 0,
-                      scale: isActive ? 1.018 : 1,
-                    }
-              }
-              className="relative rounded-2xl"
-              style={{
-                zIndex: isActive ? 10 : 1,
-              }}
-            >
-              {/* ==========================================
-                  MULTI-COLOR ROTATING BORDER
-                  Cyan → Purple → Pink → Green
-              =========================================== */}
+        <motion.div
+          className="pointer-events-none absolute left-1/2 top-[46%] h-[340px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/[0.06] blur-[100px]"
+          animate={{
+            scale: [1, 1.15, 1],
+            opacity: [0.35, 0.7, 0.35],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
 
-              <motion.div
-                className="pointer-events-none absolute -inset-[2px] overflow-hidden rounded-2xl"
-                animate={
-                  reduceMotion
-                    ? undefined
-                    : {
-                        opacity: isActive ? 1 : 0.12,
-                      }
-                }
-                transition={{
-                  duration: 0.45,
-                }}
-              >
+        <motion.div
+          className="pointer-events-none absolute left-1/2 top-[55%] h-[260px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-500/[0.07] blur-[110px]"
+          animate={{
+            scale: [1.1, 0.9, 1.1],
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+
+        {/* ==========================================
+            CARDS
+        ========================================== */}
+
+        <div
+          className="relative mx-auto h-[430px] max-w-[1180px]"
+          style={{
+            perspective: '1500px',
+          }}
+        >
+          <AnimatePresence initial={false}>
+            {skillGroups.map((group, index) => {
+              const Icon = icons[index] || FiCpu
+              const position = getRelativePosition(index)
+              const isActive = position === 0
+              const animation = getCardAnimation(position)
+
+              return (
                 <motion.div
-                  className="absolute left-1/2 top-1/2 h-[180%] w-[180%] -translate-x-1/2 -translate-y-1/2"
+                  key={group.title}
+                  className="absolute left-1/2 top-8 w-[88%] max-w-[520px] cursor-pointer"
                   style={{
-                    background:
-                      'conic-gradient(from 0deg, transparent 0deg, #22d3ee 35deg, #22d3ee 55deg, transparent 90deg, transparent 100deg, #a855f7 135deg, #a855f7 155deg, transparent 190deg, transparent 200deg, #ec4899 235deg, #ec4899 255deg, transparent 290deg, transparent 300deg, #34d399 335deg, #34d399 355deg, transparent 360deg)',
+                    marginLeft: '-44%',
+                    transformStyle: 'preserve-3d',
                   }}
-                  animate={
-                    reduceMotion
-                      ? undefined
-                      : {
-                          rotate: 360,
-                        }
-                  }
+                  initial={false}
+                  animate={animation}
                   transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: 'linear',
+                    type: 'spring',
+                    stiffness: 115,
+                    damping: 19,
+                    mass: 0.9,
                   }}
-                />
-              </motion.div>
+                  onClick={() => setActiveIndex(index)}
+                >
+                  {/* ==================================
+                      ANIMATED BORDER
+                  ================================== */}
 
-              {/* ==========================================
-                  ACTIVE CARD OUTER GLOW
-              =========================================== */}
+                  <div
+                    className={`relative overflow-hidden rounded-[24px] p-[1px] ${
+                      isActive
+                        ? 'shadow-[0_0_60px_rgba(34,211,238,0.14)]'
+                        : ''
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        className="absolute -inset-[150%]"
+                        style={{
+                          background:
+                            'conic-gradient(from 0deg, transparent 0deg, #22d3ee 45deg, #a855f7 100deg, #ec4899 155deg, #22c55e 215deg, transparent 280deg, transparent 360deg)',
+                        }}
+                        animate={{
+                          rotate: 360,
+                        }}
+                        transition={{
+                          duration: 4,
+                          repeat: Infinity,
+                          ease: 'linear',
+                        }}
+                      />
+                    )}
 
-              <motion.div
-                className="pointer-events-none absolute -inset-3 rounded-[22px]"
+                    {!isActive && (
+                      <div className="absolute inset-0 bg-white/[0.10]" />
+                    )}
+
+                    {/* ==================================
+                        CARD CONTENT
+                    ================================== */}
+
+                    <div className="relative min-h-[300px] rounded-[23px] border border-white/[0.04] bg-[#101625]/[0.96] p-7 backdrop-blur-xl">
+                      {/* active light sweep */}
+
+                      {isActive && (
+                        <motion.div
+                          className="pointer-events-none absolute inset-y-0 w-[180px] bg-gradient-to-r from-transparent via-cyan-300/[0.08] to-transparent blur-xl"
+                          animate={{
+                            left: ['-40%', '120%'],
+                          }}
+                          transition={{
+                            duration: 3.5,
+                            repeat: Infinity,
+                            ease: 'linear',
+                          }}
+                        />
+                      )}
+
+                      {/* top */}
+
+                      <div className="relative z-10 flex items-center justify-between">
+                        <motion.div
+                          className="grid h-14 w-14 place-items-center rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.05] text-2xl text-cyan-300"
+                          animate={
+                            isActive
+                              ? {
+                                  boxShadow: [
+                                    '0 0 0 rgba(34,211,238,0)',
+                                    '0 0 25px rgba(34,211,238,.18)',
+                                    '0 0 0 rgba(34,211,238,0)',
+                                  ],
+                                }
+                              : {}
+                          }
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                          }}
+                        >
+                          <Icon />
+                        </motion.div>
+
+                        <span
+                          className={`font-mono text-[11px] tracking-[.25em] ${
+                            isActive
+                              ? 'text-cyan-300'
+                              : 'text-slate-600'
+                          }`}
+                        >
+                          {group.code}
+                        </span>
+                      </div>
+
+                      {/* title */}
+
+                      <h3 className="relative z-10 mt-7 text-2xl font-semibold text-white">
+                        {group.title}
+                      </h3>
+
+                      {/* skills */}
+
+                      <div className="relative z-10 mt-6 flex flex-wrap gap-2">
+                        {group.skills.map((skill) => (
+                          <span
+                            key={skill}
+                            className={`tech-chip transition-all duration-300 ${
+                              isActive
+                                ? 'border-cyan-300/20 bg-cyan-300/[0.03]'
+                                : ''
+                            }`}
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* bottom accent */}
+
+                      {isActive && (
+                        <motion.div
+                          className="absolute bottom-0 left-[12%] h-[2px] rounded-full"
+                          style={{
+                            background:
+                              'linear-gradient(90deg,#22d3ee,#a855f7,#ec4899,#22c55e)',
+                          }}
+                          animate={{
+                            width: ['20%', '76%', '20%'],
+                            left: ['10%', '14%', '70%'],
+                          }}
+                          transition={{
+                            duration: 4,
+                            repeat: Infinity,
+                            ease: 'easeInOut',
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
+        </div>
+
+        {/* ==========================================
+            LEFT / RIGHT CONTROLS
+        ========================================== */}
+
+        <button
+          type="button"
+          onClick={previous}
+          aria-label="Previous skill group"
+          className="absolute left-2 top-[42%] z-[70] grid h-12 w-12 place-items-center rounded-full border border-cyan-300/20 bg-[#0d1422]/90 text-xl text-cyan-300 backdrop-blur-md transition hover:border-cyan-300/50 hover:bg-cyan-300/10 md:left-8"
+        >
+          <FiChevronLeft />
+        </button>
+
+        <button
+          type="button"
+          onClick={next}
+          aria-label="Next skill group"
+          className="absolute right-2 top-[42%] z-[70] grid h-12 w-12 place-items-center rounded-full border border-cyan-300/20 bg-[#0d1422]/90 text-xl text-cyan-300 backdrop-blur-md transition hover:border-cyan-300/50 hover:bg-cyan-300/10 md:right-8"
+        >
+          <FiChevronRight />
+        </button>
+
+        {/* ==========================================
+            NAVIGATION DOTS
+        ========================================== */}
+
+        <div className="relative z-[70] -mt-6 flex justify-center gap-3">
+          {skillGroups.map((group, index) => (
+            <button
+              key={group.title}
+              type="button"
+              aria-label={`Show ${group.title}`}
+              onClick={() => setActiveIndex(index)}
+              className="relative h-3 w-3"
+            >
+              <motion.span
+                className="absolute inset-0 rounded-full"
                 animate={{
-                  opacity: isActive ? 1 : 0,
-                }}
-                transition={{
-                  duration: 0.5,
-                }}
-                style={{
-                  background:
-                    'radial-gradient(circle at 20% 0%, rgba(34,211,238,.16), transparent 38%), radial-gradient(circle at 100% 25%, rgba(168,85,247,.13), transparent 40%), radial-gradient(circle at 75% 100%, rgba(236,72,153,.10), transparent 38%), radial-gradient(circle at 0% 85%, rgba(52,211,153,.10), transparent 40%)',
-                  filter: 'blur(16px)',
+                  scale: index === activeIndex ? 1.35 : 1,
+                  backgroundColor:
+                    index === activeIndex
+                      ? '#67e8f9'
+                      : '#334155',
+                  boxShadow:
+                    index === activeIndex
+                      ? '0 0 16px rgba(103,232,249,.7)'
+                      : '0 0 0 rgba(0,0,0,0)',
                 }}
               />
+            </button>
+          ))}
+        </div>
 
-              {/* ==========================================
-                  MAIN CARD
-              =========================================== */}
+        {/* current category */}
 
-              <div
-                className={`glass-card relative h-full overflow-hidden rounded-2xl p-6 transition-all duration-500 ${
-                  isActive
-                    ? 'border-white/[.16] bg-white/[.045]'
-                    : ''
-                }`}
-              >
-                {/* Moving background glow */}
+        <div className="mt-5 text-center font-mono text-[10px] uppercase tracking-[.28em] text-slate-500">
+          <span className="text-cyan-300">
+            {String(activeIndex + 1).padStart(2, '0')}
+          </span>
 
-                <motion.div
-                  className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full blur-3xl"
-                  animate={{
-                    opacity: isActive ? 1 : 0.25,
-                    scale: isActive ? 1.25 : 1,
-                  }}
-                  transition={{
-                    duration: 0.6,
-                  }}
-                  style={{
-                    background:
-                      'linear-gradient(135deg, rgba(34,211,238,.18), rgba(168,85,247,.14), rgba(236,72,153,.12), rgba(52,211,153,.12))',
-                  }}
-                />
+          <span className="mx-3">/</span>
 
-                {/* Bottom glow */}
+          <span>{String(total).padStart(2, '0')}</span>
 
-                <motion.div
-                  className="pointer-events-none absolute -bottom-16 left-1/2 h-24 w-3/4 -translate-x-1/2 rounded-full blur-3xl"
-                  animate={{
-                    opacity: isActive ? 0.7 : 0,
-                  }}
-                  transition={{
-                    duration: 0.5,
-                  }}
-                  style={{
-                    background:
-                      'linear-gradient(90deg, #22d3ee, #a855f7, #ec4899, #34d399)',
-                  }}
-                />
+          <span className="mx-3 text-slate-700">•</span>
 
-                {/* ==========================================
-                    ICON + CODE
-                =========================================== */}
-
-                <div className="relative z-10 flex items-center justify-between">
-                  <motion.div
-                    className="grid h-11 w-11 place-items-center rounded-xl border border-cyan-300/20 bg-cyan-300/[.05] text-xl text-cyan-300"
-                    animate={
-                      reduceMotion
-                        ? undefined
-                        : {
-                            scale: isActive ? 1.08 : 1,
-                            boxShadow: isActive
-                              ? '0 0 22px rgba(34,211,238,.20)'
-                              : '0 0 0 rgba(34,211,238,0)',
-                          }
-                    }
-                    transition={{
-                      duration: 0.45,
-                    }}
-                  >
-                    <Icon />
-                  </motion.div>
-
-                  <motion.span
-                    className="font-mono text-[10px] tracking-[.2em] text-slate-600"
-                    animate={{
-                      color: isActive
-                        ? 'rgb(103 232 249)'
-                        : 'rgb(71 85 105)',
-                    }}
-                    transition={{
-                      duration: 0.4,
-                    }}
-                  >
-                    {g.code}
-                  </motion.span>
-                </div>
-
-                {/* ==========================================
-                    TITLE
-                =========================================== */}
-
-                <motion.h3
-                  className="relative z-10 mt-5 text-xl font-medium text-white"
-                  animate={
-                    reduceMotion
-                      ? undefined
-                      : {
-                          x: isActive ? 3 : 0,
-                      }
-                  }
-                  transition={{
-                    duration: 0.4,
-                  }}
-                >
-                  {g.title}
-                </motion.h3>
-
-                {/* ==========================================
-                    SKILL TAGS
-                =========================================== */}
-
-                <div className="relative z-10 mt-5 flex flex-wrap gap-2">
-                  {g.skills.map((skill, skillIndex) => (
-                    <motion.span
-                      key={skill}
-                      className="tech-chip"
-                      animate={
-                        reduceMotion
-                          ? undefined
-                          : isActive
-                            ? {
-                                y: [0, -2, 0],
-                                borderColor: [
-                                  'rgba(255,255,255,.08)',
-                                  'rgba(34,211,238,.28)',
-                                  'rgba(168,85,247,.22)',
-                                  'rgba(236,72,153,.20)',
-                                  'rgba(52,211,153,.20)',
-                                  'rgba(255,255,255,.08)',
-                                ],
-                              }
-                            : {
-                                y: 0,
-                              }
-                      }
-                      transition={
-                        isActive
-                          ? {
-                              duration: 1.6,
-                              delay: skillIndex * 0.07,
-                              ease: 'easeInOut',
-                            }
-                          : {
-                              duration: 0.3,
-                            }
-                      }
-                    >
-                      {skill}
-                    </motion.span>
-                  ))}
-                </div>
-
-                {/* ==========================================
-                    ACTIVE BOTTOM LIGHT
-                =========================================== */}
-
-                <motion.div
-                  className="pointer-events-none absolute bottom-0 left-1/2 h-[2px] -translate-x-1/2 rounded-full"
-                  animate={{
-                    width: isActive ? '72%' : '0%',
-                    opacity: isActive ? 1 : 0,
-                  }}
-                  transition={{
-                    duration: 0.65,
-                    ease: 'easeOut',
-                  }}
-                  style={{
-                    background:
-                      'linear-gradient(90deg, transparent, #22d3ee, #a855f7, #ec4899, #34d399, transparent)',
-                    boxShadow:
-                      '0 0 14px rgba(34,211,238,.55), 0 0 22px rgba(168,85,247,.25)',
-                  }}
-                />
-              </div>
-            </motion.div>
-          )
-        })}
+          <span>{skillGroups[activeIndex]?.title}</span>
+        </div>
       </div>
     </section>
   )
