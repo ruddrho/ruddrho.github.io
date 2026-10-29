@@ -11,6 +11,23 @@ import {
 import { SectionTitle } from '../components/SectionTitle'
 import { activityPlaceholders } from '../data/portfolio'
 
+const academicProjects = [
+  {
+    title: 'Fully Automatic Washing Machine Control System',
+    type: 'Individual Project',
+    description:
+      'Independently designed and implemented a PLC control system for a fully automatic washing machine using a Siemens SIMATIC S7-1200 PLC and Siemens PLC programming software.',
+    tags: ['PLC', 'Siemens SIMATIC S7-1200', 'Automation'],
+  },
+  {
+    title: 'Five-Floor Elevator PLC Control System',
+    type: 'Group Project',
+    description:
+      'Worked in a team to develop PLC control for a five-floor elevator using a Siemens SIMATIC S7-1200 PLC and Siemens PLC programming software.',
+    tags: ['PLC', 'Siemens SIMATIC S7-1200', 'Elevator Control'],
+  },
+]
+
 export function Activities() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
@@ -30,6 +47,7 @@ export function Activities() {
         {activityPlaceholders.map((activity, index) => {
           const isOpen = openIndex === index
           const isResearch = activity.label === 'Research Activities'
+          const isAcademicProjects = activity.label === 'Academic Projects'
 
           return (
             <motion.div
@@ -106,7 +124,9 @@ export function Activities() {
                   <p className="mt-1 text-sm leading-6 text-slate-500">
                     {isResearch
                       ? 'Technical contribution and publicly attributed robotics work.'
-                      : activity.detail}
+                      : isAcademicProjects
+                        ? 'PLC-based control systems developed through individual and group coursework.'
+                        : activity.detail}
                   </p>
                 </div>
 
@@ -229,6 +249,47 @@ export function Activities() {
 
                             <FiExternalLink className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                           </a>
+                        </motion.div>
+                      ) : isAcademicProjects ? (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.08, duration: 0.3 }}
+                          className="grid gap-4 md:grid-cols-2"
+                        >
+                          {academicProjects.map((project, projectIndex) => (
+                            <motion.article
+                              key={project.title}
+                              initial={{ opacity: 0, y: 12 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.08 + projectIndex * 0.1 }}
+                              whileHover={{ y: -4 }}
+                              className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-cyan-300/15 bg-[#101827]/85 p-5 transition-colors duration-300 hover:border-cyan-300/40 sm:p-6"
+                            >
+                              <div className="pointer-events-none absolute -right-10 -top-12 h-32 w-32 rounded-full bg-cyan-300/5 blur-3xl transition-colors group-hover:bg-purple-400/10" />
+                              <div className="relative mb-5 flex flex-wrap items-center justify-between gap-3">
+                                <span className="font-mono text-[10px] uppercase tracking-[.2em] text-cyan-300">
+                                  Project // {String(projectIndex + 1).padStart(2, '0')}
+                                </span>
+                                <span className="rounded-full border border-purple-400/25 bg-purple-400/[.07] px-3 py-1 font-mono text-[9px] uppercase tracking-[.08em] text-purple-200">
+                                  {project.type}
+                                </span>
+                              </div>
+                              <h4 className="relative text-lg font-semibold leading-7 text-slate-100 sm:text-xl">
+                                {project.title}
+                              </h4>
+                              <p className="relative mt-4 flex-1 text-sm leading-7 text-slate-400">
+                                {project.description}
+                              </p>
+                              <div className="relative mt-6 flex flex-wrap gap-2">
+                                {project.tags.map((tag) => (
+                                  <span key={tag} className="tech-chip">
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            </motion.article>
+                          ))}
                         </motion.div>
                       ) : (
                         /* ============================
