@@ -26,6 +26,22 @@ const academicProjects = [
       'Worked in a team to develop PLC control for a five-floor elevator using a Siemens SIMATIC S7-1200 PLC and Siemens PLC programming software.',
     tags: ['PLC', 'Siemens SIMATIC S7-1200', 'Elevator Control'],
   },
+  {
+    title: 'MATLAB Linear & Circular Interpolation (PBC & DDA)',
+    type: 'MATLAB App Development',
+    description:
+      'Developed a MATLAB App Designer-based application for linear and circular interpolation, implementing both the Point-by-Point Comparison (PBC) and Digital Differential Analyzer (DDA) methods.',
+    tags: [
+      'MATLAB',
+      'App Designer',
+      'Linear Interpolation',
+      'Circular Interpolation',
+      'PBC',
+      'DDA',
+    ],
+    github:
+      'https://github.com/ruddrho/MATLAB-Linear-Circular-Interpolation-PBC-DDA',
+  },
 ]
 
 export function Activities() {
@@ -275,9 +291,22 @@ export function Activities() {
                                   {project.type}
                                 </span>
                               </div>
-                              <h4 className="relative text-lg font-semibold leading-7 text-slate-100 sm:text-xl">
-                                {project.title}
-                              </h4>
+                              {project.github ? (
+                                <a
+                                  href={project.github}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="group/title relative inline-flex items-start gap-2 text-lg font-semibold leading-7 text-slate-100 transition-colors hover:text-cyan-200 sm:text-xl"
+                                  aria-label={`Open ${project.title} GitHub repository`}
+                                >
+                                  <span>{project.title}</span>
+                                  <FiExternalLink className="mt-1.5 shrink-0 text-sm text-cyan-300 transition-transform group-hover/title:-translate-y-0.5 group-hover/title:translate-x-0.5" />
+                                </a>
+                              ) : (
+                                <h4 className="relative text-lg font-semibold leading-7 text-slate-100 sm:text-xl">
+                                  {project.title}
+                                </h4>
+                              )}
                               <p className="relative mt-4 flex-1 text-sm leading-7 text-slate-400">
                                 {project.description}
                               </p>
@@ -288,6 +317,17 @@ export function Activities() {
                                   </span>
                                 ))}
                               </div>
+                              {project.github && (
+                                <a
+                                  href={project.github}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="group/repo relative mt-6 inline-flex w-fit items-center gap-2 border-t border-white/[.07] pt-4 font-mono text-[10px] uppercase tracking-[.16em] text-cyan-300 transition-colors hover:text-cyan-100"
+                                >
+                                  View GitHub Repository
+                                  <FiExternalLink className="transition-transform group-hover/repo:-translate-y-0.5 group-hover/repo:translate-x-0.5" />
+                                </a>
+                              )}
                             </motion.article>
                           ))}
                         </motion.div>
