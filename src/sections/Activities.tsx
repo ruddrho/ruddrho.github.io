@@ -128,6 +128,13 @@ export function Activities() {
                       {activity.label}
                     </h3>
 
+                    {/* LIVE ACADEMIC PROJECT COUNT */}
+                    {isAcademicProjects && (
+                      <span className="inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-300/[.06] px-2.5 py-1 font-mono text-[9px] uppercase tracking-[.16em] text-cyan-200">
+                        {academicProjects.length} {academicProjects.length === 1 ? 'Project' : 'Projects'}
+                      </span>
+                    )}
+
                     {/* VERIFIED INDICATOR */}
                     {isResearch && (
                       <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-300/15 bg-cyan-300/[.04] px-2.5 py-1 font-mono text-[8px] uppercase tracking-[.16em] text-cyan-300/70">
