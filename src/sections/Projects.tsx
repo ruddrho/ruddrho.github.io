@@ -10,6 +10,44 @@ import {
 } from 'react-icons/fi'
 import { SectionTitle } from '../components/SectionTitle'
 
+// Send project interactions to the Google Analytics 4 tag already installed on the site.
+// No visitor identifiers, email addresses or other personal data are included.
+type TrackableProject = {
+  number: string
+  title: string
+  github: string
+}
+
+type ProjectAnalyticsEvent = 'project_view' | 'github_repo_click'
+
+type AnalyticsWindow = Window & {
+  gtag?: (
+    command: 'event',
+    eventName: ProjectAnalyticsEvent,
+    parameters: Record<string, string>
+  ) => void
+}
+
+function trackProjectEvent(
+  eventName: ProjectAnalyticsEvent,
+  project: TrackableProject,
+  source: 'project_index' | 'main_projects' | 'project_archive'
+) {
+  if (typeof window === 'undefined') return
+
+  const gtag = (window as AnalyticsWindow).gtag
+  if (typeof gtag !== 'function') return
+
+  gtag('event', eventName, {
+    project_name: project.title,
+    project_number: project.number,
+    project_source: source,
+    ...(eventName === 'github_repo_click'
+      ? { repository_url: project.github }
+      : {}),
+  })
+}
+
 const projects = [
   {
   number: '01',
@@ -407,6 +445,9 @@ export function Projects() {
                         <motion.a
                           key={project.github}
                           href={project.github}
+                          onClick={() =>
+                            trackProjectEvent('github_repo_click', project, 'project_index')
+                          }
                           target="_blank"
                           rel="noreferrer"
                           initial={{ opacity: 0, y: 8 }}
@@ -506,13 +547,14 @@ export function Projects() {
               {project.image && (
                 <button
                   type="button"
-                  onClick={() =>
+                  onClick={() => {
+                    trackProjectEvent('project_view', project, 'main_projects')
                     setPreviewProject({
                       kind: 'image',
                       image: project.image!,
                       title: project.title,
                     })
-                  }
+                  }}
                   aria-label={`Open ${project.title} simulation preview`}
                   className="relative mt-5 block w-full cursor-zoom-in overflow-hidden rounded-xl border border-cyan-300/20 bg-[#050816] text-left shadow-[0_0_25px_rgba(34,211,238,.05)]"
                 >
@@ -535,6 +577,9 @@ export function Projects() {
               <div className="relative mt-auto pt-7">
                 <a
                   href={project.github}
+                  onClick={() =>
+                    trackProjectEvent('github_repo_click', project, 'main_projects')
+                  }
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[.14em] text-cyan-300 transition hover:text-purple-300"
@@ -931,13 +976,14 @@ export function Projects() {
                             {'image' in project && project.image && (
                               <button
                                 type="button"
-                                onClick={() =>
+                                onClick={() => {
+                                  trackProjectEvent('project_view', project, 'project_archive')
                                   setPreviewProject({
                                     kind: 'image',
                                     image: project.image,
                                     title: project.title,
                                   })
-                                }
+                                }}
                                 aria-label={`Open ${project.title} simulation preview`}
                                 className="relative mt-5 block w-full cursor-zoom-in overflow-hidden rounded-xl border border-cyan-300/20 bg-[#050816] text-left shadow-[0_0_25px_rgba(34,211,238,.05)]"
                               >
@@ -961,6 +1007,9 @@ export function Projects() {
                               <div className="relative mt-auto pt-7">
                                 <a
                                   href={project.github}
+                                  onClick={() =>
+                                    trackProjectEvent('github_repo_click', project, 'project_archive')
+                                  }
                                   target="_blank"
                                   rel="noreferrer"
                                   className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[.14em] text-cyan-300 transition hover:text-purple-300"
