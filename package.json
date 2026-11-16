@@ -1,3 +1,4 @@
+
 {
   "name": "ruddrho-robotics-portfolio",
   "private": true,
@@ -10,25 +11,25 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@vitejs/plugin-react": "latest",
-    "framer-motion": "13.3.0",
-    "react": "latest",
-    "react-dom": "latest",
-    "react-icons": "latest"
+    "@vitejs/plugin-react": "4.4.1",
+    "framer-motion": "12.23.12",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-icons": "5.5.0"
   },
   "devDependencies": {
-    "@eslint/js": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "autoprefixer": "latest",
-    "eslint": "latest",
-    "eslint-plugin-react-hooks": "latest",
-    "eslint-plugin-react-refresh": "latest",
-    "globals": "latest",
-    "postcss": "latest",
-    "tailwindcss": "^3.4.17",
-    "typescript": "latest",
-    "typescript-eslint": "latest",
-    "vite": "latest"
+    "@eslint/js": "9.25.1",
+    "@types/react": "18.3.23",
+    "@types/react-dom": "18.3.7",
+    "autoprefixer": "10.4.21",
+    "eslint": "9.25.1",
+    "eslint-plugin-react-hooks": "5.2.0",
+    "eslint-plugin-react-refresh": "0.4.20",
+    "globals": "16.0.0",
+    "postcss": "8.5.6",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.8.3",
+    "typescript-eslint": "8.31.1",
+    "vite": "6.3.5"
   }
 }
