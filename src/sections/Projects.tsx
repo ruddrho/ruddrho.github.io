@@ -10,8 +10,11 @@ import {
 } from 'react-icons/fi'
 import { SectionTitle } from '../components/SectionTitle'
 
-// Google Analytics 4 custom events. The GA4 base tag must be installed in index.html.
-// For testing, open the portfolio with ?ga_debug=1, then check GA4 DebugView.
+// GA4 event tracking for project previews and GitHub repository links.
+// This targets the same GA4 property as index.html and uses beacon transport
+// for outbound-link clicks. ?ga_debug=1 enables GA4 DebugView + console logs.
+const GA4_MEASUREMENT_ID = 'G-T5765VRSXX'
+
 type TrackableProject = {
   number: string
   title: string
@@ -20,7 +23,7 @@ type TrackableProject = {
 
 type ProjectAnalyticsEvent = 'project_view' | 'github_repo_click'
 type ProjectSource = 'project_index' | 'main_projects' | 'project_archive'
-type AnalyticsParameters = Record<string, string | boolean>
+type AnalyticsParameters = Record<string, string | boolean | number>
 
 type AnalyticsWindow = Window & {
   gtag?: (
@@ -40,6 +43,8 @@ function trackProjectEvent(
 
   const debugMode = new URLSearchParams(window.location.search).has('ga_debug')
   const parameters: AnalyticsParameters = {
+    send_to: GA4_MEASUREMENT_ID,
+    transport_type: 'beacon',
     project_name: project.title,
     project_number: project.number,
     project_source: source,
@@ -55,7 +60,7 @@ function trackProjectEvent(
     gtag('event', eventName, parameters)
     if (debugMode) console.info('[GA4 event queued]', eventName, parameters)
   } else if (debugMode) {
-    console.warn('[GA4] gtag is unavailable. Check index.html and browser blocking.')
+    console.warn('[GA4] gtag unavailable; check tag loading or browser blockers.')
   }
 }
 
