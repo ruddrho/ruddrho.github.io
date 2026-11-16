@@ -15,7 +15,7 @@ import { SectionTitle } from '../components/SectionTitle'
 type TrackableProject = {
   number: string
   title: string
-  github: string
+  github?: string
 }
 
 type ProjectAnalyticsEvent = 'project_view' | 'github_repo_click'
@@ -34,6 +34,7 @@ function trackProjectEvent(
   source: 'project_index' | 'main_projects' | 'project_archive'
 ) {
   if (typeof window === 'undefined') return
+  if (eventName === 'github_repo_click' && !project.github) return
 
   const gtag = (window as AnalyticsWindow).gtag
   if (typeof gtag !== 'function') return
@@ -42,7 +43,7 @@ function trackProjectEvent(
     project_name: project.title,
     project_number: project.number,
     project_source: source,
-    ...(eventName === 'github_repo_click'
+    ...(eventName === 'github_repo_click' && project.github
       ? { repository_url: project.github }
       : {}),
   })
@@ -204,13 +205,22 @@ const archiveProjects = [
 // AUTOMATIC PROJECT INDEX DATA
 // =========================================================
 
-const allProjects = [...projects, ...archiveProjects]
-  .filter(
-    (project) =>
+const allProjects: TrackableProject[] = [...projects, ...archiveProjects]
+  .flatMap((project): TrackableProject[] => {
+    if (
       'github' in project &&
       typeof project.github === 'string' &&
       project.github.length > 0
-  )
+    ) {
+      return [{
+        number: project.number,
+        title: project.title,
+        github: project.github,
+      }]
+    }
+
+    return []
+  })
   .sort((a, b) => Number(a.number) - Number(b.number))
 
 const totalProjects = allProjects.length
