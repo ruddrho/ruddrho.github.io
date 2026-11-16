@@ -31,5 +31,9 @@
     "typescript": "5.8.3",
     "typescript-eslint": "8.31.1",
     "vite": "6.3.5"
+  },
+  "overrides": {
+    "motion-dom": "12.23.12",
+    "motion-utils": "12.23.6"
   }
 }
