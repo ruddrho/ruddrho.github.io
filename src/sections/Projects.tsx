@@ -10,8 +10,8 @@ import {
 } from 'react-icons/fi'
 import { SectionTitle } from '../components/SectionTitle'
 
-// Send project interactions to the Google Analytics 4 tag already installed on the site.
-// No visitor identifiers, email addresses or other personal data are included.
+// Google Analytics 4 custom events. The GA4 base tag must be installed in index.html.
+// For testing, open the portfolio with ?ga_debug=1, then check GA4 DebugView.
 type TrackableProject = {
   number: string
   title: string
@@ -19,34 +19,44 @@ type TrackableProject = {
 }
 
 type ProjectAnalyticsEvent = 'project_view' | 'github_repo_click'
+type ProjectSource = 'project_index' | 'main_projects' | 'project_archive'
+type AnalyticsParameters = Record<string, string | boolean>
 
 type AnalyticsWindow = Window & {
   gtag?: (
     command: 'event',
     eventName: ProjectAnalyticsEvent,
-    parameters: Record<string, string>
+    parameters: AnalyticsParameters
   ) => void
 }
 
 function trackProjectEvent(
   eventName: ProjectAnalyticsEvent,
   project: TrackableProject,
-  source: 'project_index' | 'main_projects' | 'project_archive'
+  source: ProjectSource
 ) {
   if (typeof window === 'undefined') return
   if (eventName === 'github_repo_click' && !project.github) return
 
-  const gtag = (window as AnalyticsWindow).gtag
-  if (typeof gtag !== 'function') return
-
-  gtag('event', eventName, {
+  const debugMode = new URLSearchParams(window.location.search).has('ga_debug')
+  const parameters: AnalyticsParameters = {
     project_name: project.title,
     project_number: project.number,
     project_source: source,
-    ...(eventName === 'github_repo_click' && project.github
-      ? { repository_url: project.github }
-      : {}),
-  })
+  }
+
+  if (eventName === 'github_repo_click' && project.github) {
+    parameters.repository_url = project.github
+  }
+  if (debugMode) parameters.debug_mode = true
+
+  const gtag = (window as AnalyticsWindow).gtag
+  if (typeof gtag === 'function') {
+    gtag('event', eventName, parameters)
+    if (debugMode) console.info('[GA4 event queued]', eventName, parameters)
+  } else if (debugMode) {
+    console.warn('[GA4] gtag is unavailable. Check index.html and browser blocking.')
+  }
 }
 
 const projects = [
